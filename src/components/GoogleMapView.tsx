@@ -7,6 +7,7 @@ import {
   renderPlaceMarkerHtml,
   renderSearchCenterMarkerHtml,
 } from '../lib/mapMarkers';
+import { createMapPlaceBubbleHtml } from '../lib/mapPlaceBubble';
 import { kakaoLevelToGoogleZoom, googleZoomToKakaoLevel } from '../lib/mapZoom';
 
 interface Props {
@@ -30,9 +31,12 @@ interface Props {
   onMapRightClick?: (lat: number, lng: number, clientX: number, clientY: number) => void;
   onMapCenterChange?: (lat: number, lng: number) => void;
   onMapLevelChange?: (level: number) => void;
+  infoWindowPlace?: Place | null;
+  onCloseInfoWindow?: () => void;
   fitRouteBounds?: boolean;
   fitSearchBounds?: boolean;
   highlightPlaceId?: string | null;
+  onHoverSearchPlace?: (place: Place) => void;
   pinSelectionFilter?: ReadonlySet<string>;
   plazaMarkers?: ReadonlyArray<{ id: string; lat: number; lng: number; title: string }>;
   highlightPlazaId?: string | null;
@@ -66,9 +70,12 @@ export function GoogleMapView({
   onMapRightClick,
   onMapCenterChange,
   onMapLevelChange,
+  infoWindowPlace = null,
+  onCloseInfoWindow,
   fitRouteBounds = false,
   fitSearchBounds = false,
   highlightPlaceId = null,
+  onHoverSearchPlace,
   pinSelectionFilter,
   plazaMarkers = [],
   highlightPlazaId = null,
@@ -77,11 +84,19 @@ export function GoogleMapView({
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const placeMarkersRef = useRef<GoogleHtmlMarker[]>([]);
   const routeLineRef = useRef<any>(null);
   const originMarkerRef = useRef<any>(null);
   const searchCenterMarkerRef = useRef<any>(null);
   const draftPinRef = useRef<any>(null);
   const listenersRef = useRef<any[]>([]);
+  const selectPlaceRef = useRef(onSelectPlace);
+  const pinnedClickRef = useRef(onPinnedMarkerClick);
+  const hoverSearchRef = useRef(onHoverSearchPlace);
+  selectPlaceRef.current = onSelectPlace;
+  pinnedClickRef.current = onPinnedMarkerClick;
+  hoverSearchRef.current = onHoverSearchPlace;
+  const infoBubbleRef = useRef<GoogleHtmlMarker | null>(null);
 
   const pinSelectionActive = pinSelectionFilter != null && pinSelectionFilter.size > 0;
   let visiblePinned = pinCategoryFilter
@@ -127,6 +142,8 @@ export function GoogleMapView({
       }
       listenersRef.current.forEach((l) => l.remove?.());
       listenersRef.current = [];
+      infoBubbleRef.current?.setMap(null);
+      infoBubbleRef.current = null;
       mapRef.current = null;
       if (mapEl.current) mapEl.current.innerHTML = '';
     };
@@ -165,6 +182,11 @@ export function GoogleMapView({
         }
       })
     );
+    if (onCloseInfoWindow && !pickingOriginFromMap && !pickingPinFromMap) {
+      listenersRef.current.push(
+        mapRef.current.addListener('click', () => onCloseInfoWindow())
+      );
+    }
     if (pickingOriginFromMap || pickingPinFromMap) {
       listenersRef.current.push(
         mapRef.current.addListener('click', async (e: any) => {
@@ -203,12 +225,29 @@ export function GoogleMapView({
     pickingPinFromMap,
     onOriginPicked,
     onPinLocationPicked,
+    onCloseInfoWindow,
   ]);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+    infoBubbleRef.current?.setMap(null);
+    infoBubbleRef.current = null;
+    if (!infoWindowPlace) return;
+    infoBubbleRef.current = new GoogleHtmlMarker(
+      mapRef.current,
+      { lat: infoWindowPlace.lat, lng: infoWindowPlace.lng },
+      createMapPlaceBubbleHtml(infoWindowPlace),
+      1.28,
+      undefined,
+      2000
+    );
+  }, [infoWindowPlace]);
 
   useEffect(() => {
     if (!mapRef.current) return;
     markersRef.current.forEach((m) => m.setMap(null));
     markersRef.current = [];
+    placeMarkersRef.current = [];
 
     if (plazaMarkers.length > 0) {
       const bounds = new window.google.maps.LatLngBounds();
@@ -236,6 +275,7 @@ export function GoogleMapView({
 
     const pinnedMap = new Map(visiblePinned.map((p) => [p.id, p]));
     const resultsForMarkers = pinSelectionActive ? [] : searchResults;
+    const searchIdSet = new Set(resultsForMarkers.map((s) => s.id));
     const places: Array<Place & { _pinned?: PinnedPlace }> = [
       ...resultsForMarkers.map((s) => ({ ...s, _pinned: pinnedMap.get(s.id) })),
       ...visiblePinned
@@ -245,36 +285,45 @@ export function GoogleMapView({
 
     places.forEach((place) => {
       const isPinned = !!place._pinned;
-      const isSelected = highlightPlaceId === place.id;
-      const zIndex = isSelected ? 1000 : isPinned ? 500 : 200;
+      const isSearchResult = searchIdSet.has(place.id);
       const marker = new GoogleHtmlMarker(
         mapRef.current,
         { lat: place.lat, lng: place.lng },
         renderPlaceMarkerHtml({
           place,
           pinned: place._pinned,
-          isSelected,
+          isSelected: false,
         }),
         1,
-        () => {
-          if (isPinned) onPinnedMarkerClick?.(place);
-          else onSelectPlace?.(place);
-        },
-        zIndex
+        {
+          placeId: place.id,
+          zIndex: isPinned ? 500 : 200,
+          onClick: () => {
+            if (isPinned) pinnedClickRef.current?.(place);
+            else selectPlaceRef.current?.(place);
+          },
+          onMouseEnter: isSearchResult
+            ? () => hoverSearchRef.current?.(place)
+            : undefined,
+        }
       );
       markersRef.current.push(marker);
+      placeMarkersRef.current.push(marker);
     });
   }, [
     searchResults,
     visiblePinned,
     pinSelectionActive,
-    onSelectPlace,
-    onPinnedMarkerClick,
-    highlightPlaceId,
     plazaMarkers,
     highlightPlazaId,
     onPlazaMarkerClick,
   ]);
+
+  useEffect(() => {
+    placeMarkersRef.current.forEach((marker) => {
+      marker.setSelected(marker.placeId === highlightPlaceId);
+    });
+  }, [highlightPlaceId, searchResults, visiblePinned, pinSelectionActive]);
 
   useEffect(() => {
     if (!mapRef.current) return;

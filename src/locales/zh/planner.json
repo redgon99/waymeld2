@@ -16,6 +16,8 @@
     "noResults": "没有搜索结果。",
     "loading": "搜索中…",
     "enriching": "正在加载评分…",
+    "sortLabel": "Sort 排序",
+    "sortAria": "搜索结果排序",
     "distanceHint": "按与地图中心的距离排序",
     "ratingHint": "无评分的地点排在后面",
     "reviewHint": "无评价数的地点排在后面",

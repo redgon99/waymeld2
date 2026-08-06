@@ -22,6 +22,8 @@
     "noResults": "검색 결과가 없습니다.",
     "loading": "검색 중…",
     "enriching": "별점·리뷰 불러오는 중…",
+    "sortLabel": "Sort 정렬",
+    "sortAria": "검색 결과 정렬",
     "distanceHint": "거리순 · 지도 중심 기준",
     "ratingHint": "별점 정보가 없는 장소는 아래로 정렬됩니다",
     "reviewHint": "리뷰 수 정보가 없는 장소는 아래로 정렬됩니다",

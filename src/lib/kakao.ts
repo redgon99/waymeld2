@@ -318,6 +318,60 @@ function mergePlaceResults(
   };
 }
 
+/** 지도 기본 POI 클릭 근사 — Web API는 POI 이벤트가 없어 클릭 좌표 주변 장소 검색 */
+const BASE_MAP_POI_CODES: CategoryCode[] = [
+  'FD6',
+  'CE7',
+  'AT4',
+  'AD5',
+  'CT1',
+  'MT1',
+  'CS2',
+  'PK6',
+];
+
+export async function findNearestPlaceNear(
+  lat: number,
+  lng: number,
+  opts?: { radiusMeters?: number; maxDistanceMeters?: number }
+): Promise<Place | null> {
+  const radius = opts?.radiusMeters ?? 80;
+  const maxDist = opts?.maxDistanceMeters ?? 80;
+  if (!window.kakao?.maps?.services) return null;
+
+  const batches = await Promise.all(
+    BASE_MAP_POI_CODES.map((code) =>
+      searchPlacesByCategory({
+        categoryGroupCode: code,
+        center: { lat, lng },
+        radiusMeters: radius,
+        size: 5,
+        page: 1,
+      }).catch(() => ({ places: [] as Place[], page: 1, hasMore: false }))
+    )
+  );
+
+  const seen = new Set<string>();
+  const merged: Place[] = [];
+  for (const batch of batches) {
+    for (const p of batch.places) {
+      if (seen.has(p.id)) continue;
+      seen.add(p.id);
+      merged.push(p);
+    }
+  }
+  if (!merged.length) return null;
+
+  merged.sort(
+    (a, b) =>
+      (a.distance ?? Number.POSITIVE_INFINITY) -
+      (b.distance ?? Number.POSITIVE_INFINITY)
+  );
+  const nearest = merged[0];
+  if ((nearest.distance ?? Number.POSITIVE_INFINITY) > maxDist) return null;
+  return nearest;
+}
+
 // =============================================
 // 좌표 → 주소 변환 (출발지 지도 클릭용)
 // =============================================

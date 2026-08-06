@@ -16,6 +16,8 @@
     "noResults": "検索結果がありません。",
     "loading": "検索中…",
     "enriching": "評価を読み込み中…",
+    "sortLabel": "Sort 並び替え",
+    "sortAria": "検索結果の並び替え",
     "distanceHint": "地図中心からの距離順",
     "ratingHint": "評価のない場所は下に表示されます",
     "reviewHint": "レビュー数のない場所は下に表示されます",

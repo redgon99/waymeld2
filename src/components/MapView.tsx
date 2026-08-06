@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import type { Place, PinnedPlace, GeneratedRoute, Origin, SimpleCategory } from '../types';
 import { getCategoryMeta } from '../lib/categories';
-import { coordsToAddress } from '../lib/kakao';
-import { createMapInfoCardElement } from '../lib/mapInfoCard';
+import { coordsToAddress, findNearestPlaceNear } from '../lib/kakao';
+import { createMapPlaceBubbleElement } from '../lib/mapPlaceBubble';
 import { iconSvgMarkup } from '../icons/waymeld-icons';
 import {
   renderPlaceMarkerHtml,
@@ -46,6 +46,8 @@ interface Props {
   fitRouteBounds?: boolean;
   fitSearchBounds?: boolean;
   highlightPlaceId?: string | null;
+  /** 검색 결과 마커 호버 → 결과 칩 하이라이트 (지도 이동·말풍선 없음) */
+  onHoverSearchPlace?: (place: Place) => void;
   /** 핀업 선택 모드: 지정 시 선택된 핀 마커만 표시(검색 마커 숨김) */
   pinSelectionFilter?: ReadonlySet<string>;
   /** 공유마당 전국 지도용 마커 */
@@ -83,9 +85,12 @@ export function MapView({
         onMapRightClick={rest.onMapRightClick}
         onMapCenterChange={rest.onMapCenterChange}
         onMapLevelChange={rest.onMapLevelChange}
+        infoWindowPlace={rest.infoWindowPlace}
+        onCloseInfoWindow={rest.onCloseInfoWindow}
         fitRouteBounds={rest.fitRouteBounds}
         fitSearchBounds={rest.fitSearchBounds}
         highlightPlaceId={rest.highlightPlaceId}
+        onHoverSearchPlace={rest.onHoverSearchPlace}
         pinSelectionFilter={rest.pinSelectionFilter}
         plazaMarkers={rest.plazaMarkers}
         highlightPlazaId={rest.highlightPlazaId}
@@ -128,6 +133,7 @@ function KakaoMapView({
   fitRouteBounds = false,
   fitSearchBounds = false,
   highlightPlaceId = null,
+  onHoverSearchPlace,
   pinSelectionFilter,
   plazaMarkers = [],
   highlightPlazaId = null,
@@ -136,6 +142,7 @@ function KakaoMapView({
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const overlaysRef = useRef<any[]>([]);
+  const placeMarkerContentsRef = useRef<HTMLElement[]>([]);
   const polylineRef = useRef<any>(null);
   const originMarkerRef = useRef<any>(null);
   const searchCenterMarkerRef = useRef<any>(null);
@@ -143,6 +150,12 @@ function KakaoMapView({
   const clickListenerRef = useRef<any>(null);
   const rightClickListenerRef = useRef<any>(null);
   const mapClickCloseInfoRef = useRef<any>(null);
+  const selectPlaceRef = useRef(onSelectPlace);
+  const pinnedClickRef = useRef(onPinnedMarkerClick);
+  const hoverSearchRef = useRef(onHoverSearchPlace);
+  selectPlaceRef.current = onSelectPlace;
+  pinnedClickRef.current = onPinnedMarkerClick;
+  hoverSearchRef.current = onHoverSearchPlace;
 
   const infoHandlersRef = useRef({
     onCloseInfoWindow,
@@ -306,7 +319,7 @@ function KakaoMapView({
     };
   }, [pickingOriginFromMap, pickingPinFromMap, onOriginPicked, onPinLocationPicked]);
 
-  // 지도 클릭 시 인포윈도우 닫기
+  // 기본 지도 POI 클릭 근사(Web API는 네이티브 POI 이벤트 없음) · 말풍선 닫기
   useEffect(() => {
     if (!mapRef.current) return;
     if (mapClickCloseInfoRef.current) {
@@ -317,13 +330,43 @@ function KakaoMapView({
       );
       mapClickCloseInfoRef.current = null;
     }
-    if (!infoWindowPlace || pickingOriginFromMap || pickingPinFromMap) return;
+    if (pickingOriginFromMap || pickingPinFromMap) return;
 
-    const handler = () => infoHandlersRef.current.onCloseInfoWindow?.();
+    let cancelled = false;
+    const handler = async (e: any) => {
+      const map = mapRef.current;
+      if (!map) return;
+      const lat = e.latLng.getLat();
+      const lng = e.latLng.getLng();
+      const level = typeof map.getLevel === 'function' ? map.getLevel() : 99;
+
+      // 축척이 멀면 POI 아이콘이 거의 안 보이므로 말풍선만 닫음
+      if (level > 5) {
+        infoHandlersRef.current.onCloseInfoWindow?.();
+        return;
+      }
+
+      try {
+        const nearest = await findNearestPlaceNear(lat, lng, {
+          radiusMeters: 80,
+          maxDistanceMeters: 80,
+        });
+        if (cancelled) return;
+        if (nearest) {
+          onSelectPlace?.(nearest);
+        } else {
+          infoHandlersRef.current.onCloseInfoWindow?.();
+        }
+      } catch {
+        if (!cancelled) infoHandlersRef.current.onCloseInfoWindow?.();
+      }
+    };
+
     mapClickCloseInfoRef.current = handler;
     window.kakao.maps.event.addListener(mapRef.current, 'click', handler);
 
     return () => {
+      cancelled = true;
       if (mapRef.current && mapClickCloseInfoRef.current) {
         window.kakao.maps.event.removeListener(
           mapRef.current,
@@ -333,7 +376,7 @@ function KakaoMapView({
         mapClickCloseInfoRef.current = null;
       }
     };
-  }, [infoWindowPlace, pickingOriginFromMap, pickingPinFromMap]);
+  }, [pickingOriginFromMap, pickingPinFromMap, onSelectPlace]);
 
   // 우클릭 → 검색 중심 메뉴
   useEffect(() => {
@@ -422,9 +465,11 @@ function KakaoMapView({
     if (plazaMarkers.length > 0) return;
     overlaysRef.current.forEach((o) => o.setMap(null));
     overlaysRef.current = [];
+    placeMarkerContentsRef.current = [];
 
     const pinnedMap = new Map(visiblePinned.map((p) => [p.id, p]));
     const resultsForMarkers = pinSelectionActive ? [] : searchResults;
+    const searchIdSet = new Set(resultsForMarkers.map((s) => s.id));
 
     const places: Array<Place & { _pinned?: PinnedPlace }> = [
       ...resultsForMarkers.map((s) => ({ ...s, _pinned: pinnedMap.get(s.id) })),
@@ -433,36 +478,39 @@ function KakaoMapView({
         .map((p) => ({ ...p, _pinned: p })),
     ];
 
-    const markerPlaces = [...places].sort((a, b) => {
-      const aSel = highlightPlaceId === a.id;
-      const bSel = highlightPlaceId === b.id;
-      if (aSel === bSel) return 0;
-      return aSel ? 1 : -1;
-    });
+    const markerPlaces = places;
 
     markerPlaces.forEach((place) => {
       const isPinned = !!place._pinned;
-      const isSelected = highlightPlaceId === place.id;
+      const isSearchResult = searchIdSet.has(place.id);
 
       const content = document.createElement('div');
+      content.dataset.placeId = place.id;
       content.innerHTML = renderPlaceMarkerHtml({
         place,
         pinned: place._pinned,
-        isSelected,
+        isSelected: false,
       });
       content.addEventListener('click', (e) => {
         e.stopPropagation();
         if (isPinned) {
-          onPinnedMarkerClick?.(place);
+          pinnedClickRef.current?.(place);
         } else {
-          onSelectPlace?.(place);
+          selectPlaceRef.current?.(place);
         }
       });
+      if (isSearchResult) {
+        content.addEventListener('mouseenter', () => {
+          hoverSearchRef.current?.(place);
+        });
+      }
+      placeMarkerContentsRef.current.push(content);
 
       const overlay = new window.kakao.maps.CustomOverlay({
         position: new window.kakao.maps.LatLng(place.lat, place.lng),
         content,
         yAnchor: 1,
+        zIndex: 1,
         clickable: true,
       });
       overlay.setMap(mapRef.current);
@@ -486,18 +534,32 @@ function KakaoMapView({
       overlay.setMap(mapRef.current);
       overlaysRef.current.push(overlay);
     }
+    // 선택 하이라이트는 highlightPlaceId effect에서 class만 갱신
   }, [
     searchResults,
     visiblePinned,
     pinSelectionActive,
-    onSelectPlace,
-    onPinnedMarkerClick,
-    highlightPlaceId,
     draftPinLocation,
     plazaMarkers.length,
   ]);
 
-  // 핀업 인포윈도우
+  // 선택 장소 마커 하이라이트 (호버/클릭 시 재생성 없이 class만 갱신)
+  useEffect(() => {
+    placeMarkerContentsRef.current.forEach((content) => {
+      const id = content.dataset.placeId;
+      const marker = content.querySelector('.map-marker');
+      const selected = id != null && id === highlightPlaceId;
+      marker?.classList.toggle('selected', selected);
+    });
+    overlaysRef.current.forEach((overlay) => {
+      const content = overlay.getContent?.() as HTMLElement | undefined;
+      const id = content?.dataset?.placeId;
+      if (!id) return;
+      overlay.setZIndex?.(id === highlightPlaceId ? 10 : 1);
+    });
+  }, [highlightPlaceId, searchResults, visiblePinned, pinSelectionActive, draftPinLocation]);
+
+  // 대상물 상세 말풍선 (구글맵 POI 상세와 유사)
   useEffect(() => {
     if (!mapRef.current) return;
     if (infoOverlayRef.current) {
@@ -507,29 +569,20 @@ function KakaoMapView({
     if (!infoWindowPlace) return;
 
     const place = infoWindowPlace;
-    const isPinned = infoHandlersRef.current.pinnedIds.has(place.id);
-    const content = createMapInfoCardElement(place, {
-      isPinned,
-      isClosed: false,
+    const content = createMapPlaceBubbleElement(place, {
       onClose: () => infoHandlersRef.current.onCloseInfoWindow?.(),
-      onTogglePin: () => infoHandlersRef.current.onTogglePinFromInfo?.(place),
-      onRoadview: () => infoHandlersRef.current.onOpenRoadviewFromInfo?.(place),
-      onOpenPlacePhotos: () =>
-        infoHandlersRef.current.onOpenPlacePhotosFromInfo?.(place),
-      onShowTaxiCard: () =>
-        infoHandlersRef.current.onShowTaxiCardFromInfo?.(place),
     });
 
     const overlay = new window.kakao.maps.CustomOverlay({
       position: new window.kakao.maps.LatLng(place.lat, place.lng),
       content,
-      yAnchor: 1.35,
-      zIndex: 20,
+      yAnchor: 1.28,
+      zIndex: 30,
       clickable: true,
     });
     overlay.setMap(mapRef.current);
     infoOverlayRef.current = overlay;
-  }, [infoWindowPlace, pinnedIds]);
+  }, [infoWindowPlace]);
 
   // 검색 결과가 여러 개일 때 지도 범위 맞춤
   useEffect(() => {

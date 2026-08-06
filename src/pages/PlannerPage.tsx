@@ -29,7 +29,7 @@ import {
   writeMapProviderChoice,
 } from '../lib/mapProviderPreference';
 import { getApproximateLocation } from '../lib/geolocation';
-import { KAKAO_LEVEL_50M, KAKAO_LEVEL_DEFAULT } from '../lib/mapZoom';
+import { KAKAO_LEVEL_DEFAULT } from '../lib/mapZoom';
 import { googleMapsLanguage, normalizeLocale } from '../lib/locale';
 import i18n from '../lib/i18n';
 import {
@@ -187,7 +187,6 @@ export default function PlannerPage() {
   // 지도 중심 · 지도/검색 앱
   const [mapCenter, setMapCenter] = useState(DEFAULT_CENTER);
   const [mapLevel, setMapLevel] = useState(KAKAO_LEVEL_DEFAULT);
-  const [mapLevelTick, setMapLevelTick] = useState(0);
   const [mapProviderBooting, setMapProviderBooting] = useState(
     () => !hasSavedMapProviderChoice()
   );
@@ -878,8 +877,12 @@ export default function PlannerPage() {
     setSelectedPlaceId(place.id);
     setFitSearchBounds(false);
     setMapCenter({ lat: place.lat, lng: place.lng });
-    setMapLevel(KAKAO_LEVEL_50M);
-    setMapLevelTick((n) => n + 1);
+    setInfoWindowPlace(place);
+  }, []);
+
+  /** 지도 검색 핀 호버 — 결과 칩만 선택 (지도 이동·말풍선 없음) */
+  const handleHoverSearchPlace = useCallback((place: Place) => {
+    setSelectedPlaceId((prev) => (prev === place.id ? prev : place.id));
   }, []);
 
   const handlePinnedMarkerClick = useCallback((place: Place) => {
@@ -1608,7 +1611,6 @@ export default function PlannerPage() {
           googleMapsReady={googleReady}
           center={mapCenter}
           level={mapLevel}
-          levelTick={mapLevelTick}
           searchResults={displayResults}
           pinned={mapPins}
           pinCategoryFilter={mapPinCategoryFilter}
@@ -1624,6 +1626,7 @@ export default function PlannerPage() {
           highlightPlaceId={selectedPlaceId}
           pinSelectionFilter={pinSelectionActive ? selectedPinIds : undefined}
           onSelectPlace={handleSelectPlace}
+          onHoverSearchPlace={handleHoverSearchPlace}
           onPinnedMarkerClick={handlePinnedMarkerClick}
           infoWindowPlace={infoWindowPlace}
           pinnedIds={pinnedIds}

@@ -1,5 +1,5 @@
 import { Icon } from './Icon';
-import { useEffect, useMemo, useState, type ClipboardEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type ClipboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
   Place,
@@ -9,7 +9,7 @@ import type {
   SearchRadiusMeters,
   FoodRestriction,
 } from '../types';
-import { useSearchCategoryFilters } from '../lib/i18nCategories';
+import { useSearchCategoryFilters, useSortLabels } from '../lib/i18nCategories';
 import { getSearchCategoryAccent } from '../lib/categories';
 import { formatNumber } from '../lib/format';
 import { normalizeLocale } from '../lib/locale';
@@ -30,6 +30,14 @@ import { OpenStatusBadge } from './OpenStatusBadge';
 import { MapProviderPicker } from './MapProviderPicker';
 import { LinkExtractResults } from './LinkExtractResults';
 import type { MapProvider } from '../lib/mapProvider';
+import type { IconName } from '../icons/waymeld-icons';
+
+/** 검색 결과 정렬 — 거리·별점 */
+const SEARCH_SORT_KEYS = ['distance', 'rating'] as const satisfies readonly SortKey[];
+const SORT_ICONS: Record<(typeof SEARCH_SORT_KEYS)[number], IconName> = {
+  distance: 'mapPin',
+  rating: 'star',
+};
 
 interface Props {
   results: Place[];
@@ -124,9 +132,10 @@ export function SearchPanel({
   const { t } = useTranslation('planner');
   const { t: tc } = useTranslation('common');
   const categoryFilters = useSearchCategoryFilters();
+  const sortLabels = useSortLabels();
   const appLocale = normalizeLocale(i18n.language);
   const compact = variant === 'compact';
-  const [sortKey] = useState<SortKey>('distance');
+  const [sortKey, setSortKey] = useState<SortKey>('distance');
   const subFilterGroup = getSearchSubFilterGroup(categoryFilter);
   const activeSubFilters =
     categoryFilter === 'FD6' ? foodRestrictions : categorySubFilters;
@@ -143,6 +152,7 @@ export function SearchPanel({
   >(null);
   const [linkPreviewHref, setLinkPreviewHref] = useState<string | null>(null);
   const [pasteHint, setPasteHint] = useState<string | null>(null);
+  const resultListRef = useRef<HTMLUListElement>(null);
 
   const linkEnabled = isLinkPlacesExtractConfigured() && Boolean(onSearchCandidate);
   const detectedLink = useMemo(
@@ -207,6 +217,19 @@ export function SearchPanel({
     }
   }, [detectedLink, linkPreviewKey, query, t]);
 
+  useEffect(() => {
+    if (!selectedId || !resultListRef.current) return;
+    const card = resultListRef.current.querySelector<HTMLElement>(
+      `[data-place-id="${CSS.escape(selectedId)}"]`
+    );
+    card?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [selectedId]);
+
+  const hasRatings = useMemo(
+    () => results.some((p) => p.rating != null),
+    [results]
+  );
+
   const sorted = useMemo(() => {
     const list = [...results];
     list.sort((a, b) => {
@@ -219,10 +242,18 @@ export function SearchPanel({
       const aOpen = openRank(a);
       const bOpen = openRank(b);
       if (aOpen !== bOpen) return aOpen - bOpen;
-      return (a.distance ?? Infinity) - (b.distance ?? Infinity);
+      switch (sortKey) {
+        case 'rating':
+          return (b.rating ?? -1) - (a.rating ?? -1);
+        case 'review':
+          return (b.reviewCount ?? -1) - (a.reviewCount ?? -1);
+        case 'distance':
+        default:
+          return (a.distance ?? Infinity) - (b.distance ?? Infinity);
+      }
     });
     return list;
-  }, [results]);
+  }, [results, sortKey]);
 
   const canSubmitSearch =
     Boolean(query.trim()) || (searchScope === 'nearby' && categoryFilter !== null);
@@ -496,6 +527,30 @@ export function SearchPanel({
         </p>
       )}
 
+      {results.length > 0 && !loading && (
+        <div className="search-sort-row">
+          <span className="search-sort-label">{t('search.sortLabel', { defaultValue: 'Sort 정렬' })}</span>
+          <div className="search-sort-chips" role="group" aria-label={t('search.sortAria', { defaultValue: '검색 결과 정렬' })}>
+            {SEARCH_SORT_KEYS.map((key) => (
+              <button
+                key={key}
+                type="button"
+                className={`search-sort-chip ${sortKey === key ? 'active' : ''}`}
+                aria-pressed={sortKey === key}
+                onClick={() => setSortKey(key)}
+              >
+                <Icon name={SORT_ICONS[key]} size={12} />
+                {sortLabels[key]}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {sortKey === 'rating' && results.length > 0 && !hasRatings && !enrichingStats && (
+        <p className="search-sort-hint">{t('search.ratingHint')}</p>
+      )}
+
       {searchError && (
         <div className="search-error" role="alert">
           {searchError}
@@ -513,7 +568,7 @@ export function SearchPanel({
       )}
 
       {results.length > 0 && (
-        <ul className="search-result-list">
+        <ul className="search-result-list" ref={resultListRef}>
           {sorted.map((place) => {
             const isPinned = pinnedIds.has(place.id);
             const badge = insightBadge(place);
@@ -521,6 +576,7 @@ export function SearchPanel({
             return (
               <li
                 key={place.id}
+                data-place-id={place.id}
                 className={`search-result-card ${isPinned ? 'pinned' : ''} ${
                   selectedId === place.id ? 'selected' : ''
                 }`}
@@ -542,16 +598,19 @@ export function SearchPanel({
                     )}
                   </div>
                   <div className="search-result-stats">
-                    {place.rating !== undefined && (
-                      <span>
+                    {place.rating != null && (
+                      <span className="search-result-rating">
                         ★ {place.rating.toFixed(1)}
-                        {place.reviewCount !== undefined
+                        {place.reviewCount != null
                           ? ` · ${formatNumber(place.reviewCount, appLocale)} reviews`
                           : ''}
                       </span>
                     )}
                     {place.distance !== undefined && (
-                      <span> · {formatDistance(place.distance)}</span>
+                      <span className="search-result-distance">
+                        {place.rating != null ? ' · ' : ''}
+                        {formatDistance(place.distance)}
+                      </span>
                     )}
                   </div>
                   {badge && (
@@ -591,7 +650,10 @@ export function SearchPanel({
         <button
           type="button"
           className="search-reset-link"
-          onClick={onResetResults}
+          onClick={() => {
+            setSortKey('distance');
+            onResetResults();
+          }}
           disabled={loading}
         >
           <Icon name="refresh" size={14} /> 결과 초기화

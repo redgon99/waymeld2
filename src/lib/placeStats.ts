@@ -102,15 +102,22 @@ function parsePanel3Response(
   const summary = root.summary as Record<string, unknown> | undefined;
   const kakaoReview = root.kakaomap_review as Record<string, unknown> | undefined;
   const blogReview = root.blog_review as Record<string, unknown> | undefined;
+  const scoreSet = kakaoReview?.score_set as Record<string, unknown> | undefined;
 
-  const rating = pickNumber(
+  const ratingRaw = pickNumber(
+    scoreSet?.average_score,
+    scoreSet?.score,
     summary?.rating,
     summary?.average_score,
     summary?.star_rating,
-    summary?.score
+    summary?.score,
+    kakaoReview?.average_score,
+    kakaoReview?.rating
   );
 
   const reviewCount = pickNumber(
+    scoreSet?.review_count,
+    scoreSet?.count,
     kakaoReview?.review_count,
     kakaoReview?.count,
     kakaoReview?.total_count,
@@ -118,6 +125,13 @@ function parsePanel3Response(
     blogReview?.count,
     summary?.review_count
   );
+
+  // 후기 0건이면 API가 average_score: 0 을 주는 경우가 많아 별점 없음으로 취급
+  const rating =
+    ratingRaw !== undefined &&
+    !(ratingRaw === 0 && (reviewCount === undefined || reviewCount === 0))
+      ? ratingRaw
+      : undefined;
 
   const confirmId = pickString(summary?.confirm_id) ?? placeId;
   const thumbnailUrl =

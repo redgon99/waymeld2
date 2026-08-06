@@ -22,6 +22,8 @@
     "noResults": "No results found.",
     "loading": "Searching…",
     "enriching": "Loading ratings…",
+    "sortLabel": "Sort",
+    "sortAria": "Sort search results",
     "distanceHint": "By distance from map center",
     "ratingHint": "Places without ratings are sorted lower",
     "reviewHint": "Places without review counts are sorted lower",
