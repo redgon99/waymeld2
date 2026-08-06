@@ -1,0 +1,15 @@
+# Supabase local / deploy config (Edge Functions)
+# https://supabase.com/docs/guides/functions/function-configuration
+
+[functions.tour-search]
+verify_jwt = false
+
+# MVP: 익명 키로 호출 가능 (YOUTUBE/ANTHROPIC 시크릿은 서버만). 남용 시 JWT 또는 rate limit 권장.
+[functions.youtube-places-extract]
+verify_jwt = false
+
+[functions.link-places-extract]
+verify_jwt = false
+
+[functions.insight-guide-draft]
+verify_jwt = false

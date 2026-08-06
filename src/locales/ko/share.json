@@ -1,0 +1,25 @@
+{
+  "trip": {
+    "readOnly": "읽기 전용 공유",
+    "notFound": "여행을 찾을 수 없습니다.",
+    "loading": "불러오는 중…"
+  },
+  "plaza": {
+    "title": "공유마당",
+    "board": "게시판",
+    "map": "지도",
+    "import": "끌어오기",
+    "imported": "끌어옴",
+    "loginRequired": "로그인 후 끌어올 수 있습니다.",
+    "filterLocale": "언어",
+    "localeAll": "전체",
+    "localeKo": "한국어",
+    "localeEn": "English",
+    "localeJa": "日本語",
+    "localeZh": "中文"
+  },
+  "modal": {
+    "shareTitle": "여행 공유",
+    "publishPlaza": "공유마당에 등록"
+  }
+}

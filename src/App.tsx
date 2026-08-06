@@ -1,0 +1,52 @@
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import { LocaleLayout } from './components/LocaleLayout';
+import LandingPage from './pages/LandingPage';
+import PlannerPage from './pages/PlannerPage';
+import ShareTripPage from './pages/ShareTripPage';
+import SharePlazaPage from './pages/SharePlazaPage';
+import LoginPage from './pages/LoginPage';
+import AdminPage from './pages/AdminPage';
+import AdminInsightsPage from './pages/AdminInsightsPage';
+import AdminGuidesPage from './pages/AdminGuidesPage';
+import GuidesPage from './pages/GuidesPage';
+import GuideDetailPage from './pages/GuideDetailPage';
+import KoreaSetupPage from './pages/KoreaSetupPage';
+import HelpPage from './pages/HelpPage';
+import ThemesPage from './pages/ThemesPage';
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './lib/locale';
+
+const PAGE_ROUTES = (
+  <>
+    <Route path="login" element={<LoginPage />} />
+    <Route index element={<LandingPage />} />
+    <Route path="plan" element={<PlannerPage />} />
+    <Route path="trip/:slug" element={<ShareTripPage />} />
+    <Route path="plaza" element={<SharePlazaPage />} />
+    <Route path="guides" element={<GuidesPage />} />
+    <Route path="guides/:slug" element={<GuideDetailPage />} />
+    <Route path="admin" element={<AdminPage />} />
+    <Route path="admin/insights" element={<AdminInsightsPage />} />
+    <Route path="admin/guides" element={<AdminGuidesPage />} />
+    <Route path="setup" element={<KoreaSetupPage />} />
+    <Route path="help" element={<HelpPage />} />
+    <Route path="themes" element={<ThemesPage />} />
+  </>
+);
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route element={<LocaleLayout />}>{PAGE_ROUTES}</Route>
+          {SUPPORTED_LOCALES.filter((l) => l !== DEFAULT_LOCALE).map((lang) => (
+            <Route key={lang} path={lang} element={<LocaleLayout />}>
+              {PAGE_ROUTES}
+            </Route>
+          ))}
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}

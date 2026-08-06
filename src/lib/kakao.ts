@@ -1,0 +1,273 @@
+import type { KakaoPlace, Place, CategoryCode } from '../types';
+import type { SearchScope } from '../types';
+import { getCategoryMeta } from './categories';
+import { buildKakaoPhotosUrl } from './kakaoPlaceUrls';
+
+declare global {
+  interface Window {
+    kakao: any;
+  }
+}
+
+// =============================================
+// Kakao SDK 로더 (싱글톤)
+// =============================================
+
+let sdkPromise: Promise<typeof window.kakao> | null = null;
+
+export function loadKakaoSdk(appkey: string): Promise<typeof window.kakao> {
+  if (typeof window === 'undefined') return Promise.reject(new Error('SSR'));
+  if (sdkPromise) return sdkPromise;
+
+  sdkPromise = new Promise((resolve, reject) => {
+    if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+      resolve(window.kakao);
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appkey}&libraries=services,clusterer&autoload=false`;
+    script.async = true;
+    script.onload = () => window.kakao.maps.load(() => resolve(window.kakao));
+    script.onerror = (e) => reject(e);
+    document.head.appendChild(script);
+  });
+
+  return sdkPromise;
+}
+
+// =============================================
+// KakaoPlace → Place 정규화
+// =============================================
+
+export function normalizePlace(kp: KakaoPlace): Place {
+  const code = (kp.category_group_code || 'OTHER') as CategoryCode | 'OTHER';
+  const meta = getCategoryMeta(code);
+
+  return {
+    id: kp.id,
+    name: kp.place_name,
+    category: meta.category,
+    categoryCode: code,
+    categoryLabel: meta.label,
+    categoryDetail: kp.category_name || undefined,
+    address: kp.address_name,
+    roadAddress: kp.road_address_name,
+    phone: kp.phone || undefined,
+    lat: parseFloat(kp.y),
+    lng: parseFloat(kp.x),
+    distance: kp.distance ? parseInt(kp.distance, 10) : undefined,
+    placeUrl: kp.place_url || undefined,
+    photosUrl: buildKakaoPhotosUrl(kp.id, kp.place_url || undefined),
+    openingStatus: 'unknown',
+  };
+}
+
+/** 주소·장소명 → 좌표 (출발지 입력용) */
+export function resolveAddressToCoords(query: string): Promise<{ lat: number; lng: number; label: string } | null> {
+  return new Promise((resolve) => {
+    if (!window.kakao?.maps?.services || !query.trim()) {
+      resolve(null);
+      return;
+    }
+    const ps = new window.kakao.maps.services.Places();
+    ps.keywordSearch(
+      query.trim(),
+      (data: KakaoPlace[], status: string) => {
+        if (status !== window.kakao.maps.services.Status.OK || !data[0]) {
+          resolve(null);
+          return;
+        }
+        const p = data[0];
+        resolve({
+          lat: parseFloat(p.y),
+          lng: parseFloat(p.x),
+          label: p.place_name || query.trim(),
+        });
+      },
+      { size: 1, sort: window.kakao.maps.services.SortBy.ACCURACY }
+    );
+  });
+}
+
+// =============================================
+// 장소 검색
+// =============================================
+
+export type KakaoSearchSort = 'accuracy' | 'distance';
+
+export interface SearchOptions {
+  keyword: string;
+  categoryGroupCode?: CategoryCode;
+  center?: { lat: number; lng: number };
+  radiusMeters?: number;
+  sort?: KakaoSearchSort;
+  size?: number;
+  page?: number;
+}
+
+export interface CategorySearchOptions {
+  categoryGroupCode: CategoryCode;
+  center: { lat: number; lng: number };
+  radiusMeters?: number;
+  size?: number;
+  page?: number;
+}
+
+export interface PlacesSearchResult {
+  places: Place[];
+  page: number;
+  hasMore: boolean;
+}
+
+export interface UnifiedSearchParams {
+  keyword?: string;
+  categoryGroupCode?: CategoryCode | null;
+  scope: SearchScope;
+  center?: { lat: number; lng: number };
+  radiusMeters?: number;
+  size?: number;
+  page?: number;
+}
+
+function handlePlacesCallback(
+  data: KakaoPlace[],
+  status: string,
+  pagination: { current: number; hasNextPage: boolean } | undefined,
+  page: number,
+  resolve: (r: PlacesSearchResult) => void,
+  reject: (e: Error) => void
+) {
+  if (status === window.kakao.maps.services.Status.OK) {
+    resolve({
+      places: data.map((d) => normalizePlace(d)),
+      page: pagination?.current ?? page,
+      hasMore: pagination?.hasNextPage ?? false,
+    });
+  } else if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
+    resolve({ places: [], page, hasMore: false });
+  } else {
+    reject(new Error(`Kakao search failed: ${status}`));
+  }
+}
+
+/** 키워드 장소 검색 (category_group_code 선택) */
+export function searchPlaces(opts: SearchOptions): Promise<PlacesSearchResult> {
+  return new Promise((resolve, reject) => {
+    if (!window.kakao?.maps?.services) {
+      reject(new Error('Kakao SDK not loaded'));
+      return;
+    }
+    const ps = new window.kakao.maps.services.Places();
+    const page = opts.page ?? 1;
+    const searchOpts: Record<string, unknown> = {
+      size: opts.size ?? 15,
+      page,
+    };
+    if (opts.categoryGroupCode) {
+      searchOpts.category_group_code = opts.categoryGroupCode;
+    }
+    if (opts.center) {
+      searchOpts.location = new window.kakao.maps.LatLng(opts.center.lat, opts.center.lng);
+      searchOpts.radius = opts.radiusMeters ?? 20_000;
+      searchOpts.sort =
+        opts.sort === 'accuracy'
+          ? window.kakao.maps.services.SortBy.ACCURACY
+          : window.kakao.maps.services.SortBy.DISTANCE;
+    } else {
+      searchOpts.sort =
+        opts.sort === 'distance'
+          ? window.kakao.maps.services.SortBy.DISTANCE
+          : window.kakao.maps.services.SortBy.ACCURACY;
+    }
+    ps.keywordSearch(
+      opts.keyword,
+      (data: KakaoPlace[], status: string, pagination: { current: number; hasNextPage: boolean }) => {
+        handlePlacesCallback(data, status, pagination, page, resolve, reject);
+      },
+      searchOpts
+    );
+  });
+}
+
+/** 카테고리 장소 검색 (지도 주변, 키워드 없이) */
+export function searchPlacesByCategory(opts: CategorySearchOptions): Promise<PlacesSearchResult> {
+  return new Promise((resolve, reject) => {
+    if (!window.kakao?.maps?.services) {
+      reject(new Error('Kakao SDK not loaded'));
+      return;
+    }
+    const ps = new window.kakao.maps.services.Places();
+    const page = opts.page ?? 1;
+    const searchOpts: Record<string, unknown> = {
+      location: new window.kakao.maps.LatLng(opts.center.lat, opts.center.lng),
+      radius: opts.radiusMeters ?? 5000,
+      size: opts.size ?? 15,
+      page,
+      sort: window.kakao.maps.services.SortBy.DISTANCE,
+    };
+    ps.categorySearch(
+      opts.categoryGroupCode,
+      (data: KakaoPlace[], status: string, pagination: { current: number; hasNextPage: boolean }) => {
+        handlePlacesCallback(data, status, pagination, page, resolve, reject);
+      },
+      searchOpts
+    );
+  });
+}
+
+/** 키워드·카테고리·범위 통합 검색 */
+export async function searchPlacesUnified(params: UnifiedSearchParams): Promise<PlacesSearchResult> {
+  const keyword = params.keyword?.trim() ?? '';
+  const category = params.categoryGroupCode ?? undefined;
+  const nearby = params.scope === 'nearby';
+
+  if (!keyword && !category) {
+    return { places: [], page: 1, hasMore: false };
+  }
+
+  if (!keyword && category && nearby && params.center) {
+    return searchPlacesByCategory({
+      categoryGroupCode: category,
+      center: params.center,
+      radiusMeters: params.radiusMeters,
+      size: params.size,
+      page: params.page,
+    });
+  }
+
+  if (!keyword) {
+    return { places: [], page: 1, hasMore: false };
+  }
+
+  return searchPlaces({
+    keyword,
+    categoryGroupCode: category,
+    center: nearby ? params.center : undefined,
+    radiusMeters: nearby ? params.radiusMeters : undefined,
+    sort: nearby ? 'distance' : 'accuracy',
+    size: params.size,
+    page: params.page,
+  });
+}
+
+// =============================================
+// 좌표 → 주소 변환 (출발지 지도 클릭용)
+// =============================================
+
+export function coordsToAddress(lat: number, lng: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    if (!window.kakao?.maps?.services) {
+      reject(new Error('Kakao SDK not loaded'));
+      return;
+    }
+    const geocoder = new window.kakao.maps.services.Geocoder();
+    geocoder.coord2Address(lng, lat, (result: any[], status: string) => {
+      if (status === window.kakao.maps.services.Status.OK && result[0]) {
+        const r = result[0];
+        resolve(r.road_address?.address_name || r.address?.address_name || '');
+      } else {
+        reject(new Error(`Reverse geocode failed: ${status}`));
+      }
+    });
+  });
+}

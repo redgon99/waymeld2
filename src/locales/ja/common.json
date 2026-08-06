@@ -1,0 +1,76 @@
+{
+  "appName": "WayMeld",
+  "appNameEn": "WayMeld",
+  "appTagline": "場所を集めて、ルートを紡ぐ",
+  "loadingMap": "地図を読み込み中…",
+  "search": "検索",
+  "clear": "クリア",
+  "close": "閉じる",
+  "cancel": "キャンセル",
+  "confirm": "OK",
+  "save": "保存",
+  "delete": "削除",
+  "share": "共有",
+  "next": "次へ",
+  "back": "戻る",
+  "retry": "再試行",
+  "more": "もっと見る",
+  "all": "すべて",
+  "day": "{{count}}日目",
+  "dayShort": "{{n}}日目",
+  "reviews": "レビュー {{count}}",
+  "reviewsCount": "レビュー {{count}}件",
+  "rating": "評価",
+  "distance": "距離",
+  "locale": "言語",
+  "localeLabel": "言語を選択",
+  "mapProvider": {
+    "kakao": "カカオマップ",
+    "google": "Google マップ",
+    "switchedKakao": "カカオマップに切り替えました",
+    "switchedGoogle": "Google マップに切り替えました"
+  },
+  "auth": {
+    "localMode": "ローカル保存モード",
+    "cloudLogin": "クラウド保存（ログイン）",
+    "logout": "ログアウト",
+    "admin": "管理者",
+    "beforeLogin": "未ログイン"
+  },
+  "openStatus": {
+    "open": "営業中",
+    "scheduled": "まもなく営業",
+    "closed": "営業終了",
+    "offday": "定休日"
+  },
+  "sort": {
+    "distance": "距離順",
+    "rating": "評価順",
+    "review": "レビュー順"
+  },
+  "category": {
+    "all": "すべて",
+    "food": "グルメ",
+    "cafe": "カフェ",
+    "tour": "観光",
+    "stay": "宿泊",
+    "culture": "文化",
+    "shop": "マート",
+    "parking": "駐車",
+    "other": "その他"
+  },
+  "travelMode": {
+    "car": "車",
+    "walk": "徒歩",
+    "transit": "公共交通",
+    "bike": "自転車"
+  },
+  "payment": {
+    "creditCard": "クレジットカード",
+    "debitCard": "デビットカード",
+    "nfc": "NFC"
+  },
+  "mobility": {
+    "straightLineOnly": "韓国外は直線距離で推定されます。"
+  }
+}

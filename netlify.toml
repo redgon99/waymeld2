@@ -1,0 +1,43 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# 카카오맵 장소 API — netlify/edge-functions/kakao-place-proxy.ts (필수 헤더 주입)
+# 이미지 프록시 (CORS·hotlink 우회)
+[[redirects]]
+  from = "/api/kakao-img-t1/*"
+  to = "https://t1.daumcdn.net/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/kakao-img-cdn/*"
+  to = "https://img1.kakaocdn.net/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/kakao-img-naver/*"
+  to = "https://postfiles.pstatic.net/:splat"
+  status = 200
+  force = true
+
+# SPA fallback - 모든 경로를 index.html로 라우팅
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# 정적 자산 캐시 헤더
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"

@@ -1,0 +1,80 @@
+{
+  "appName": "WayMeld",
+  "appNameEn": "WayMeld",
+  "appTagline": "Collect places. Meld your route.",
+  "loadingMap": "Loading map…",
+  "search": "Search",
+  "clear": "Clear",
+  "close": "Close",
+  "cancel": "Cancel",
+  "confirm": "OK",
+  "save": "Save",
+  "delete": "Delete",
+  "share": "Share",
+  "next": "Next",
+  "back": "Back",
+  "retry": "Retry",
+  "more": "More",
+  "all": "All",
+  "day": "Day {{count}}",
+  "dayShort": "Day {{n}}",
+  "reviews": "{{count}} reviews",
+  "reviewsCount": "{{count}} reviews",
+  "rating": "Rating",
+  "distance": "Distance",
+  "locale": "Language",
+  "localeLabel": "Choose language",
+  "mapProvider": {
+    "kakao": "Kakao Map",
+    "google": "Google Maps",
+    "switchedKakao": "Switched to Kakao Map",
+    "switchedGoogle": "Switched to Google Maps"
+  },
+  "auth": {
+    "localMode": "Local save mode",
+    "cloudLogin": "Cloud save (sign in)",
+    "logout": "Sign out",
+    "admin": "Admin",
+    "beforeLogin": "Not signed in"
+  },
+  "openStatus": {
+    "open": "Open",
+    "scheduled": "Opens soon",
+    "closed": "Closed",
+    "offday": "Closed today"
+  },
+  "sort": {
+    "distance": "Distance",
+    "rating": "Rating",
+    "review": "Reviews"
+  },
+  "category": {
+    "all": "All",
+    "food": "Food",
+    "cafe": "Cafe",
+    "tour": "Sights",
+    "stay": "Stay",
+    "culture": "Culture",
+    "shop": "Mart",
+    "beauty": "Beauty",
+    "market": "Market",
+    "transport": "Transit",
+    "road": "Street",
+    "parking": "Parking",
+    "other": "Other"
+  },
+  "travelMode": {
+    "car": "Car",
+    "walk": "Walk",
+    "transit": "Transit",
+    "bike": "Bike"
+  },
+  "payment": {
+    "creditCard": "Credit card",
+    "debitCard": "Debit card",
+    "nfc": "NFC"
+  },
+  "mobility": {
+    "straightLineOnly": "Outside Korea, distance is estimated in a straight line."
+  }
+}

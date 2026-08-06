@@ -1,0 +1,45 @@
+{
+  "brand": "WayMeld guides",
+  "list": {
+    "metaTitle": "Travel guides · WayMeld",
+    "title": "Travel guides",
+    "subtitle": "Recommended courses, practical tips, and prep checklists. Only admin-reviewed cards are published.",
+    "loading": "Loading…",
+    "empty": "No published guides yet.",
+    "kindFilter": "Guide types"
+  },
+  "detail": {
+    "back": "All guides",
+    "notFound": "Guide not found.",
+    "sources": "Sources",
+    "disclaimer": "Fares, policies, and hours may change. Check official information before you go."
+  },
+  "cta": {
+    "planner": "Open planner",
+    "autoRoute": "Build this course automatically",
+    "setup": "Korea prep checklist",
+    "plaza": "Share plaza"
+  },
+  "kinds": {
+    "all": "All",
+    "course": "Recommended courses",
+    "practical": "Practical tips",
+    "prepare": "Trip prep",
+    "food": "Food & cafés",
+    "culture": "Culture & etiquette",
+    "shopping": "Shopping & tax-free",
+    "safety": "Safety & emergency"
+  },
+  "tags": {
+    "transport": "Transit",
+    "payment": "Payments",
+    "sim": "SIM / data",
+    "etiquette": "Etiquette",
+    "food": "Food",
+    "other": "Other"
+  },
+  "errors": {
+    "notConfigured": "Supabase must be configured to show guides.",
+    "loadFailed": "Could not load guides."
+  }
+}

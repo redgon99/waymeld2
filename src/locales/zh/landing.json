@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "title": "WayMeld — 收藏地点，编织路线",
+    "description": "搜索、标记地点，生成带时间的行程。Kakao与Google地图、多日行程、分享链接。"
+  },
+  "brand": {
+    "primary": "WayMeld",
+    "secondary": "여로담"
+  },
+  "nav": {
+    "features": "功能",
+    "howItWorks": "开始",
+    "plaza": "分享广场",
+    "tips": "旅行贴士",
+    "start": "创建路线",
+    "login": "登录"
+  },
+  "hero": {
+    "eyebrow": "WayMeld",
+    "title": "收藏想去的地方，\n编织旅行路线",
+    "subtitle": "搜索并标记地点，按分类整理。拖动调整顺序，生成几点到几点的行程。不是去过哪里，而是规划下一步怎么走。",
+    "ctaPrimary": "免费开始",
+    "ctaSecondary": "浏览分享广场",
+    "note": "无需安装 · 可本地保存"
+  },
+  "pillars": {
+    "title": "三步",
+    "search": { "title": "搜索与收藏", "body": "关键词或分类搜索，从地图或结果中标记。美食、咖啡、景点以标签展示。" },
+    "route": { "title": "编织路线", "body": "含停留与午餐时段的时间表，Kakao实际道路计算移动时间。" },
+    "share": { "title": "分享", "body": "只读链接分享，或从广场导入他人行程。" }
+  },
+  "features": {
+    "title": "WayMeld 的方式",
+    "subtitle": "不同于记录「去过哪里」的应用，WayMeld 规划「接下来怎么走」。",
+    "multiDay": { "title": "多日标签", "body": "第1天、第2天分别管理标记与路线。" },
+    "category": { "title": "分类标记栏", "body": "拖动调整顺序与分类，联动地图筛选。" },
+    "maps": { "title": "Kakao + Google", "body": "韩国用Kakao，海外用Google Places。四语言界面。" },
+    "presentation": { "title": "演示模式", "body": "适合会议、课堂或导游讲解。" }
+  },
+  "compare": {
+    "title": "定位",
+    "us": "WayMeld",
+    "them": "到访记录应用",
+    "row1": ["今日明日路线", "去过的地方"],
+    "row2": ["带时间的行程", "仅地图标记"],
+    "row3": ["多日+实际道路", "回忆与照片为主"]
+  },
+  "steps": {
+    "title": "如何开始",
+    "step1": { "title": "浏览器打开", "body": "无需安装。" },
+    "step2": { "title": "搜索与标记", "body": "搜索或点击地图添加。" },
+    "step3": { "title": "排序与路线", "body": "拖动标签，创建路线。" },
+    "step4": { "title": "分享", "body": "链接或分享广场。" }
+  },
+  "gallery": { "title": "界面预览" },
+  "tips": {
+    "title": "旅行贴士",
+    "subtitle": "交通、支付、通讯等韩国旅行实用指南",
+    "more": "查看更多",
+    "empty": "实用贴士即将上线。"
+  },
+  "cta": {
+    "title": "开始规划下一段旅程",
+    "subtitle": "无需登录即可本地保存。Plus 提供云同步。",
+    "button": "打开路线规划"
+  },
+  "footer": {
+    "tagline": "收藏 → 编织 → 路线 → 分享",
+    "plaza": "分享广场",
+    "tips": "旅行贴士",
+    "login": "登录",
+    "plan": "规划器",
+    "rights": "© {{year}} WayMeld"
+  }
+}

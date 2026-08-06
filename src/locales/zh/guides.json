@@ -1,0 +1,45 @@
+{
+  "brand": "WayMeld 指南",
+  "list": {
+    "metaTitle": "旅行指南 · WayMeld",
+    "title": "旅行指南",
+    "subtitle": "推荐路线、实用贴士、出行准备等。仅展示管理员审核后的内容。",
+    "loading": "加载中…",
+    "empty": "暂无已发布的指南。",
+    "kindFilter": "指南类型"
+  },
+  "detail": {
+    "back": "指南列表",
+    "notFound": "未找到该指南。",
+    "sources": "参考来源",
+    "disclaimer": "费用、政策与营业时间可能变动。出行前请核对官方信息。"
+  },
+  "cta": {
+    "planner": "打开行程规划",
+    "autoRoute": "用此路线自动规划",
+    "setup": "出行准备清单",
+    "plaza": "分享广场"
+  },
+  "kinds": {
+    "all": "全部",
+    "course": "推荐行程",
+    "practical": "实用信息",
+    "prepare": "出行准备",
+    "food": "美食咖啡",
+    "culture": "文化礼仪",
+    "shopping": "购物免税",
+    "safety": "安全急救"
+  },
+  "tags": {
+    "transport": "交通",
+    "payment": "支付",
+    "sim": "通讯",
+    "etiquette": "礼仪",
+    "food": "餐饮",
+    "other": "其他"
+  },
+  "errors": {
+    "notConfigured": "显示指南需要配置 Supabase。",
+    "loadFailed": "无法加载指南。"
+  }
+}

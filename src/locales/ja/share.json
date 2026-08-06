@@ -1,0 +1,25 @@
+{
+  "trip": {
+    "readOnly": "共有旅行（閲覧のみ）",
+    "notFound": "旅行が見つかりません。",
+    "loading": "読み込み中…"
+  },
+  "plaza": {
+    "title": "共有広場",
+    "board": "掲示板",
+    "map": "地図",
+    "import": "取り込む",
+    "imported": "取り込み済み",
+    "loginRequired": "ログイン後に取り込めます。",
+    "filterLocale": "言語",
+    "localeAll": "すべて",
+    "localeKo": "韓国語",
+    "localeEn": "英語",
+    "localeJa": "日本語",
+    "localeZh": "中国語"
+  },
+  "modal": {
+    "shareTitle": "旅行を共有",
+    "publishPlaza": "共有広場に登録"
+  }
+}

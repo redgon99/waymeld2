@@ -1,0 +1,80 @@
+{
+  "appName": "여로담",
+  "appNameEn": "WayMeld",
+  "appTagline": "가고 싶은 곳을 담으면, 여행길이 됩니다.",
+  "loadingMap": "지도를 불러오는 중…",
+  "search": "검색",
+  "clear": "지우기",
+  "close": "닫기",
+  "cancel": "취소",
+  "confirm": "확인",
+  "save": "저장",
+  "delete": "삭제",
+  "share": "공유",
+  "next": "다음",
+  "back": "뒤로",
+  "retry": "다시 시도",
+  "more": "더보기",
+  "all": "전체",
+  "day": "{{count}}일차",
+  "dayShort": "{{n}}일차",
+  "reviews": "리뷰 {{count}}",
+  "reviewsCount": "리뷰 {{count}}개",
+  "rating": "평점",
+  "distance": "거리",
+  "locale": "언어",
+  "localeLabel": "언어 선택",
+  "mapProvider": {
+    "kakao": "카카오맵",
+    "google": "Google 지도",
+    "switchedKakao": "카카오맵으로 전환했습니다",
+    "switchedGoogle": "Google 지도로 전환했습니다"
+  },
+  "auth": {
+    "localMode": "로컬 저장 모드",
+    "cloudLogin": "클라우드 저장 (로그인)",
+    "logout": "로그아웃",
+    "admin": "관리자",
+    "beforeLogin": "로그인 전"
+  },
+  "openStatus": {
+    "open": "영업중",
+    "scheduled": "영업예정",
+    "closed": "영업종료",
+    "offday": "휴무일"
+  },
+  "sort": {
+    "distance": "거리순",
+    "rating": "평점순",
+    "review": "리뷰순"
+  },
+  "category": {
+    "all": "전체",
+    "food": "맛집",
+    "cafe": "카페",
+    "tour": "관광",
+    "stay": "숙소",
+    "culture": "문화",
+    "shop": "마트",
+    "beauty": "뷰티",
+    "market": "시장",
+    "transport": "교통",
+    "road": "거리",
+    "parking": "주차",
+    "other": "기타"
+  },
+  "travelMode": {
+    "car": "자동차",
+    "walk": "도보",
+    "transit": "대중교통",
+    "bike": "자전거"
+  },
+  "payment": {
+    "creditCard": "신용카드",
+    "debitCard": "체크카드",
+    "nfc": "NFC 결제"
+  },
+  "mobility": {
+    "straightLineOnly": "해외·비한국 구간은 직선 거리로 추정됩니다."
+  }
+}

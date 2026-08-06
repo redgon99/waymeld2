@@ -1,0 +1,25 @@
+{
+  "trip": {
+    "readOnly": "Shared trip (read-only)",
+    "notFound": "Trip not found.",
+    "loading": "Loading…"
+  },
+  "plaza": {
+    "title": "Share plaza",
+    "board": "Board",
+    "map": "Map",
+    "import": "Import",
+    "imported": "Imported",
+    "loginRequired": "Sign in to import this trip.",
+    "filterLocale": "Language",
+    "localeAll": "All",
+    "localeKo": "Korean",
+    "localeEn": "English",
+    "localeJa": "Japanese",
+    "localeZh": "Chinese"
+  },
+  "modal": {
+    "shareTitle": "Share trip",
+    "publishPlaza": "List on share plaza"
+  }
+}

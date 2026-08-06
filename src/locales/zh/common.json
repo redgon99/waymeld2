@@ -1,0 +1,76 @@
+{
+  "appName": "WayMeld",
+  "appNameEn": "WayMeld",
+  "appTagline": "收藏地点，编织路线",
+  "loadingMap": "正在加载地图…",
+  "search": "搜索",
+  "clear": "清除",
+  "close": "关闭",
+  "cancel": "取消",
+  "confirm": "确定",
+  "save": "保存",
+  "delete": "删除",
+  "share": "分享",
+  "next": "下一步",
+  "back": "返回",
+  "retry": "重试",
+  "more": "更多",
+  "all": "全部",
+  "day": "第{{count}}天",
+  "dayShort": "第{{n}}天",
+  "reviews": "{{count}}条评价",
+  "reviewsCount": "{{count}}条评价",
+  "rating": "评分",
+  "distance": "距离",
+  "locale": "语言",
+  "localeLabel": "选择语言",
+  "mapProvider": {
+    "kakao": "Kakao地图",
+    "google": "Google地图",
+    "switchedKakao": "已切换到Kakao地图",
+    "switchedGoogle": "已切换到Google地图"
+  },
+  "auth": {
+    "localMode": "本地保存模式",
+    "cloudLogin": "云保存（登录）",
+    "logout": "退出登录",
+    "admin": "管理",
+    "beforeLogin": "未登录"
+  },
+  "openStatus": {
+    "open": "营业中",
+    "scheduled": "即将营业",
+    "closed": "已打烊",
+    "offday": "休息日"
+  },
+  "sort": {
+    "distance": "距离",
+    "rating": "评分",
+    "review": "评价数"
+  },
+  "category": {
+    "all": "全部",
+    "food": "美食",
+    "cafe": "咖啡",
+    "tour": "景点",
+    "stay": "住宿",
+    "culture": "文化",
+    "shop": "超市",
+    "parking": "停车",
+    "other": "其他"
+  },
+  "travelMode": {
+    "car": "驾车",
+    "walk": "步行",
+    "transit": "公交",
+    "bike": "骑行"
+  },
+  "payment": {
+    "creditCard": "信用卡",
+    "debitCard": "借记卡",
+    "nfc": "NFC"
+  },
+  "mobility": {
+    "straightLineOnly": "韩国以外按直线距离估算。"
+  }
+}

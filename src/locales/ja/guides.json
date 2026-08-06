@@ -1,0 +1,45 @@
+{
+  "brand": "WayMeld ガイド",
+  "list": {
+    "metaTitle": "旅行ガイド · WayMeld",
+    "title": "旅行ガイド",
+    "subtitle": "おすすめコース・実用Tips・準備チェック。管理者が確認したカードのみ公開されます。",
+    "loading": "読み込み中…",
+    "empty": "公開中のガイドはまだありません。",
+    "kindFilter": "ガイド種類"
+  },
+  "detail": {
+    "back": "ガイド一覧",
+    "notFound": "ガイドが見つかりません。",
+    "sources": "参考元",
+    "disclaimer": "料金・政策・営業時間は変更される場合があります。ご利用前に公式情報をご確認ください。"
+  },
+  "cta": {
+    "planner": "プランナーを開く",
+    "autoRoute": "このコースで自動ルート作成",
+    "setup": "旅行準備チェックリスト",
+    "plaza": "共有広場"
+  },
+  "kinds": {
+    "all": "すべて",
+    "course": "おすすめコース",
+    "practical": "実用情報",
+    "prepare": "旅行準備",
+    "food": "グルメ・カフェ",
+    "culture": "文化・マナー",
+    "shopping": "ショッピング・免税",
+    "safety": "安全・救急"
+  },
+  "tags": {
+    "transport": "交通",
+    "payment": "決済",
+    "sim": "通信",
+    "etiquette": "マナー",
+    "food": "食事",
+    "other": "その他"
+  },
+  "errors": {
+    "notConfigured": "ガイド表示にはSupabase設定が必要です。",
+    "loadFailed": "ガイドを読み込めませんでした。"
+  }
+}
