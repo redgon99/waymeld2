@@ -67,8 +67,8 @@ export interface TripSummary {
   totalDays: number;
 }
 
-const LS_STORE = 'tripasist:trips-store:v2';
-const LS_PLAZA_IMPORTED = 'tripasist:plaza-imported-ids';
+const LS_STORE = 'waymeld:trips-store:v2';
+const LS_PLAZA_IMPORTED = 'waymeld:plaza-imported-ids';
 
 interface LocalStore {
   activeId: string | null;
@@ -259,7 +259,7 @@ async function listRemote(userId: string): Promise<TripSummary[]> {
   const sb = getSupabase();
   if (!sb) return [];
   const { data, error } = await sb
-    .from('tripsasist')
+    .from('waymeld_trips')
     .select('id, slug, title, total_days, updated_at')
     .eq('owner_id', userId)
     .order('updated_at', { ascending: false });
@@ -277,7 +277,7 @@ async function readRemoteById(userId: string, tripId: string): Promise<Trip | nu
   const sb = getSupabase();
   if (!sb) return null;
   const { data, error } = await sb
-    .from('tripsasist')
+    .from('waymeld_trips')
     .select(TRIP_SELECT)
     .eq('owner_id', userId)
     .eq('id', tripId)
@@ -290,7 +290,7 @@ async function readRemoteLatest(userId: string): Promise<Trip | null> {
   const sb = getSupabase();
   if (!sb) return null;
   const { data, error } = await sb
-    .from('tripsasist')
+    .from('waymeld_trips')
     .select(TRIP_SELECT)
     .eq('owner_id', userId)
     .order('updated_at', { ascending: false })
@@ -304,7 +304,7 @@ async function readBySlugRemote(slug: string): Promise<Trip | null> {
   const sb = getSupabase();
   if (!sb) return null;
   const { data, error } = await sb
-    .from('tripsasist')
+    .from('waymeld_trips')
     .select(TRIP_SELECT)
     .eq('slug', slug)
     .eq('is_public', true)
@@ -324,7 +324,7 @@ async function writeRemote(trip: Trip): Promise<void> {
     generatedRouteByDay: normalized.generatedRouteByDay,
     materials: normalized.materials ?? [],
   };
-  const { error } = await sb.from('tripsasist').upsert(
+  const { error } = await sb.from('waymeld_trips').upsert(
     {
       id: trip.id,
       slug: trip.slug,
@@ -354,7 +354,7 @@ async function listPlazaRemote(localeFilter?: string | null): Promise<PlazaListi
   const sb = getSupabase();
   if (!sb) return [];
   let query = sb
-    .from('tripsasist')
+    .from('waymeld_trips')
     .select(PLAZA_LIST_SELECT)
     .eq('listed_in_plaza', true)
     .eq('is_public', true);
@@ -529,7 +529,7 @@ async function deleteRemote(userId: string, tripId: string): Promise<void> {
   const sb = getSupabase();
   if (!sb) return;
   const { error } = await sb
-    .from('tripsasist')
+    .from('waymeld_trips')
     .delete()
     .eq('id', tripId)
     .eq('owner_id', userId);

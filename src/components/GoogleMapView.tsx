@@ -7,11 +7,13 @@ import {
   renderPlaceMarkerHtml,
   renderSearchCenterMarkerHtml,
 } from '../lib/mapMarkers';
+import { kakaoLevelToGoogleZoom, googleZoomToKakaoLevel } from '../lib/mapZoom';
 
 interface Props {
   mapsReady?: boolean;
   center: { lat: number; lng: number };
   level?: number;
+  levelTick?: number;
   searchResults: Place[];
   pinned: PinnedPlace[];
   pinCategoryFilter?: SimpleCategory | null;
@@ -27,6 +29,7 @@ interface Props {
   onPinnedMarkerClick?: (place: Place) => void;
   onMapRightClick?: (lat: number, lng: number, clientX: number, clientY: number) => void;
   onMapCenterChange?: (lat: number, lng: number) => void;
+  onMapLevelChange?: (level: number) => void;
   fitRouteBounds?: boolean;
   fitSearchBounds?: boolean;
   highlightPlaceId?: string | null;
@@ -37,6 +40,8 @@ interface Props {
 }
 
 function levelToZoom(level: number) {
+  // 상세(≤3, ~50m)는 축척 맞춤, 그 외는 기존 개요 매핑 유지
+  if (level <= 3) return kakaoLevelToGoogleZoom(level);
   return Math.max(3, Math.min(18, 15 - level));
 }
 
@@ -44,6 +49,7 @@ export function GoogleMapView({
   mapsReady = false,
   center,
   level = 5,
+  levelTick = 0,
   searchResults,
   pinned,
   pinCategoryFilter = null,
@@ -59,6 +65,7 @@ export function GoogleMapView({
   onPinnedMarkerClick,
   onMapRightClick,
   onMapCenterChange,
+  onMapLevelChange,
   fitRouteBounds = false,
   fitSearchBounds = false,
   highlightPlaceId = null,
@@ -94,6 +101,36 @@ export function GoogleMapView({
       mapTypeControl: false,
       fullscreenControl: false,
     });
+    return () => {
+      markersRef.current.forEach((m) => {
+        try {
+          m.setMap(null);
+        } catch {
+          /* ignore */
+        }
+      });
+      markersRef.current = [];
+      for (const ref of [
+        routeLineRef,
+        originMarkerRef,
+        searchCenterMarkerRef,
+        draftPinRef,
+      ] as const) {
+        if (ref.current) {
+          try {
+            ref.current.setMap(null);
+          } catch {
+            /* ignore */
+          }
+          ref.current = null;
+        }
+      }
+      listenersRef.current.forEach((l) => l.remove?.());
+      listenersRef.current = [];
+      mapRef.current = null;
+      if (mapEl.current) mapEl.current.innerHTML = '';
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapsReady]);
 
   useEffect(() => {
@@ -104,7 +141,7 @@ export function GoogleMapView({
   useEffect(() => {
     if (!mapRef.current) return;
     mapRef.current.setZoom(levelToZoom(level));
-  }, [level]);
+  }, [level, levelTick]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -117,13 +154,17 @@ export function GoogleMapView({
           onMapCenterChange(c.lat(), c.lng());
         })
       );
-      listenersRef.current.push(
-        mapRef.current.addListener('zoom_changed', () => {
+    }
+    listenersRef.current.push(
+      mapRef.current.addListener('zoom_changed', () => {
+        const z = mapRef.current.getZoom();
+        if (typeof z === 'number') onMapLevelChange?.(googleZoomToKakaoLevel(z));
+        if (onMapCenterChange) {
           const c = mapRef.current.getCenter();
           onMapCenterChange(c.lat(), c.lng());
-        })
-      );
-    }
+        }
+      })
+    );
     if (pickingOriginFromMap || pickingPinFromMap) {
       listenersRef.current.push(
         mapRef.current.addListener('click', async (e: any) => {
@@ -156,6 +197,7 @@ export function GoogleMapView({
     };
   }, [
     onMapCenterChange,
+    onMapLevelChange,
     onMapRightClick,
     pickingOriginFromMap,
     pickingPinFromMap,

@@ -16,6 +16,7 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
   horizontalListSortingStrategy,
+  verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import type { PinnedPlace, SimpleCategory } from '../types';
 import { getCategoryMeta, DEFAULT_CODE_BY_SIMPLE_CATEGORY } from '../lib/categories';
@@ -49,7 +50,7 @@ interface Props {
   routeOptionsOpen: boolean;
   presentationMode?: boolean;
   onTogglePresentation?: () => void;
-  variant?: 'default' | 'compact';
+  variant?: 'default' | 'compact' | 'panel';
   hideTransferMenus?: boolean;
   hideHeader?: boolean;
 }
@@ -105,6 +106,7 @@ export function PinupBar({
   const tripTitle = tripTitleProp ?? t('export.tripName');
   const categoryLabel = (category: SimpleCategory) => tc(`category.${category}`);
   const compact = variant === 'compact';
+  const panel = variant === 'panel';
   const [dragActive, setDragActive] = useState(false);
   const ids = pinned.map((p) => p.id);
   const selectionCount = selectedPinIds.size;
@@ -181,7 +183,9 @@ export function PinupBar({
 
   if (pinned.length === 0) {
     return (
-      <div className={`pinup-bar empty ${presentationMode ? 'presentation-active' : ''}`}>
+      <div
+        className={`pinup-bar empty ${panel ? 'pinup-bar-panel' : ''} ${presentationMode ? 'presentation-active' : ''}`}
+      >
         <Icon name="pin" />
         <span>{t('trip.emptyPins')}</span>
         {transferMenus}
@@ -302,8 +306,8 @@ export function PinupBar({
   );
 
   return (
-    <div className={`pinup-bar ${presentationMode ? 'presentation-active' : ''} ${compact ? 'pinup-bar-compact' : ''}`}>
-      {!hideHeader && (
+    <div className={`pinup-bar ${presentationMode ? 'presentation-active' : ''} ${compact ? 'pinup-bar-compact' : ''} ${panel ? 'pinup-bar-panel' : ''}`}>
+      {!hideHeader && !panel && (
       <div className="pinup-header">
         <div className="pinup-title-block">
           <Icon name="pin" />
@@ -363,10 +367,26 @@ export function PinupBar({
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <SortableContext items={ids} strategy={horizontalListSortingStrategy}>
+        <SortableContext
+          items={ids}
+          strategy={panel ? verticalListSortingStrategy : horizontalListSortingStrategy}
+        >
           {groupsContent}
         </SortableContext>
       </DndContext>
+
+      {panel && (
+        <div className="pinup-panel-footer">
+          <button
+            type="button"
+            className={`route-cta panel-route-cta ${routeOptionsOpen ? 'active' : ''}`}
+            onClick={onOpenRouteOptions}
+            disabled={routeTargetCount < 2}
+          >
+            Set up route · 동선 만들기 →
+          </button>
+        </div>
+      )}
     </div>
   );
 }

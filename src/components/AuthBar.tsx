@@ -1,38 +1,17 @@
 import { Icon } from './Icon';
-import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../contexts/AuthContext';
-import { isCurrentUserAdmin } from '../lib/admin';
 import { LocaleSwitcher } from './LocaleSwitcher';
 import { pathWithLocale, normalizeLocale } from '../lib/locale';
 import i18n from '../lib/i18n';
 
 export function AuthBar() {
   const { t } = useTranslation('common');
-  const { user, configured, signOut } = useAuth();
-  const [admin, setAdmin] = useState(false);
+  const { user, configured, signOut, isAdmin } = useAuth();
   const locale = normalizeLocale(i18n.language);
   const loginPath = pathWithLocale('/login', locale);
   const adminPath = pathWithLocale('/admin', locale);
-
-  useEffect(() => {
-    if (!configured || !user) {
-      setAdmin(false);
-      return;
-    }
-    let alive = true;
-    void isCurrentUserAdmin()
-      .then((ok) => {
-        if (alive) setAdmin(ok);
-      })
-      .catch(() => {
-        if (alive) setAdmin(false);
-      });
-    return () => {
-      alive = false;
-    };
-  }, [configured, user]);
 
   if (!configured) {
     return (
@@ -50,7 +29,7 @@ export function AuthBar() {
         <Icon name="cloudOk" />
         <span className="auth-email">{user.email}</span>
         <LocaleSwitcher compact />
-        {admin && (
+        {isAdmin && (
           <Link to={adminPath} className="auth-link">
             {t('auth.admin')}
           </Link>

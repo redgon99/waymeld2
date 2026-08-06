@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+html,body { margin:0; height:100%; font-family:'Instrument Sans','Noto Sans KR',sans-serif; color:#0f172a; background:#efede7; }
+a { color:#ca8a04; text-decoration:none; } a:hover { color:#a16207; }
+button { cursor:pointer; }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px 0">
+<div data-screen-label="Planner Mobile" style="position:relative;width:390px;height:800px;border-radius:32px;overflow:hidden;background:#d8e9ee;box-shadow:0 24px 64px rgba(15,23,42,0.25);border:1px solid rgba(15,23,42,0.1)">
+
+  <!-- MAP -->
+  <svg viewBox="0 0 390 800" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%">
+    <rect width="390" height="800" fill="#d8e9ee"></rect>
+    <path d="M-40 620 C 40 500, 90 540, 140 470 C 190 400, 180 300, 240 250 C 300 200, 370 230, 420 300 L 420 820 L -40 820 Z" fill="#f6f3ec"></path>
+    <path d="M240 250 C 260 340, 290 380, 330 420" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round"></path>
+    <path d="M140 470 C 200 460, 260 490, 330 530" stroke="#ffffff" stroke-width="5" fill="none" stroke-linecap="round"></path>
+    <circle cx="180" cy="560" r="46" fill="#e6ecd9"></circle>
+    <circle cx="300" cy="300" r="30" fill="#e6ecd9"></circle>
+    <sc-if value="{{ routeMade }}" hint-placeholder-val="{{ false }}">
+      <path d="M117 336 C 150 280, 175 255, 199 244 C 230 265, 245 285, 258 308 C 285 335, 300 350, 316 368 C 330 390, 338 400, 341 416 C 330 450, 310 470, 288 488" stroke="#0f172a" stroke-width="3" fill="none" stroke-linecap="round"></path>
+    </sc-if>
+  </svg>
+  <sc-for list="{{ pinnedMarkers }}" as="p" hint-placeholder-count="6">
+    <button onClick="{{ p.select }}" style="position:absolute;left:calc({{ p.x }}% - 13px);top:calc({{ p.y }}px - 13px);width:26px;height:26px;border-radius:99px;background:{{ p.color }};border:2px solid #fff;box-shadow:0 2px 6px rgba(15,23,42,0.3);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0;z-index:3">{{ p.num }}</button>
+  </sc-for>
+
+  <!-- TOP: search + days -->
+  <div style="position:absolute;top:14px;left:14px;right:14px;z-index:6;display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;gap:8px">
+      <button onClick="{{ openSearch }}" style="flex:1;display:flex;align-items:center;gap:9px;background:#fff;border:1px solid rgba(15,23,42,0.08);border-radius:99px;box-shadow:0 4px 16px rgba(15,23,42,0.12);padding:12px 16px;font-family:inherit;text-align:left">
+        <span style="color:#94a3b8">⌕</span><span style="font-size:13.5px;color:#94a3b8">Search places · 장소 검색</span>
+      </button>
+      <button style="width:44px;height:44px;border-radius:99px;background:#fff;border:1px solid rgba(15,23,42,0.08);box-shadow:0 4px 16px rgba(15,23,42,0.12);font-size:16px">☰</button>
+    </div>
+    <div style="display:flex;gap:6px">
+      <button style="background:#0f172a;color:#fff;border:none;border-radius:99px;padding:7px 14px;font-size:12.5px;font-weight:600;font-family:inherit;box-shadow:0 2px 8px rgba(15,23,42,0.15)">Day 1 · 6</button>
+      <button style="background:#fff;border:none;border-radius:99px;padding:7px 14px;font-size:12.5px;font-weight:600;font-family:inherit;color:#64748b;box-shadow:0 2px 8px rgba(15,23,42,0.1)">Day 2</button>
+      <button style="background:#fff;border:none;border-radius:99px;padding:7px 12px;font-size:12.5px;font-weight:600;font-family:inherit;color:#94a3b8;box-shadow:0 2px 8px rgba(15,23,42,0.1)">+</button>
+      <div style="flex:1"></div>
+      <a href="WayMeld Planner PC.dc.html" style="background:#fff;border-radius:99px;padding:7px 12px;font-size:12px;font-weight:600;box-shadow:0 2px 8px rgba(15,23,42,0.1)">🖥 PC</a>
+    </div>
+  </div>
+
+  <!-- PLACE MINI CARD -->
+  <sc-if value="{{ selected }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:14px;right:14px;bottom:{{ cardBottom }};background:#fff;border-radius:18px;border:1px solid rgba(15,23,42,0.08);box-shadow:0 12px 40px rgba(15,23,42,0.2);padding:13px 15px;z-index:8">
+      <div style="display:flex;align-items:flex-start;gap:11px">
+        <div style="width:44px;height:44px;border-radius:12px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">{{ selIcon }}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ selName }} <span style="font-weight:500;color:#64748b;font-size:12px">{{ selEn }}</span></div>
+          <div style="font-size:12px;color:#64748b">★ {{ selRating }} · {{ selReviews }} reviews · {{ selDist }}</div>
+          <sc-if value="{{ selBadge }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:5px"><span style="background:{{ selBadgeBg }};color:{{ selBadgeFg }};font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:99px">{{ selBadge }}</span></div>
+          </sc-if>
+        </div>
+        <button onClick="{{ closePopup }}" style="background:none;border:none;color:#94a3b8;font-size:14px;padding:2px">✕</button>
+      </div>
+      <div style="display:flex;gap:7px;margin-top:11px">
+        <button onClick="{{ selToggle }}" style="flex:1;background:{{ selPinBg }};color:{{ selPinFg }};border:{{ selPinBd }};border-radius:99px;padding:11px 0;font-size:13px;font-weight:700;font-family:inherit;min-height:44px">{{ selPinLabel }}</button>
+        <button style="background:#0f172a;color:#fff;border:none;border-radius:99px;padding:11px 15px;font-size:13px;font-weight:600;font-family:inherit;min-height:44px">🚕 Taxi card</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- BOTTOM SHEET -->
+  <div style="position:absolute;left:0;right:0;bottom:0;top:{{ sheetTop }};background:#fff;border-radius:22px 22px 0 0;box-shadow:0 -8px 32px rgba(15,23,42,0.15);z-index:7;display:flex;flex-direction:column;overflow:hidden;transition:top 0.25s ease">
+    <button onClick="{{ cycleSheet }}" style="background:none;border:none;padding:9px 0 5px;flex-shrink:0">
+      <div style="width:40px;height:4px;border-radius:99px;background:#e2e8f0;margin:0 auto"></div>
+    </button>
+    <!-- peek header -->
+    <div style="padding:2px 18px 12px;flex-shrink:0">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:14.5px;font-weight:700">{{ sheetTitle }}</span>
+        <sc-if value="{{ routeMade }}" hint-placeholder-val="{{ false }}">
+          <span style="background:#f0fdf4;color:#15803d;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px">Fatigue OK</span>
+        </sc-if>
+        <div style="flex:1"></div>
+        <span style="font-size:12px;color:#64748b;font-weight:600">{{ sheetSummary }}</span>
+      </div>
+    </div>
+    <!-- tab switcher -->
+    <sc-if value="{{ sheetExpanded }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:0 18px 12px;flex-shrink:0">
+        <div style="display:flex;background:#f1f5f9;border-radius:12px;padding:3px">
+          <button onClick="{{ tabPinned }}" style="flex:1;background:{{ tPinnedBg }};border:none;border-radius:10px;padding:9px 0;font-size:13px;font-weight:{{ tPinnedW }};font-family:inherit;color:{{ tPinnedFg }};box-shadow:{{ tPinnedSh }};min-height:38px">Pins 핀 {{ pinCount }}</button>
+          <button onClick="{{ tabRoute }}" style="flex:1;background:{{ tRouteBg }};border:none;border-radius:10px;padding:9px 0;font-size:13px;font-weight:{{ tRouteW }};font-family:inherit;color:{{ tRouteFg }};box-shadow:{{ tRouteSh }};min-height:38px">Route 동선</button>
+        </div>
+      </div>
+      <!-- PINS -->
+      <sc-if value="{{ isPinned }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1;overflow-y:auto;padding:0 18px 12px;display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ pinnedList }}" as="p" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;gap:10px;border:1px solid rgba(15,23,42,0.08);border-radius:14px;padding:11px 12px">
+              <span style="width:24px;height:24px;border-radius:99px;background:{{ p.color }};color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ p.num }}</span>
+              <button onClick="{{ p.select }}" style="flex:1;min-width:0;background:none;border:none;padding:0;text-align:left;font-family:inherit">
+                <div style="font-size:14px;font-weight:700;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.name }} <span style="font-weight:500;color:#64748b;font-size:12px">{{ p.en }}</span></div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b">★ {{ p.rating }} · {{ p.catLabel }}
+                  <sc-if value="{{ p.badge }}" hint-placeholder-val="{{ false }}"><span style="background:{{ p.badgeBg }};color:{{ p.badgeFg }};font-weight:700;font-size:10px;padding:2px 7px;border-radius:99px">{{ p.badge }}</span></sc-if>
+                </div>
+              </button>
+              <span style="color:#cbd5e1;font-size:16px;cursor:grab;padding:6px 2px">⠿</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:10px 18px 20px;border-top:1px solid rgba(15,23,42,0.08);background:#fafaf8;flex-shrink:0">
+          <button onClick="{{ makeRoute }}" style="width:100%;background:#facc15;border:none;border-radius:99px;padding:14px 0;font-size:15px;font-weight:700;font-family:inherit;color:#0f172a;min-height:48px">✦ Build route · 동선 만들기</button>
+        </div>
+      </sc-if>
+      <!-- ROUTE -->
+      <sc-if value="{{ isRoute }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;overflow-y:auto;padding:0 18px 12px">
+          <div style="display:flex;gap:6px;margin-bottom:12px">
+            <div style="flex:1;border:1px solid rgba(15,23,42,0.08);border-radius:12px;padding:8px 11px;background:#fafaf8"><div style="font-size:10.5px;color:#94a3b8;font-weight:700">DEPART</div><div style="font-size:13px;font-weight:700">09:00</div></div>
+            <div style="flex:1;border:1px solid rgba(15,23,42,0.08);border-radius:12px;padding:8px 11px;background:#fafaf8"><div style="font-size:10.5px;color:#94a3b8;font-weight:700">MODE</div><div style="font-size:13px;font-weight:700">🚗 Car</div></div>
+            <div style="flex:1;border:1px solid rgba(15,23,42,0.08);border-radius:12px;padding:8px 11px;background:#fafaf8"><div style="font-size:10.5px;color:#94a3b8;font-weight:700">TOTAL</div><div style="font-size:13px;font-weight:700">78 km · 1h 18m</div></div>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ timeline }}" as="s" hint-placeholder-count="6">
+              <div style="display:flex;gap:12px">
+                <div style="display:flex;flex-direction:column;align-items:center;width:26px;flex-shrink:0">
+                  <span style="width:24px;height:24px;border-radius:99px;background:{{ s.color }};color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">{{ s.num }}</span>
+                  <sc-if value="{{ s.conn }}" hint-placeholder-val="{{ true }}"><div style="flex:1;width:2px;background:repeating-linear-gradient(180deg,#cbd5e1 0 5px,transparent 5px 9px);min-height:26px"></div></sc-if>
+                </div>
+                <div style="flex:1;padding-bottom:{{ s.pb }}">
+                  <div style="font-size:14px;font-weight:700">{{ s.name }}</div>
+                  <div style="font-size:12px;color:#64748b">{{ s.timing }}</div>
+                  <sc-if value="{{ s.conn }}" hint-placeholder-val="{{ true }}"><div style="font-size:11.5px;color:#94a3b8;margin-top:6px">🚗 {{ s.connMin }} · {{ s.connKm }}</div></sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="padding:10px 18px 20px;border-top:1px solid rgba(15,23,42,0.08);background:#fafaf8;flex-shrink:0;display:flex;gap:8px">
+          <button style="flex:1;background:#fff;border:1px solid rgba(15,23,42,0.14);border-radius:99px;padding:13px 0;font-size:13.5px;font-weight:700;font-family:inherit;color:#0f172a;min-height:48px">↗ Kakao Map</button>
+          <button onClick="{{ makeRoute }}" style="flex:1.4;background:#facc15;border:none;border-radius:99px;padding:13px 0;font-size:13.5px;font-weight:700;font-family:inherit;color:#0f172a;min-height:48px">Re-optimize 다시 만들기</button>
+        </div>
+      </sc-if>
+    </sc-if>
+  </div>
+
+  <!-- SEARCH OVERLAY -->
+  <sc-if value="{{ searchOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:#fff;z-index:10;display:flex;flex-direction:column">
+      <div style="padding:16px 16px 10px;display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <button onClick="{{ closeSearch }}" style="width:38px;height:38px;border-radius:99px;background:#f1f5f9;border:none;font-size:15px">←</button>
+        <div style="flex:1;display:flex;align-items:center;gap:9px;border:1.5px solid #facc15;border-radius:99px;padding:10px 16px">
+          <span style="color:#94a3b8">⌕</span><span style="font-size:13.5px;color:#94a3b8">Place, YouTube, blog link…</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto;flex-shrink:0">
+        <sc-for list="{{ cats }}" as="c" hint-placeholder-count="5">
+          <button onClick="{{ c.set }}" style="background:{{ c.bg }};color:{{ c.fg }};border:1px solid rgba(15,23,42,0.1);border-radius:99px;padding:8px 14px;font-size:12.5px;font-weight:600;font-family:inherit;white-space:nowrap;min-height:38px">{{ c.label }}</button>
+        </sc-for>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:0 16px 16px;display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:11.5px;color:#94a3b8">Near map center · 지도 주변 5 km</div>
+        <sc-for list="{{ results }}" as="r" hint-placeholder-count="5">
+          <div style="display:flex;align-items:center;gap:11px;border:1px solid rgba(15,23,42,0.08);border-radius:14px;padding:11px 13px">
+            <div style="width:40px;height:40px;border-radius:11px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">{{ r.icon }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.name }} <span style="font-weight:500;color:#64748b;font-size:12px">{{ r.en }}</span></div>
+              <div style="font-size:12px;color:#64748b">★ {{ r.rating }} · {{ r.dist }}</div>
+              <sc-if value="{{ r.badge }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:4px"><span style="background:{{ r.badgeBg }};color:{{ r.badgeFg }};font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px">{{ r.badge }}</span></div>
+              </sc-if>
+            </div>
+            <button onClick="{{ r.toggle }}" style="background:#fff;border:1.5px solid rgba(15,23,42,0.2);border-radius:99px;padding:9px 14px;font-size:12px;font-weight:700;font-family:inherit;min-height:40px">Pin 핀업</button>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:860},&quot;showInsights&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Content&quot;}}">
+class Component extends DCLogic {
+  state = { sheet: 'half', tab: 'pinned', selectedId: null, routeMade: false, searchOpen: false, cat: 'all',
+    pinnedIds: ['dream','seul','deok','pellis','kmart','barang'] };
+  data() {
+    return [
+      { id:'dream', name:'제주 드림타워', en:'Hotel', cat:'stay', icon:'🏨', rating:4.4, reviews:1204, dist:'0 km', badge:null, x:30, y:336, timing:'10:30 · check-out 체크아웃' },
+      { id:'seul', name:'슬슬슬로우', en:'Noodle bar', cat:'food', icon:'🍜', rating:3.9, reviews:186, dist:'18 km', badge:'★ Trending 인기 급상승', badgeType:'y', x:51, y:244, timing:'12:10–13:10 · lunch 60m' },
+      { id:'deok', name:'덕천토종닭', en:'Chicken stew', cat:'food', icon:'🍗', rating:4.0, reviews:298, dist:'5.8 km', badge:'92% positive reviews', badgeType:'g', x:66, y:308, timing:'19:55–20:55 · dinner 60m' },
+      { id:'pellis', name:'펠리스타운', en:'Stay', cat:'stay', icon:'🏡', rating:3.8, reviews:64, dist:'24 km', badge:null, x:81, y:368, timing:'21:30 · drop bags 짐 맡기기' },
+      { id:'kmart', name:'케이(K)마트', en:'Local mart', cat:'mart', icon:'🛒', rating:2.8, reviews:6, dist:'3 km', badge:'Cash only 현금 결제 후기', badgeType:'n', x:87, y:416, timing:'21:40–22:10 · shop 30m' },
+      { id:'barang', name:'바랑쉬 게스트하우스', en:'Guesthouse', cat:'stay', icon:'🛏', rating:3.6, reviews:41, dist:'2 km', badge:'Loved by solo travelers', badgeType:'y', x:74, y:488, timing:'22:20 · check-in 체크인' },
+      { id:'seongsan', name:'성산일출봉', en:'Sunrise Peak', cat:'sight', icon:'🌋', rating:4.7, reviews:8420, dist:'4.1 km', badge:'#1 pick by visitors 방문자 1위', badgeType:'y', x:0, y:0 },
+      { id:'gwangchigi', name:'광치기해변', en:'Beach', cat:'sight', icon:'🏖', rating:4.6, reviews:1930, dist:'3.2 km', badge:null, x:0, y:0 },
+      { id:'badahouse', name:'바다의집', en:'Seafood', cat:'food', icon:'🦐', rating:4.2, reviews:520, dist:'2.4 km', badge:'Long wait 웨이팅 김', badgeType:'n', x:0, y:0 },
+      { id:'dongmart', name:'제주동마트', en:'Supermarket', cat:'mart', icon:'🛒', rating:3.9, reviews:298, dist:'2.0 km', badge:null, x:0, y:0 },
+    ];
+  }
+  renderVals() {
+    const S = this.state, set = (p) => this.setState(p);
+    const COLORS = { food:'#c2410c', stay:'#475569', mart:'#4d7c0f', sight:'#0e7490' };
+    const CATLBL = { food:'Food 맛집', stay:'Stay 숙소', mart:'Mart 마트', sight:'Sights 관광' };
+    const BDG = { y:['#fef9c3','#a16207'], g:['#f0fdf4','#15803d'], n:['#f1f5f9','#475569'] };
+    const showInsights = this.props.showInsights ?? true;
+    const all = this.data();
+    const byId = Object.fromEntries(all.map(p => [p.id, p]));
+    const pinned = S.pinnedIds.map((id, i) => ({ ...byId[id], num: i + 1 }));
+    const results = all.filter(p => !S.pinnedIds.includes(p.id) && (S.cat === 'all' || p.cat === S.cat));
+    const travels = [{min:'25 min',km:'18 km'},{min:'9 min',km:'5.8 km'},{min:'38 min',km:'24 km'},{min:'6 min',km:'3 km'},{min:'4 min',km:'2 km'}];
+    const sel = S.selectedId ? byId[S.selectedId] : null;
+    const selPinned = sel && S.pinnedIds.includes(sel.id);
+    const togglePin = (id) => set({ pinnedIds: S.pinnedIds.includes(id) ? S.pinnedIds.filter(x => x !== id) : [...S.pinnedIds, id] });
+    const sheetTops = { peek: 'calc(100% - 92px)', half: '52%', full: '18%' };
+    const expanded = S.sheet !== 'peek';
+    const tb = (t) => ({ [`t${t[0].toUpperCase()+t.slice(1)}Bg`]: S.tab===t?'#fff':'transparent', [`t${t[0].toUpperCase()+t.slice(1)}Fg`]: S.tab===t?'#0f172a':'#64748b', [`t${t[0].toUpperCase()+t.slice(1)}W`]: S.tab===t?700:600, [`t${t[0].toUpperCase()+t.slice(1)}Sh`]: S.tab===t?'0 1px 3px rgba(15,23,42,0.1)':'none' });
+    return {
+      ...tb('pinned'), ...tb('route'),
+      tabPinned: () => set({ tab:'pinned' }), tabRoute: () => set({ tab:'route' }),
+      isPinned: S.tab==='pinned', isRoute: S.tab==='route',
+      pinCount: pinned.length,
+      sheetTop: sheetTops[S.sheet],
+      sheetExpanded: expanded,
+      cycleSheet: () => set({ sheet: S.sheet==='peek' ? 'half' : S.sheet==='half' ? 'full' : 'peek' }),
+      sheetTitle: S.tab==='route' && S.routeMade ? 'Day 1 route · 1일차 동선' : 'Jeju Trip · 제주 여행',
+      sheetSummary: S.routeMade ? '78 km · 1h 18m · ends 22:20' : `${pinned.length} pins · Day 1`,
+      routeMade: S.routeMade,
+      makeRoute: () => set({ routeMade:true, tab:'route', sheet:'half' }),
+      pinnedMarkers: pinned.map(p => ({ ...p, color: COLORS[p.cat], select: () => set({ selectedId: p.id, sheet:'peek' }) })),
+      pinnedList: pinned.map(p => ({ ...p, color: COLORS[p.cat], catLabel: CATLBL[p.cat],
+        badge: showInsights ? p.badge : null, badgeBg: BDG[p.badgeType||'n'][0], badgeFg: BDG[p.badgeType||'n'][1],
+        select: () => set({ selectedId: p.id, sheet:'peek' }) })),
+      timeline: pinned.map((p, i) => ({ ...p, color: COLORS[p.cat], conn: i < pinned.length-1,
+        connMin: travels[i] ? travels[i].min : '', connKm: travels[i] ? travels[i].km : '', pb: i < pinned.length-1 ? '14px' : '0' })),
+      cats: [['all','All 전체'],['food','Food 맛집'],['sight','Sights 관광'],['stay','Stay 숙소'],['mart','Mart 마트']].map(([v,label]) => ({
+        label, set: () => set({ cat:v }), bg: S.cat===v?'#0f172a':'#fff', fg: S.cat===v?'#fff':'#475569' })),
+      results: results.map(r => ({ ...r, badge: showInsights ? r.badge : null,
+        badgeBg: BDG[r.badgeType||'n'][0], badgeFg: BDG[r.badgeType||'n'][1], toggle: () => togglePin(r.id) })),
+      searchOpen: S.searchOpen,
+      openSearch: () => set({ searchOpen:true }), closeSearch: () => set({ searchOpen:false }),
+      selected: !!sel,
+      cardBottom: '108px',
+      selName: sel?.name, selEn: sel?.en, selIcon: sel?.icon, selRating: sel?.rating, selReviews: sel?.reviews, selDist: sel?.dist,
+      selBadge: sel && showInsights ? sel.badge : null,
+      selBadgeBg: sel ? BDG[sel.badgeType||'n'][0] : '', selBadgeFg: sel ? BDG[sel.badgeType||'n'][1] : '',
+      selPinLabel: selPinned ? '✓ Pinned 핀업됨' : 'Pin 핀업',
+      selPinBg: selPinned ? '#fef9c3' : '#fff', selPinFg: selPinned ? '#a16207' : '#0f172a',
+      selPinBd: selPinned ? '1.5px solid #facc15' : '1.5px solid rgba(15,23,42,0.2)',
+      selToggle: () => sel && togglePin(sel.id),
+      closePopup: () => set({ selectedId: null }),
+    };
+  }
+}
+
+</script>
+</body>
+</html>

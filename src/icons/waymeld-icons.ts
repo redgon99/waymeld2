@@ -1,5 +1,5 @@
 /**
- * Tripasist 아이콘 세트 — 여행·지도·핀·동선·자료함 UI용
+ * WayMeld 아이콘 세트 — 여행·지도·핀·동선·자료함 UI용
  * 24×24, stroke 1.75, currentColor (앱 accent·텍스트와 조화)
  */
 
@@ -90,7 +90,7 @@ export interface IconPath {
   fill?: boolean;
 }
 
-export const TRIPASIST_ICONS: Record<IconName, IconPath[]> = {
+export const WAYMELD_ICONS: Record<IconName, IconPath[]> = {
   search: [
     { d: 'M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z' },
     { d: 'M16.5 16.5 5 21' },
@@ -396,8 +396,8 @@ export const TRIPASIST_ICONS: Record<IconName, IconPath[]> = {
   ],
 };
 
-/** Tabler 클래스명 → Tripasist 아이콘 (마이그레이션·문서용) */
-export const TABLER_TO_TRIPASIST: Record<string, IconName> = {
+/** Tabler 클래스명 → WayMeld 아이콘 (마이그레이션·문서용) */
+export const TABLER_TO_WAYMELD: Record<string, IconName> = {
   'ti-search': 'search',
   'ti-x': 'close',
   'ti-refresh': 'refresh',
@@ -448,9 +448,9 @@ export function iconSvgMarkup(
   options?: { size?: number; className?: string; color?: string }
 ): string {
   const size = options?.size ?? 20;
-  const cls = options?.className ? ` class="${options.className} ta-icon"` : ' class="ta-icon"';
+  const cls = options?.className ? ` class="${options.className} wm-icon"` : ' class="wm-icon"';
   const style = options?.color ? ` style="color:${options.color}"` : '';
-  const paths = TRIPASIST_ICONS[name]
+  const paths = WAYMELD_ICONS[name]
     .map((p) =>
       p.fill
         ? `<path fill="currentColor" stroke="none" d="${p.d}"/>`

@@ -72,7 +72,7 @@ export async function isCurrentUserAdmin(): Promise<boolean> {
 export async function listAdminUserRows(): Promise<AdminUserRow[]> {
   const sb = requireSupabase();
   const { data: trips, error: tripsError } = await sb
-    .from('tripsasist')
+    .from('waymeld_trips')
     .select('owner_id, created_at, updated_at')
     .not('owner_id', 'is', null)
     .order('updated_at', { ascending: false });
@@ -161,7 +161,7 @@ export async function upsertUserVerification(input: {
 export async function fetchAdminShareStats(): Promise<AdminShareStats> {
   const sb = requireSupabase();
   const { data: trips, error: tripsError } = await sb
-    .from('tripsasist')
+    .from('waymeld_trips')
     .select('id, title, owner_id, is_public, listed_in_plaza, plaza_listed_at, payload');
   if (tripsError) throw tripsError;
 

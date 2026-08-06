@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { TRIPASIST_ICONS, type IconName } from '../icons/tripasist-icons';
+import { WAYMELD_ICONS, type IconName } from '../icons/waymeld-icons';
 
 export type { IconName };
 
@@ -13,8 +13,8 @@ interface IconProps {
 }
 
 export function Icon({ name, size = 20, className, style, spin, title }: IconProps) {
-  const paths = TRIPASIST_ICONS[name];
-  const classes = ['ta-icon', spin ? 'ta-spin' : '', className].filter(Boolean).join(' ');
+  const paths = WAYMELD_ICONS[name];
+  const classes = ['wm-icon', spin ? 'wm-spin' : '', className].filter(Boolean).join(' ');
 
   return (
     <svg

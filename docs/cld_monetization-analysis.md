@@ -38,7 +38,7 @@
    - **지금 당장 유료 사용자 받을 수 없는 상태**
 
 2. **Google 검색 캡이 클라이언트 사이드(localStorage)**
-   - 브라우저 개발자 도구로 `tripasist:google-search-count` 삭제하면 무력화
+   - 브라우저 개발자 도구로 `waymeld:google-search-count` 삭제하면 무력화
    - 서버 사이드 카운터(Supabase RLS 기반)로 이전 필요
 
 3. **export 기능 자체가 미완성**

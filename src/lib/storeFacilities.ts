@@ -1,4 +1,4 @@
-import type { IconName } from '../icons/tripasist-icons';
+import type { IconName } from '../icons/waymeld-icons';
 
 export interface StoreFacilityChip {
   key: string;

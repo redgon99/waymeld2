@@ -25,6 +25,8 @@ interface Props {
   pickingOriginFromMap?: boolean;
   hasExistingRoute?: boolean;
   onUpdateStayMinutes?: (placeId: string, minutes: number) => void;
+  /** 좌측 탭 패널 안에 임베드 (고정 우측 슬라이드 비활성) */
+  embedded?: boolean;
 }
 
 export function RouteOptionsPanel({
@@ -41,6 +43,7 @@ export function RouteOptionsPanel({
   pickingOriginFromMap = false,
   hasExistingRoute = false,
   onUpdateStayMinutes,
+  embedded = false,
 }: Props) {
   // 실시간 미리보기 계산
   const preview = useMemo(() => {
@@ -71,10 +74,13 @@ export function RouteOptionsPanel({
     }
   }
 
-  if (!open) return null;
+  if (!open && !embedded) return null;
 
   return (
-    <aside className={`route-panel ${open ? 'open' : ''}`} aria-label="경로 설정">
+    <aside
+      className={`route-panel ${open || embedded ? 'open' : ''} ${embedded ? 'route-panel-embedded' : ''}`}
+      aria-label="경로 설정"
+    >
       {/* 헤더 */}
       <header className="route-panel-header">
         <div>
@@ -86,9 +92,11 @@ export function RouteOptionsPanel({
             {currentDay}일차 · {pinned.length}개 장소 · 카테고리 {countCategories(pinned)}종
           </div>
         </div>
-        <button className="icon-btn" onClick={onClose} aria-label="패널 닫기">
-          <Icon name="close" />
-        </button>
+        {!embedded && (
+          <button className="icon-btn" onClick={onClose} aria-label="패널 닫기">
+            <Icon name="close" />
+          </button>
+        )}
       </header>
 
       <div className="route-panel-body">

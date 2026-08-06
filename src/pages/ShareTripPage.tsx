@@ -142,7 +142,7 @@ export default function ShareTripPage() {
 
   return (
     <div
-      className={`tripasist-root share-mode${shareOnboardingOpen ? ' share-onboarding-active' : ''}`}
+      className={`waymeld-root share-mode${shareOnboardingOpen ? ' share-onboarding-active' : ''}`}
     >
       {!((mapProvider === 'kakao' && kakaoReady) || (mapProvider === 'google' && googleReady)) && (
         <div className="map-canvas map-loading" aria-live="polite">

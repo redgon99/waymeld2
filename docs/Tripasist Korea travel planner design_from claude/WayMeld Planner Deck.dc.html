@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body { margin:0; background:#1a1a1a; font-family:'Instrument Sans','Noto Sans KR',sans-serif; color:#0f172a; }
+a { color:#ca8a04; text-decoration:none; } a:hover { color:#a16207; }
+</style>
+</helmet>
+<x-import component-from-global-scope="deck-stage" from="./deck-stage.js" width="1920" height="1080" hint-size="100%,100%">
+
+  <section data-label="Title" data-speaker-notes="WayMeld planner redesign overview. Combined direction: left panel + bottom timeline, map maximized." style="background:#fafaf8;display:flex;flex-direction:column;justify-content:center;padding:0 160px;font-family:'Instrument Sans','Noto Sans KR',sans-serif">
+    <div style="display:flex;align-items:center;gap:18px;margin-bottom:48px">
+      <div style="width:64px;height:64px;border-radius:18px;background:#facc15;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:32px">여</div>
+      <div style="font-size:30px;font-weight:700">WayMeld <span style="color:#94a3b8;font-weight:500">여로담</span></div>
+    </div>
+    <h1 style="margin:0 0 24px;font-size:88px;font-weight:700;letter-spacing:-0.02em;line-height:1.08">Trip Planner<br>Redesign · 플래너 리디자인</h1>
+    <p style="margin:0 0 12px;font-size:32px;color:#475569;font-weight:500">Collect places. Meld your route.</p>
+    <p style="margin:0;font-size:26px;color:#94a3b8">가고 싶은 곳을 담으면, 여행길이 됩니다 · 2026.08</p>
+    <div style="position:absolute;bottom:64px;left:160px;right:160px;display:flex;justify-content:space-between;font-size:22px;color:#94a3b8">
+      <span>Design proposal — PC planner</span><span>waymeld.com</span>
+    </div>
+  </section>
+
+  <section data-label="System" data-speaker-notes="Design system: warm off-white, ink, yellow accent. Category pin colors and traveler insight badges." style="background:#fafaf8;padding:100px 160px;font-family:'Instrument Sans','Noto Sans KR',sans-serif">
+    <div style="font-size:24px;font-weight:700;color:#a16207;letter-spacing:0.08em;margin-bottom:14px">DESIGN SYSTEM</div>
+    <h2 style="margin:0 0 64px;font-size:60px;font-weight:700;letter-spacing:-0.01em">담백한 실용 톤 · One brand, four categories</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:48px">
+      <div style="background:#fff;border:1px solid rgba(15,23,42,0.08);border-radius:24px;padding:40px">
+        <div style="font-size:24px;font-weight:700;margin-bottom:28px">Color 컬러</div>
+        <div style="display:flex;flex-direction:column;gap:16px;font-size:24px">
+          <div style="display:flex;align-items:center;gap:14px"><span style="width:44px;height:44px;border-radius:12px;background:#fafaf8;border:1px solid rgba(15,23,42,0.12)"></span>#fafaf8 오프화이트 배경</div>
+          <div style="display:flex;align-items:center;gap:14px"><span style="width:44px;height:44px;border-radius:12px;background:#0f172a"></span>#0f172a 잉크 본문</div>
+          <div style="display:flex;align-items:center;gap:14px"><span style="width:44px;height:44px;border-radius:12px;background:#facc15"></span>#facc15 옐로 액센트</div>
+          <div style="display:flex;align-items:center;gap:14px"><span style="width:44px;height:44px;border-radius:12px;background:#64748b"></span>#64748b 보조 텍스트</div>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid rgba(15,23,42,0.08);border-radius:24px;padding:40px">
+        <div style="font-size:24px;font-weight:700;margin-bottom:28px">Category pins 카테고리 핀</div>
+        <div style="display:flex;flex-direction:column;gap:18px;font-size:24px">
+          <div style="display:flex;align-items:center;gap:14px"><span style="width:40px;height:40px;border-radius:99px;background:#c2410c;border:3px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.25);color:#fff;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center">2</span>Food 맛집</div>
+          <div style="display:flex;align-items:center;gap:14px"><span style="width:40px;height:40px;border-radius:99px;background:#0e7490;border:3px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.25);color:#fff;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center">3</span>Sights 관광</div>
+          <div style="display:flex;align-items:center;gap:14px"><span style="width:40px;height:40px;border-radius:99px;background:#475569;border:3px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.25);color:#fff;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center">1</span>Stay 숙소</div>
+          <div style="display:flex;align-items:center;gap:14px"><span style="width:40px;height:40px;border-radius:99px;background:#4d7c0f;border:3px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.25);color:#fff;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center">5</span>Mart 마트</div>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid rgba(15,23,42,0.08);border-radius:24px;padding:40px">
+        <div style="font-size:24px;font-weight:700;margin-bottom:28px">Traveler insights 인사이트</div>
+        <div style="display:flex;flex-direction:column;gap:18px;align-items:flex-start">
+          <span style="background:#fef9c3;color:#a16207;font-size:22px;font-weight:700;padding:10px 22px;border-radius:99px">★ Trending 인기 급상승</span>
+          <span style="background:#f0fdf4;color:#15803d;font-size:22px;font-weight:700;padding:10px 22px;border-radius:99px">92% positive reviews</span>
+          <span style="background:#f1f5f9;color:#475569;font-size:22px;font-weight:700;padding:10px 22px;border-radius:99px">Cash only 현금 결제 후기</span>
+          <div style="font-size:21px;color:#64748b;line-height:1.55;margin-top:10px">후기·니즈 분석 데이터가 장소 카드 안에 뱃지와 인사이트 문장으로 노출됩니다.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section data-label="Plan view" data-speaker-notes="Plan view: single left panel with Search / Pins / Route tabs. Pins grouped by category with insight badges." style="background:#fafaf8;display:flex;align-items:center;gap:56px;padding:0 80px;font-family:'Instrument Sans','Noto Sans KR',sans-serif">
+    <div style="width:380px;flex-shrink:0">
+      <div style="font-size:24px;font-weight:700;color:#a16207;letter-spacing:0.08em;margin-bottom:14px">01 · PLAN</div>
+      <h2 style="margin:0 0 28px;font-size:52px;font-weight:700;letter-spacing:-0.01em;line-height:1.15">계획 화면<br>Plan view</h2>
+      <ul style="margin:0;padding-left:26px;font-size:25px;color:#475569;line-height:1.7">
+        <li>검색·핀·동선을 <strong style="color:#0f172a">탭 하나로 통합</strong>한 단일 좌측 패널</li>
+        <li>핀 목록은 카테고리 그룹 + 드래그 정렬</li>
+        <li>인사이트 뱃지가 카드 안에서 바로 보임</li>
+        <li>패널을 접으면 아이콘 레일만 남아 지도 전면</li>
+      </ul>
+    </div>
+    <div style="transform:scale(0.95);transform-origin:left center;flex-shrink:0;width:1360px;height:850px"><div style="position:relative;width:1360px;height:850px;border-radius:16px;overflow:hidden;border:1px solid rgba(15,23,42,0.12);background:#d8e9ee">
+        <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%">
+          <rect width="1440" height="900" fill="#d8e9ee"></rect>
+          <path d="M-60 740 C 120 580, 260 650, 400 560 C 540 470, 520 330, 690 265 C 860 200, 1010 260, 1120 355 C 1230 450, 1300 440, 1400 540 C 1490 630, 1460 800, 1300 850 C 1100 920, 320 950, 100 880 C -30 838, -80 800, -60 740 Z" fill="#f6f3ec"></path>
+          <path d="M690 265 C 750 380, 810 420, 950 470 C 1050 505, 1100 560, 1060 650" stroke="#ffffff" stroke-width="8" fill="none" stroke-linecap="round"></path>
+          <path d="M400 560 C 560 540, 740 580, 940 650" stroke="#ffffff" stroke-width="6" fill="none" stroke-linecap="round"></path>
+          <circle cx="600" cy="640" r="78" fill="#e6ecd9"></circle>
+          <circle cx="1120" cy="740" r="50" fill="#e6ecd9"></circle>
+          <circle cx="870" cy="330" r="44" fill="#e6ecd9"></circle>
+          <path d="M490 396 C 560 320, 610 285, 662 270 C 720 295, 755 330, 792 369 C 860 415, 905 440, 950 468 C 985 498, 1010 515, 1022 540 C 1000 585, 960 615, 922 639" stroke="#0f172a" stroke-width="3.5" fill="none" stroke-linecap="round"></path>
+        </svg>
+        <div style="position:absolute;left:calc(34% - 15px);top:calc(44% - 15px);width:30px;height:30px;border-radius:99px;background:#475569;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">1</div>
+        <div style="position:absolute;left:calc(46% - 15px);top:calc(30% - 15px);width:30px;height:30px;border-radius:99px;background:#c2410c;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">2</div>
+        <div style="position:absolute;left:calc(55% - 15px);top:calc(41% - 15px);width:30px;height:30px;border-radius:99px;background:#c2410c;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">3</div>
+        <div style="position:absolute;left:calc(66% - 15px);top:calc(52% - 15px);width:30px;height:30px;border-radius:99px;background:#475569;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">4</div>
+        <div style="position:absolute;left:calc(71% - 15px);top:calc(60% - 15px);width:30px;height:30px;border-radius:99px;background:#4d7c0f;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">5</div>
+        <div style="position:absolute;left:calc(64% - 15px);top:calc(71% - 15px);width:30px;height:30px;border-radius:99px;background:#475569;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">6</div>
+        <!-- app bar -->
+        <div style="position:absolute;top:0;left:0;right:0;height:56px;background:rgba(255,255,255,0.94);border-bottom:1px solid rgba(15,23,42,0.08);display:flex;align-items:center;gap:14px;padding:0 18px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:26px;height:26px;border-radius:8px;background:#facc15;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">여</div>
+            <span style="font-size:15px;font-weight:700">WayMeld <span style="color:#94a3b8;font-weight:500">여로담</span></span>
+          </div>
+          <div style="width:1px;height:22px;background:rgba(15,23,42,0.08)"></div>
+          <span style="font-size:14.5px;font-weight:700">Jeju Trip · 제주 여행</span>
+          <div style="display:flex;gap:5px">
+            <span style="background:#0f172a;color:#fff;border-radius:99px;padding:6px 13px;font-size:12.5px;font-weight:600">Day 1 · 6</span>
+            <span style="background:#f1f5f9;color:#64748b;border-radius:99px;padding:6px 13px;font-size:12.5px;font-weight:600">Day 2 · 0</span>
+            <span style="border:1px dashed rgba(15,23,42,0.2);border-radius:99px;padding:6px 11px;font-size:12.5px;font-weight:600;color:#94a3b8">+ Day</span>
+          </div>
+          <div style="flex:1"></div>
+          <span style="font-size:12px;color:#94a3b8">Auto-saved ✓ 저장됨</span>
+          <span style="background:#0f172a;color:#fff;border-radius:99px;padding:7px 15px;font-size:13px;font-weight:600">⛶ Overview 조감</span>
+          <span style="background:#fff;border:1px solid rgba(15,23,42,0.12);border-radius:99px;padding:7px 14px;font-size:13px;font-weight:600;color:#475569">Share 공유</span>
+        </div>
+        <!-- left panel: pins tab -->
+        <div style="position:absolute;top:72px;left:16px;bottom:16px;width:360px;background:#fff;border-radius:20px;border:1px solid rgba(15,23,42,0.08);box-shadow:0 8px 32px rgba(15,23,42,0.12);display:flex;flex-direction:column;overflow:hidden">
+          <div style="padding:14px 16px 0">
+            <div style="display:flex;background:#f1f5f9;border-radius:12px;padding:3px">
+              <span style="flex:1;text-align:center;border-radius:10px;padding:8px 0;font-size:13px;font-weight:600;color:#64748b">Search 검색</span>
+              <span style="flex:1;text-align:center;background:#fff;border-radius:10px;padding:8px 0;font-size:13px;font-weight:700;box-shadow:0 1px 3px rgba(15,23,42,0.1)">Pins 핀 6</span>
+              <span style="flex:1;text-align:center;border-radius:10px;padding:8px 0;font-size:13px;font-weight:600;color:#64748b">Route 동선</span>
+            </div>
+          </div>
+          <div style="flex:1;overflow:hidden;padding:14px 16px;display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:11.5px;color:#94a3b8;line-height:1.5">Drag to reorder · tap a pin to see it on the map<br>드래그로 순서 변경 · 핀을 누르면 지도에서 확인</div>
+            <div style="font-size:11.5px;font-weight:700;color:#94a3b8;letter-spacing:0.06em">FOOD 맛집 · 2</div>
+            <div style="display:flex;align-items:center;gap:10px;border:1px solid rgba(15,23,42,0.08);border-radius:14px;padding:10px 12px">
+              <span style="width:22px;height:22px;border-radius:99px;background:#c2410c;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">2</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:14px;font-weight:700">슬슬슬로우 <span style="font-weight:500;color:#64748b;font-size:12px">Noodle bar</span></div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b">★ 3.9 <span style="background:#fef9c3;color:#a16207;font-weight:700;font-size:10.5px;padding:2px 7px;border-radius:99px">★ Trending 인기 급상승</span></div>
+              </div>
+              <span style="color:#cbd5e1;font-size:15px">⠿</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;border:1px solid rgba(15,23,42,0.08);border-radius:14px;padding:10px 12px">
+              <span style="width:22px;height:22px;border-radius:99px;background:#c2410c;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">3</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:14px;font-weight:700">덕천토종닭 <span style="font-weight:500;color:#64748b;font-size:12px">Chicken stew</span></div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b">★ 4.0 <span style="background:#f0fdf4;color:#15803d;font-weight:700;font-size:10.5px;padding:2px 7px;border-radius:99px">92% positive reviews</span></div>
+              </div>
+              <span style="color:#cbd5e1;font-size:15px">⠿</span>
+            </div>
+            <div style="font-size:11.5px;font-weight:700;color:#94a3b8;letter-spacing:0.06em;margin-top:4px">MART 마트 · 1</div>
+            <div style="display:flex;align-items:center;gap:10px;border:1px solid rgba(15,23,42,0.08);border-radius:14px;padding:10px 12px">
+              <span style="width:22px;height:22px;border-radius:99px;background:#4d7c0f;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">5</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:14px;font-weight:700">케이(K)마트 <span style="font-weight:500;color:#64748b;font-size:12px">Local mart</span></div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b">★ 2.8 <span style="background:#f1f5f9;color:#475569;font-weight:700;font-size:10.5px;padding:2px 7px;border-radius:99px">Cash only 현금 결제 후기</span></div>
+              </div>
+              <span style="color:#cbd5e1;font-size:15px">⠿</span>
+            </div>
+            <div style="font-size:11.5px;font-weight:700;color:#94a3b8;letter-spacing:0.06em;margin-top:4px">STAY 숙소 · 3</div>
+            <div style="display:flex;align-items:center;gap:10px;border:1px solid rgba(15,23,42,0.08);border-radius:14px;padding:10px 12px">
+              <span style="width:22px;height:22px;border-radius:99px;background:#475569;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">1</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:14px;font-weight:700">제주 드림타워 <span style="font-weight:500;color:#64748b;font-size:12px">Hotel</span></div>
+                <div style="font-size:12px;color:#64748b">★ 4.4 · Check-out day 1</div>
+              </div>
+              <span style="color:#cbd5e1;font-size:15px">⠿</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;border:1px solid rgba(15,23,42,0.08);border-radius:14px;padding:10px 12px">
+              <span style="width:22px;height:22px;border-radius:99px;background:#475569;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">4</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:14px;font-weight:700">펠리스타운 <span style="font-weight:500;color:#64748b;font-size:12px">Stay</span></div>
+                <div style="font-size:12px;color:#64748b">★ 3.8 · Drop bags 짐 맡기기</div>
+              </div>
+              <span style="color:#cbd5e1;font-size:15px">⠿</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;border:1px solid rgba(15,23,42,0.08);border-radius:14px;padding:10px 12px">
+              <span style="width:22px;height:22px;border-radius:99px;background:#475569;color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">6</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:14px;font-weight:700">바랑쉬 게스트하우스 <span style="font-weight:500;color:#64748b;font-size:12px">Guesthouse</span></div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:#64748b">★ 3.6 <span style="background:#fef9c3;color:#a16207;font-weight:700;font-size:10.5px;padding:2px 7px;border-radius:99px">Loved by solo travelers</span></div>
+              </div>
+              <span style="color:#cbd5e1;font-size:15px">⠿</span>
+            </div>
+          </div>
+          <div style="padding:12px 16px 16px;border-top:1px solid rgba(15,23,42,0.08);background:#fafaf8">
+            <div style="width:100%;background:#facc15;border-radius:99px;padding:13px 0;font-size:14.5px;font-weight:700;color:#0f172a;text-align:center">Set up route · 동선 만들기 →</div>
+          </div>
+        </div>
+      </div>
+  </section>
+
+  <section data-label="Route view" data-speaker-notes="Route view: after building the route the panel collapses to a rail, bottom timeline dock shows times, stays and travel legs." style="background:#fafaf8;display:flex;align-items:center;gap:56px;padding:0 80px;font-family:'Instrument Sans','Noto Sans KR',sans-serif">
+    <div style="width:380px;flex-shrink:0">
+      <div style="font-size:24px;font-weight:700;color:#a16207;letter-spacing:0.08em;margin-bottom:14px">02 · ROUTE</div>
+      <h2 style="margin:0 0 28px;font-size:52px;font-weight:700;letter-spacing:-0.01em;line-height:1.15">동선 화면<br>Route view</h2>
+      <ul style="margin:0;padding-left:26px;font-size:25px;color:#475569;line-height:1.7">
+        <li>동선 생성 시 패널이 자동으로 접혀 <strong style="color:#0f172a">지도 최대화</strong></li>
+        <li>하단 타임라인 독: 도착·체류·이동을 시간축으로</li>
+        <li>장소 팝업에 여행자 인사이트(현금·웨이팅 등)</li>
+        <li>피로도 체크와 Kakao Map 연동</li>
+      </ul>
+    </div>
+    <div style="transform:scale(0.95);transform-origin:left center;flex-shrink:0;width:1360px;height:850px"><div style="position:relative;width:1360px;height:850px;border-radius:16px;overflow:hidden;border:1px solid rgba(15,23,42,0.12);background:#d8e9ee">
+        <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%">
+          <rect width="1440" height="900" fill="#d8e9ee"></rect>
+          <path d="M-60 740 C 120 580, 260 650, 400 560 C 540 470, 520 330, 690 265 C 860 200, 1010 260, 1120 355 C 1230 450, 1300 440, 1400 540 C 1490 630, 1460 800, 1300 850 C 1100 920, 320 950, 100 880 C -30 838, -80 800, -60 740 Z" fill="#f6f3ec"></path>
+          <path d="M690 265 C 750 380, 810 420, 950 470 C 1050 505, 1100 560, 1060 650" stroke="#ffffff" stroke-width="8" fill="none" stroke-linecap="round"></path>
+          <circle cx="600" cy="640" r="78" fill="#e6ecd9"></circle>
+          <circle cx="870" cy="330" r="44" fill="#e6ecd9"></circle>
+          <path d="M490 396 C 560 320, 610 285, 662 270 C 720 295, 755 330, 792 369 C 860 415, 905 440, 950 468 C 985 498, 1010 515, 1022 540 C 1000 585, 960 615, 922 639" stroke="#0f172a" stroke-width="3.5" fill="none" stroke-linecap="round"></path>
+        </svg>
+        <div style="position:absolute;left:calc(34% - 15px);top:calc(44% - 15px);width:30px;height:30px;border-radius:99px;background:#475569;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">1</div>
+        <div style="position:absolute;left:calc(46% - 15px);top:calc(30% - 15px);width:30px;height:30px;border-radius:99px;background:#c2410c;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">2</div>
+        <div style="position:absolute;left:calc(55% - 15px);top:calc(41% - 15px);width:30px;height:30px;border-radius:99px;background:#c2410c;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">3</div>
+        <div style="position:absolute;left:calc(66% - 15px);top:calc(52% - 15px);width:30px;height:30px;border-radius:99px;background:#475569;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">4</div>
+        <div style="position:absolute;left:calc(71% - 15px);top:calc(60% - 15px);width:30px;height:30px;border-radius:99px;background:#4d7c0f;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">5</div>
+        <div style="position:absolute;left:calc(64% - 15px);top:calc(71% - 15px);width:30px;height:30px;border-radius:99px;background:#475569;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">6</div>
+        <!-- app bar -->
+        <div style="position:absolute;top:0;left:0;right:0;height:56px;background:rgba(255,255,255,0.94);border-bottom:1px solid rgba(15,23,42,0.08);display:flex;align-items:center;gap:14px;padding:0 18px">
+          <div style="display:flex;align-items:center;gap:9px">
+            <div style="width:26px;height:26px;border-radius:8px;background:#facc15;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">여</div>
+            <span style="font-size:15px;font-weight:700">WayMeld <span style="color:#94a3b8;font-weight:500">여로담</span></span>
+          </div>
+          <div style="width:1px;height:22px;background:rgba(15,23,42,0.08)"></div>
+          <span style="font-size:14.5px;font-weight:700">Jeju Trip · 제주 여행</span>
+          <span style="background:#0f172a;color:#fff;border-radius:99px;padding:6px 13px;font-size:12.5px;font-weight:600">Day 1 · 6</span>
+          <div style="flex:1"></div>
+          <span style="background:#0f172a;color:#fff;border-radius:99px;padding:7px 15px;font-size:13px;font-weight:600">⛶ Overview 조감</span>
+          <span style="background:#fff;border:1px solid rgba(15,23,42,0.12);border-radius:99px;padding:7px 14px;font-size:13px;font-weight:600;color:#475569">Share 공유</span>
+        </div>
+        <!-- rail -->
+        <div style="position:absolute;top:72px;left:16px;width:52px;background:#fff;border-radius:16px;border:1px solid rgba(15,23,42,0.08);box-shadow:0 8px 32px rgba(15,23,42,0.12);display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 0">
+          <span style="width:38px;height:38px;border-radius:11px;font-size:16px;display:flex;align-items:center;justify-content:center">⌕</span>
+          <span style="width:38px;height:38px;border-radius:11px;font-size:15px;display:flex;align-items:center;justify-content:center;position:relative">📍<span style="position:absolute;top:2px;right:0;background:#facc15;font-size:9.5px;font-weight:700;border-radius:99px;padding:1px 5px">6</span></span>
+          <span style="width:38px;height:38px;border-radius:11px;font-size:15px;display:flex;align-items:center;justify-content:center;background:#f1f5f9">〰</span>
+        </div>
+        <!-- popup with insight -->
+        <div style="position:absolute;left:calc(50% - 170px);top:76px;width:340px;background:#fff;border-radius:18px;border:1px solid rgba(15,23,42,0.08);box-shadow:0 16px 48px rgba(15,23,42,0.2);overflow:hidden">
+          <div style="padding:14px 16px 16px">
+            <div style="display:flex;gap:6px;margin-bottom:8px">
+              <span style="background:#f1f5f9;color:#475569;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px">Mart 마트</span>
+              <span style="background:#f1f5f9;color:#475569;font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px">Cash only 현금 결제 후기</span>
+            </div>
+            <div style="font-size:17px;font-weight:700">케이(K)마트 <span style="font-weight:500;color:#64748b;font-size:13px">Local mart</span></div>
+            <div style="font-size:12.5px;color:#64748b;margin:3px 0 10px">★ 2.8 · 6 reviews · 3 km</div>
+            <div style="background:#fafaf8;border:1px solid rgba(15,23,42,0.06);border-radius:12px;padding:9px 12px;margin-bottom:11px">
+              <div style="font-size:10.5px;font-weight:700;color:#a16207;letter-spacing:0.05em;margin-bottom:3px">✦ TRAVELER INSIGHT 여행자 인사이트</div>
+              <div style="font-size:12px;color:#475569;line-height:1.55">Recent reviews note foreign cards are often declined — bring cash. 최근 후기: 해외 카드 결제 오류 잦음, 현금 지참.</div>
+            </div>
+            <div style="display:flex;gap:7px">
+              <span style="flex:1;background:#fef9c3;color:#a16207;border:1.5px solid #facc15;border-radius:99px;padding:10px 0;font-size:13px;font-weight:700;text-align:center">✓ Pinned 핀업됨</span>
+              <span style="background:#0f172a;color:#fff;border-radius:99px;padding:10px 15px;font-size:13px;font-weight:600">🚕 Taxi card 택시 카드</span>
+            </div>
+          </div>
+        </div>
+        <!-- timeline dock -->
+        <div style="position:absolute;left:92px;right:16px;bottom:16px;background:#fff;border-radius:18px;border:1px solid rgba(15,23,42,0.08);box-shadow:0 12px 40px rgba(15,23,42,0.16);padding:13px 18px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:11px;flex-wrap:wrap">
+            <span style="font-size:13.5px;font-weight:700">Day 1 route · 1일차 동선</span>
+            <span style="font-size:12px;color:#64748b">Depart <strong style="color:#0f172a">09:00</strong> · 🚗 Car · 최단거리</span>
+            <span style="background:#f0fdf4;color:#15803d;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:99px">Fatigue OK 피로도 양호</span>
+            <div style="flex:1"></div>
+            <span style="font-size:13px;font-weight:700">78 km · 1h 18m · ends 22:20</span>
+            <span style="background:#facc15;border-radius:99px;padding:8px 15px;font-size:12.5px;font-weight:700;color:#0f172a">Re-optimize 다시 만들기</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;overflow:hidden">
+            <div style="width:172px;flex-shrink:0;border:1px solid rgba(15,23,42,0.08);border-radius:14px;padding:9px 11px;background:#fafaf8">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span style="width:20px;height:20px;border-radius:99px;background:#475569;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">1</span><span style="font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">제주 드림타워</span></div>
+              <div style="font-size:11px;color:#64748b;padding-left:27px;white-space:nowrap">10:30 · check-out</div>
+            </div>
+            <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;width:64px;flex-shrink:0;color:#94a3b8;padding-top:8px"><span style="font-size:10.5px;font-weight:600">25 min</span><div style="width:44px;height:2px;background:repeating-linear-gradient(90deg,#cbd5e1 0 6px,transparent 6px 11px);margin:3px 0"></div><span style="font-size:10px">🚗 18 km</span></div>
+            <div style="width:172px;flex-shrink:0;border:1.5px solid #facc15;border-radius:14px;padding:9px 11px;background:#fffbeb">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span style="width:20px;height:20px;border-radius:99px;background:#c2410c;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">2</span><span style="font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">슬슬슬로우</span></div>
+              <div style="font-size:11px;color:#64748b;padding-left:27px;white-space:nowrap">12:10–13:10 · lunch 60m</div>
+            </div>
+            <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;width:64px;flex-shrink:0;color:#94a3b8;padding-top:8px"><span style="font-size:10.5px;font-weight:600">9 min</span><div style="width:44px;height:2px;background:repeating-linear-gradient(90deg,#cbd5e1 0 6px,transparent 6px 11px);margin:3px 0"></div><span style="font-size:10px">🚗 5.8 km</span></div>
+            <div style="width:172px;flex-shrink:0;border:1px solid rgba(15,23,42,0.08);border-radius:14px;padding:9px 11px;background:#fafaf8">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span style="width:20px;height:20px;border-radius:99px;background:#c2410c;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">3</span><span style="font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">덕천토종닭</span></div>
+              <div style="font-size:11px;color:#64748b;padding-left:27px;white-space:nowrap">19:55–20:55 · dinner 60m</div>
+            </div>
+            <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;width:64px;flex-shrink:0;color:#94a3b8;padding-top:8px"><span style="font-size:10.5px;font-weight:600">38 min</span><div style="width:44px;height:2px;background:repeating-linear-gradient(90deg,#cbd5e1 0 6px,transparent 6px 11px);margin:3px 0"></div><span style="font-size:10px">🚗 24 km</span></div>
+            <div style="width:172px;flex-shrink:0;border:1px solid rgba(15,23,42,0.08);border-radius:14px;padding:9px 11px;background:#fafaf8">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span style="width:20px;height:20px;border-radius:99px;background:#475569;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">4</span><span style="font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">펠리스타운</span></div>
+              <div style="font-size:11px;color:#64748b;padding-left:27px;white-space:nowrap">21:30 · drop bags</div>
+            </div>
+            <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;width:64px;flex-shrink:0;color:#94a3b8;padding-top:8px"><span style="font-size:10.5px;font-weight:600">6 min</span><div style="width:44px;height:2px;background:repeating-linear-gradient(90deg,#cbd5e1 0 6px,transparent 6px 11px);margin:3px 0"></div><span style="font-size:10px">🚗 3 km</span></div>
+            <div style="width:172px;flex-shrink:0;border:1px solid rgba(15,23,42,0.08);border-radius:14px;padding:9px 11px;background:#fafaf8">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span style="width:20px;height:20px;border-radius:99px;background:#4d7c0f;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">5</span><span style="font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">케이(K)마트</span></div>
+              <div style="font-size:11px;color:#64748b;padding-left:27px;white-space:nowrap">21:40–22:10 · shop 30m</div>
+            </div>
+            <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;width:64px;flex-shrink:0;color:#94a3b8;padding-top:8px"><span style="font-size:10.5px;font-weight:600">4 min</span><div style="width:44px;height:2px;background:repeating-linear-gradient(90deg,#cbd5e1 0 6px,transparent 6px 11px);margin:3px 0"></div><span style="font-size:10px">🚗 2 km</span></div>
+            <div style="width:172px;flex-shrink:0;border:1px solid rgba(15,23,42,0.08);border-radius:14px;padding:9px 11px;background:#fafaf8">
+              <div style="display:flex;align-items:center;gap:7px;margin-bottom:3px"><span style="width:20px;height:20px;border-radius:99px;background:#475569;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">6</span><span style="font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">바랑쉬 게스트하우스</span></div>
+              <div style="font-size:11px;color:#64748b;padding-left:27px;white-space:nowrap">22:20 · check-in</div>
+            </div>
+          </div>
+        </div>
+      </div>
+  </section>
+
+  <section data-label="Overview mode" data-speaker-notes="Overview mode: fullscreen map with labeled pins, category legend toggles, route line toggle." style="background:#fafaf8;display:flex;align-items:center;gap:56px;padding:0 80px;font-family:'Instrument Sans','Noto Sans KR',sans-serif">
+    <div style="width:380px;flex-shrink:0">
+      <div style="font-size:24px;font-weight:700;color:#a16207;letter-spacing:0.08em;margin-bottom:14px">03 · OVERVIEW</div>
+      <h2 style="margin:0 0 28px;font-size:52px;font-weight:700;letter-spacing:-0.01em;line-height:1.15">조감 모드<br>Overview mode</h2>
+      <ul style="margin:0;padding-left:26px;font-size:25px;color:#475569;line-height:1.7">
+        <li>지도 전체화면 + <strong style="color:#0f172a">이름 라벨 핀</strong>으로 전체 조감</li>
+        <li>하단 범례에서 카테고리별 표시/숨김 토글</li>
+        <li>경로선 on/off로 분포와 동선을 번갈아 확인</li>
+        <li>핀 클릭 시 동일한 상세 팝업 사용</li>
+      </ul>
+    </div>
+    <div style="transform:scale(0.95);transform-origin:left center;flex-shrink:0;width:1360px;height:850px"><div style="position:relative;width:1360px;height:850px;border-radius:16px;overflow:hidden;border:1px solid rgba(15,23,42,0.12);background:#d8e9ee">
+        <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" style="position:absolute;inset:0;width:100%;height:100%">
+          <rect width="1440" height="900" fill="#d8e9ee"></rect>
+          <path d="M-60 740 C 120 580, 260 650, 400 560 C 540 470, 520 330, 690 265 C 860 200, 1010 260, 1120 355 C 1230 450, 1300 440, 1400 540 C 1490 630, 1460 800, 1300 850 C 1100 920, 320 950, 100 880 C -30 838, -80 800, -60 740 Z" fill="#f6f3ec"></path>
+          <path d="M690 265 C 750 380, 810 420, 950 470 C 1050 505, 1100 560, 1060 650" stroke="#ffffff" stroke-width="8" fill="none" stroke-linecap="round"></path>
+          <circle cx="600" cy="640" r="78" fill="#e6ecd9"></circle>
+          <circle cx="870" cy="330" r="44" fill="#e6ecd9"></circle>
+          <path d="M490 396 C 560 320, 610 285, 662 270 C 720 295, 755 330, 792 369 C 860 415, 905 440, 950 468 C 985 498, 1010 515, 1022 540 C 1000 585, 960 615, 922 639" stroke="#0f172a" stroke-width="3.5" fill="none" stroke-linecap="round"></path>
+        </svg>
+        <div style="position:absolute;left:calc(34% - 15px);top:calc(44% - 15px);display:flex;align-items:center;gap:7px"><span style="width:30px;height:30px;border-radius:99px;background:#475569;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">1</span><span style="background:#fff;border:1px solid rgba(15,23,42,0.1);border-radius:99px;padding:5px 12px;font-size:12.5px;font-weight:700;box-shadow:0 2px 8px rgba(15,23,42,0.15);white-space:nowrap">제주 드림타워 <span style="font-weight:500;color:#94a3b8;font-size:11px">Stay</span></span></div>
+        <div style="position:absolute;left:calc(46% - 15px);top:calc(30% - 15px);display:flex;align-items:center;gap:7px"><span style="width:30px;height:30px;border-radius:99px;background:#c2410c;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">2</span><span style="background:#fff;border:1px solid rgba(15,23,42,0.1);border-radius:99px;padding:5px 12px;font-size:12.5px;font-weight:700;box-shadow:0 2px 8px rgba(15,23,42,0.15);white-space:nowrap">슬슬슬로우 <span style="font-weight:500;color:#94a3b8;font-size:11px">Food</span></span></div>
+        <div style="position:absolute;left:calc(55% - 15px);top:calc(41% - 15px);display:flex;align-items:center;gap:7px"><span style="width:30px;height:30px;border-radius:99px;background:#c2410c;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">3</span><span style="background:#fff;border:1px solid rgba(15,23,42,0.1);border-radius:99px;padding:5px 12px;font-size:12.5px;font-weight:700;box-shadow:0 2px 8px rgba(15,23,42,0.15);white-space:nowrap">덕천토종닭 <span style="font-weight:500;color:#94a3b8;font-size:11px">Food</span></span></div>
+        <div style="position:absolute;left:calc(66% - 15px);top:calc(52% - 15px);display:flex;align-items:center;gap:7px"><span style="width:30px;height:30px;border-radius:99px;background:#475569;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">4</span><span style="background:#fff;border:1px solid rgba(15,23,42,0.1);border-radius:99px;padding:5px 12px;font-size:12.5px;font-weight:700;box-shadow:0 2px 8px rgba(15,23,42,0.15);white-space:nowrap">펠리스타운 <span style="font-weight:500;color:#94a3b8;font-size:11px">Stay</span></span></div>
+        <div style="position:absolute;left:calc(71% - 15px);top:calc(60% - 15px);display:flex;align-items:center;gap:7px"><span style="width:30px;height:30px;border-radius:99px;background:#4d7c0f;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">5</span><span style="background:#fff;border:1px solid rgba(15,23,42,0.1);border-radius:99px;padding:5px 12px;font-size:12.5px;font-weight:700;box-shadow:0 2px 8px rgba(15,23,42,0.15);white-space:nowrap">케이(K)마트 <span style="font-weight:500;color:#94a3b8;font-size:11px">Mart</span></span></div>
+        <div style="position:absolute;left:calc(64% - 15px);top:calc(71% - 15px);display:flex;align-items:center;gap:7px"><span style="width:30px;height:30px;border-radius:99px;background:#475569;border:2.5px solid #fff;box-shadow:0 2px 8px rgba(15,23,42,0.3);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center">6</span><span style="background:#fff;border:1px solid rgba(15,23,42,0.1);border-radius:99px;padding:5px 12px;font-size:12.5px;font-weight:700;box-shadow:0 2px 8px rgba(15,23,42,0.15);white-space:nowrap">바랑쉬 게스트하우스 <span style="font-weight:500;color:#94a3b8;font-size:11px">Stay</span></span></div>
+        <!-- dark pill -->
+        <div style="position:absolute;top:20px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;background:#0f172a;border-radius:99px;box-shadow:0 8px 28px rgba(15,23,42,0.3);padding:9px 12px 9px 18px">
+          <div style="width:22px;height:22px;border-radius:7px;background:#facc15;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;color:#0f172a">여</div>
+          <span style="font-size:14px;font-weight:700;color:#fff">Overview 조감 모드 · Day 1 · 6 pins</span>
+          <span style="background:rgba(255,255,255,0.15);border-radius:99px;padding:6px 14px;font-size:12.5px;font-weight:600;color:#fff">Exit 나가기 ✕</span>
+        </div>
+        <!-- legend -->
+        <div style="position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:10px">
+          <div style="display:flex;gap:8px;background:#fff;border-radius:99px;border:1px solid rgba(15,23,42,0.08);box-shadow:0 8px 28px rgba(15,23,42,0.16);padding:8px 10px">
+            <span style="display:flex;align-items:center;gap:7px;background:#f1f5f9;border-radius:99px;padding:8px 15px;font-size:13px;font-weight:700"><span style="width:10px;height:10px;border-radius:99px;background:#c2410c"></span>Food 맛집 2</span>
+            <span style="display:flex;align-items:center;gap:7px;border-radius:99px;padding:8px 15px;font-size:13px;font-weight:700;color:#94a3b8;opacity:0.55"><span style="width:10px;height:10px;border-radius:99px;background:#0e7490"></span>Sights 관광 0</span>
+            <span style="display:flex;align-items:center;gap:7px;background:#f1f5f9;border-radius:99px;padding:8px 15px;font-size:13px;font-weight:700"><span style="width:10px;height:10px;border-radius:99px;background:#475569"></span>Stay 숙소 3</span>
+            <span style="display:flex;align-items:center;gap:7px;background:#f1f5f9;border-radius:99px;padding:8px 15px;font-size:13px;font-weight:700"><span style="width:10px;height:10px;border-radius:99px;background:#4d7c0f"></span>Mart 마트 1</span>
+            <span style="width:1px;background:rgba(15,23,42,0.1);margin:2px 4px"></span>
+            <span style="display:flex;align-items:center;gap:7px;background:#fef9c3;color:#a16207;border-radius:99px;padding:8px 15px;font-size:13px;font-weight:700">〰 Route 경로</span>
+          </div>
+          <span style="font-size:12px;color:#475569;background:rgba(255,255,255,0.85);border-radius:99px;padding:4px 14px">Click a category to focus · 카테고리를 눌러 집중해서 보기</span>
+        </div>
+      </div>
+  </section>
+
+</x-import>
+
+</x-dc>
+</body>
+</html>

@@ -225,6 +225,29 @@ export async function searchPlacesUnified(params: UnifiedSearchParams): Promise<
     return { places: [], page: 1, hasMore: false };
   }
 
+  /** 마트 칩 = 대형마트(MT1) + 편의점(CS2) */
+  const shopBundle = category === 'MT1';
+
+  if (!keyword && shopBundle && nearby && params.center) {
+    const [marts, cvs] = await Promise.all([
+      searchPlacesByCategory({
+        categoryGroupCode: 'MT1',
+        center: params.center,
+        radiusMeters: params.radiusMeters,
+        size: params.size,
+        page: params.page,
+      }),
+      searchPlacesByCategory({
+        categoryGroupCode: 'CS2',
+        center: params.center,
+        radiusMeters: params.radiusMeters,
+        size: params.size,
+        page: params.page,
+      }),
+    ]);
+    return mergePlaceResults(marts, cvs, params.size);
+  }
+
   if (!keyword && category && nearby && params.center) {
     return searchPlacesByCategory({
       categoryGroupCode: category,
@@ -239,6 +262,30 @@ export async function searchPlacesUnified(params: UnifiedSearchParams): Promise<
     return { places: [], page: 1, hasMore: false };
   }
 
+  if (shopBundle) {
+    const [marts, cvs] = await Promise.all([
+      searchPlaces({
+        keyword,
+        categoryGroupCode: 'MT1',
+        center: nearby ? params.center : undefined,
+        radiusMeters: nearby ? params.radiusMeters : undefined,
+        sort: nearby ? 'distance' : 'accuracy',
+        size: params.size,
+        page: params.page,
+      }),
+      searchPlaces({
+        keyword,
+        categoryGroupCode: 'CS2',
+        center: nearby ? params.center : undefined,
+        radiusMeters: nearby ? params.radiusMeters : undefined,
+        sort: nearby ? 'distance' : 'accuracy',
+        size: params.size,
+        page: params.page,
+      }),
+    ]);
+    return mergePlaceResults(marts, cvs, params.size);
+  }
+
   return searchPlaces({
     keyword,
     categoryGroupCode: category,
@@ -248,6 +295,27 @@ export async function searchPlacesUnified(params: UnifiedSearchParams): Promise<
     size: params.size,
     page: params.page,
   });
+}
+
+function mergePlaceResults(
+  a: PlacesSearchResult,
+  b: PlacesSearchResult,
+  size?: number
+): PlacesSearchResult {
+  const seen = new Set<string>();
+  const places = [];
+  for (const p of [...a.places, ...b.places]) {
+    if (seen.has(p.id)) continue;
+    seen.add(p.id);
+    places.push(p);
+  }
+  places.sort((x, y) => (x.distance ?? Number.POSITIVE_INFINITY) - (y.distance ?? Number.POSITIVE_INFINITY));
+  const limit = size ?? 15;
+  return {
+    places: places.slice(0, limit),
+    page: a.page,
+    hasMore: a.hasMore || b.hasMore || places.length > limit,
+  };
 }
 
 // =============================================

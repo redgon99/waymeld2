@@ -1,6 +1,6 @@
 import { Icon } from '../components/Icon';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type {
   Place,
@@ -29,6 +29,7 @@ import {
   writeMapProviderChoice,
 } from '../lib/mapProviderPreference';
 import { getApproximateLocation } from '../lib/geolocation';
+import { KAKAO_LEVEL_50M, KAKAO_LEVEL_DEFAULT } from '../lib/mapZoom';
 import { googleMapsLanguage, normalizeLocale } from '../lib/locale';
 import i18n from '../lib/i18n';
 import {
@@ -60,41 +61,39 @@ import {
 } from '../lib/trips';
 import type { ShareTripModalSubmit } from '../components/ShareTripModal';
 import { ShareTripModal } from '../components/ShareTripModal';
-import { TripBar } from '../components/TripBar';
+import { PlannerAppBar } from '../components/PlannerAppBar';
+import { PlannerSidePanel, type PlannerPanelTab } from '../components/PlannerSidePanel';
+import { PanelIconRail } from '../components/PanelIconRail';
+import { RouteTimelineDock } from '../components/RouteTimelineDock';
 import { useAuth } from '../hooks/useAuth';
 import { SearchPanel } from '../components/SearchPanel';
 import { PinupBar } from '../components/PinupBar';
 import { RouteOptionsPanel } from '../components/RouteOptionsPanel';
 import { MapView } from '../components/MapView';
-import { RouteSummary } from '../components/RouteSummary';
-import { AuthBar } from '../components/AuthBar';
-import { DayTabs } from '../components/DayTabs';
 import { Toast } from '../components/Toast';
 import { RoadviewModal } from '../components/RoadviewModal';
 import { PlacePhotosModal } from '../components/PlacePhotosModal';
 import { MapContextMenu } from '../components/MapContextMenu';
 import { ManualPinModal } from '../components/ManualPinModal';
 import { TripMaterialsPanel } from '../components/TripMaterialsPanel';
-import { MobileDock } from '../components/mobile/MobileDock';
-import { MobileTopBar } from '../components/mobile/MobileTopBar';
 import { MobileSearchSheet } from '../components/mobile/MobileSearchSheet';
-import { MobilePinSheet } from '../components/mobile/MobilePinSheet';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { createManualPlace } from '../lib/manualPlace';
 import type { PinImportResult } from '../lib/importPins';
-import { SaveStatusBadge, type SaveStatus } from '../components/SaveStatusBadge';
+import type { SaveStatus } from '../components/SaveStatusBadge';
 import { OnboardingCoach } from '../components/OnboardingCoach';
 import { ThemePreferenceChips } from '../components/ThemePreferenceChips';
-import { FoodRestrictionChips } from '../components/FoodRestrictionChips';
 import { TaxiDriverCardModal } from '../components/TaxiDriverCardModal';
 import { shouldShowOnboarding, isPlazaNavUnlocked, unlockPlazaNav } from '../lib/onboarding';
 import { TRIP_THEMES } from '../lib/themes';
 import { splitSearchQueries } from '../lib/searchQueries';
-import { filterPlacesByFoodRestrictions } from '../lib/foodRestrictions';
+import { filterPlacesBySubFilters, type SearchSubFilterId } from '../lib/searchSubFilters';
 import { isTourApiConfigured, searchTourPlaces } from '../lib/tourApi';
 import '../styles/app.css';
 
 type MobileSheetKind = 'search' | 'pins' | null;
+type MobileSheetLevel = 'peek' | 'half' | 'full';
+type MobileSheetTab = 'pins' | 'route';
 
 interface PendingManualPin {
   lat: number;
@@ -123,7 +122,7 @@ function makeEmptyTrip(): Trip {
 export default function PlannerPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, configured: authConfigured, plan } = useAuth();
+  const { user, configured: authConfigured, plan, isAdmin } = useAuth();
   const { t: tc } = useTranslation('common');
   const { t: tp } = useTranslation('planner');
   const { t: tb } = useTranslation('billing');
@@ -146,6 +145,7 @@ export default function PlannerPage() {
   const [searchEmpty, setSearchEmpty] = useState(false);
   const [searchScope, setSearchScope] = useState<SearchScope>('nationwide');
   const [categoryFilter, setCategoryFilter] = useState<SearchCategoryFilter>(null);
+  const [categorySubFilters, setCategorySubFilters] = useState<SearchSubFilterId[]>([]);
   const [searchRadius, setSearchRadius] = useState<SearchRadiusMeters>(5000);
   const [fitSearchBounds, setFitSearchBounds] = useState(false);
   const [searchPage, setSearchPage] = useState(1);
@@ -169,18 +169,25 @@ export default function PlannerPage() {
   const [routeOptionsOpen, setRouteOptionsOpen] = useState(false);
   const [materialsPanelOpen, setMaterialsPanelOpen] = useState(false);
   const [presentationMode, setPresentationMode] = useState(false);
+  const [panelOpen, setPanelOpen] = useState(true);
+  const [panelTab, setPanelTab] = useState<PlannerPanelTab>('search');
+  const [dockCollapsed, setDockCollapsed] = useState(false);
   const [pickingOriginFromMap, setPickingOriginFromMap] = useState(false);
   const [pickingPinFromMap, setPickingPinFromMap] = useState(false);
   const [pendingManualPin, setPendingManualPin] = useState<PendingManualPin | null>(null);
   const [refining, setRefining] = useState(false);
   const isMobile = useIsMobile();
   const [mobileSheet, setMobileSheet] = useState<MobileSheetKind>(null);
+  const [mobileSheetLevel, setMobileSheetLevel] = useState<MobileSheetLevel>('half');
+  const [mobileSheetTab, setMobileSheetTab] = useState<MobileSheetTab>('pins');
   const [selectedPinIds, setSelectedPinIds] = useState<Set<string>>(() => new Set());
   const [mustVisitOnly, setMustVisitOnly] = useState(false);
   const [taxiCardPlace, setTaxiCardPlace] = useState<Place | null>(null);
 
   // 지도 중심 · 지도/검색 앱
   const [mapCenter, setMapCenter] = useState(DEFAULT_CENTER);
+  const [mapLevel, setMapLevel] = useState(KAKAO_LEVEL_DEFAULT);
+  const [mapLevelTick, setMapLevelTick] = useState(0);
   const [mapProviderBooting, setMapProviderBooting] = useState(
     () => !hasSavedMapProviderChoice()
   );
@@ -325,6 +332,8 @@ export default function PlannerPage() {
       };
     });
     setRouteOptionsOpen(true);
+    setPanelTab('route');
+    setPanelOpen(true);
     showToast(
       guideTitle
         ? `「${guideTitle}」코스 — 장소를 2곳 이상 핀업한 뒤 자동 동선을 만드세요`
@@ -474,6 +483,8 @@ export default function PlannerPage() {
     radius?: SearchRadiusMeters;
     center?: { lat: number; lng: number };
     query?: string;
+    /** true면 검색 후 지도 중심·bounds를 바꾸지 않음 (지정 지점 주변 검색용) */
+    keepMapCenter?: boolean;
   };
 
   /** 지도 주변 검색 중심 — 한 번 정해지면 수동·옵션 변경 전까지 유지 */
@@ -495,6 +506,12 @@ export default function PlannerPage() {
     [mapCenter, nearbySearchCenter, ensureNearbySearchCenter]
   );
 
+  const openSearchPanel = useCallback(() => {
+    setPanelOpen(true);
+    setPanelTab('search');
+    setMobileSheet('search');
+  }, []);
+
   const runSearch = useCallback(
     async (page: number, append: boolean, overrides?: SearchRunOverrides) => {
       const scope = overrides?.scope ?? searchScope;
@@ -503,14 +520,21 @@ export default function PlannerPage() {
       const radius = overrides?.radius ?? searchRadius;
       const searchCenter = getSearchCenter(scope, overrides?.center);
       const keyword = (overrides?.query ?? query).trim();
+      const keepMapCenter = overrides?.keepMapCenter === true;
       const batchQueries = keyword ? splitSearchQueries(keyword) : [];
       const isBatchSearch = batchQueries.length > 1 && !append && page === 1;
-      const canSearch = Boolean(keyword) || (scope === 'nearby' && category);
+      /** 키워드·카테고리 없이 지도 주변만 볼 때: 주요 카테고리 병합 검색 */
+      const browseNearby =
+        scope === 'nearby' && !keyword && !category && !append && page === 1;
+      const canSearch =
+        Boolean(keyword) ||
+        (scope === 'nearby' && Boolean(category)) ||
+        browseNearby;
       const providerReady =
         mapProvider === 'google' ? googleReady : kakaoReady;
       if (!providerReady || !canSearch) return;
 
-      if (mapProvider === 'google' && !canRunGoogleSearch(plan)) {
+      if (mapProvider === 'google' && !canRunGoogleSearch(plan, isAdmin)) {
         showToast(tb('limits.searchCap'));
         setUpgradeOpen(true);
         return;
@@ -525,6 +549,61 @@ export default function PlannerPage() {
         setSelectedPlaceId(null);
       }
       try {
+        if (browseNearby) {
+          const browseCodes = ['FD6', 'AT4', 'AD5', 'MT1'] as const;
+          const merged: Place[] = [];
+          const seen = new Set<string>();
+          for (const code of browseCodes) {
+            const { places } =
+              mapProvider === 'google'
+                ? await searchPlacesUnifiedWithGoogle({
+                    categoryGroupCode: code,
+                    scope: 'nearby',
+                    center: searchCenter,
+                    radiusMeters: radius,
+                    size: 8,
+                    page: 1,
+                  })
+                : await searchPlacesUnified({
+                    categoryGroupCode: code,
+                    scope: 'nearby',
+                    center: searchCenter,
+                    radiusMeters: radius,
+                    size: 8,
+                    page: 1,
+                  });
+            for (const place of places) {
+              if (seen.has(place.id)) continue;
+              seen.add(place.id);
+              merged.push({
+                ...place,
+                distance: Math.round(haversineMeters(searchCenter, place)),
+              });
+            }
+          }
+          if (mapProvider === 'google') recordGoogleSearch(plan, isAdmin);
+          merged.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
+          const clipped = merged.slice(0, 20);
+          setResults(clipped);
+          setSearchPage(1);
+          setSearchHasMore(false);
+          setSearchEmpty(clipped.length === 0);
+          if (!keepMapCenter) {
+            if (clipped.length === 1) {
+              setMapCenter({ lat: clipped[0].lat, lng: clipped[0].lng });
+            } else if (clipped.length > 1) {
+              setFitSearchBounds(true);
+            }
+          }
+          if (clipped.length > 0 && mapProvider === 'kakao') {
+            setEnrichingStats(true);
+            void enrichPlacesWithStats(clipped)
+              .then(setResults)
+              .finally(() => setEnrichingStats(false));
+          }
+          return;
+        }
+
         if (isBatchSearch) {
           const merged: Place[] = [];
           const seen = new Set<string>();
@@ -558,15 +637,17 @@ export default function PlannerPage() {
               });
             }
           }
-          if (mapProvider === 'google') recordGoogleSearch(plan);
+          if (mapProvider === 'google') recordGoogleSearch(plan, isAdmin);
           setResults(merged);
           setSearchPage(1);
           setSearchHasMore(false);
           setSearchEmpty(merged.length === 0);
-          if (merged.length === 1) {
-            setMapCenter({ lat: merged[0].lat, lng: merged[0].lng });
-          } else if (merged.length > 1) {
-            setFitSearchBounds(true);
+          if (!keepMapCenter) {
+            if (merged.length === 1) {
+              setMapCenter({ lat: merged[0].lat, lng: merged[0].lng });
+            } else if (merged.length > 1) {
+              setFitSearchBounds(true);
+            }
           }
           if (merged.length > 0) {
             showToast(tp('search.batchDone', { count: batchQueries.length, results: merged.length }));
@@ -605,15 +686,17 @@ export default function PlannerPage() {
           distance: Math.round(haversineMeters(searchCenter, place)),
         }));
         setResults((prev) => (append ? [...prev, ...withDistance] : withDistance));
-        if (mapProvider === 'google') recordGoogleSearch(plan);
+        if (mapProvider === 'google') recordGoogleSearch(plan, isAdmin);
         setSearchPage(page);
         setSearchHasMore(hasMore);
         if (!append) {
           setSearchEmpty(withDistance.length === 0);
-          if (withDistance.length === 1) {
-            setMapCenter({ lat: withDistance[0].lat, lng: withDistance[0].lng });
-          } else if (withDistance.length > 1) {
-            setFitSearchBounds(true);
+          if (!keepMapCenter) {
+            if (withDistance.length === 1) {
+              setMapCenter({ lat: withDistance[0].lat, lng: withDistance[0].lng });
+            } else if (withDistance.length > 1) {
+              setFitSearchBounds(true);
+            }
           }
         }
         if (withDistance.length > 0 && mapProvider === 'kakao') {
@@ -665,6 +748,7 @@ export default function PlannerPage() {
       categoryFilter,
       searchRadius,
       plan,
+      isAdmin,
       tb,
       showToast,
       tp,
@@ -742,6 +826,7 @@ export default function PlannerPage() {
   const handleCategoryFilterChange = useCallback(
     (code: SearchCategoryFilter) => {
       setCategoryFilter(code);
+      setCategorySubFilters([]);
 
       if (code !== null) {
         setSearchScope('nearby');
@@ -791,7 +876,10 @@ export default function PlannerPage() {
 
   const handleSelectPlace = useCallback((place: Place) => {
     setSelectedPlaceId(place.id);
+    setFitSearchBounds(false);
     setMapCenter({ lat: place.lat, lng: place.lng });
+    setMapLevel(KAKAO_LEVEL_50M);
+    setMapLevelTick((n) => n + 1);
   }, []);
 
   const handlePinnedMarkerClick = useCallback((place: Place) => {
@@ -821,13 +909,17 @@ export default function PlannerPage() {
     const center = { lat, lng };
     nearbySearchCenterRef.current = center;
     setNearbySearchCenter(center);
+    setMapCenter(center);
     setSearchScope('nearby');
-    showToast('이 위치를 검색 중심으로 설정했습니다 (지도 주변)');
-    const canSearch = query.trim() || categoryFilter;
-    if (canSearch && searchReady) {
-      void runSearch(1, false, { scope: 'nearby', center: { lat, lng } });
-    }
-  }, [mapContextMenu, query, categoryFilter, searchReady, runSearch]);
+    setFitSearchBounds(false);
+    openSearchPanel();
+    showToast('이 위치를 중심으로 검색합니다');
+    void runSearch(1, false, {
+      scope: 'nearby',
+      center,
+      keepMapCenter: true,
+    });
+  }, [mapContextMenu, runSearch, openSearchPanel]);
 
   const handleOpenPlacePhotos = useCallback((place: Place) => {
     setPhotosTarget(place);
@@ -843,13 +935,16 @@ export default function PlannerPage() {
       setMapCenter(center);
       setNearbySearchCenter(center);
       setSearchScope('nearby');
-      showToast('현재 위치를 검색 중심으로 설정했습니다');
-      const canSearch = query.trim() || categoryFilter;
-      if (canSearch && searchReady) {
-        void runSearch(1, false, { scope: 'nearby', center });
-      }
+      setFitSearchBounds(false);
+      openSearchPanel();
+      showToast('현재 위치를 중심으로 검색합니다');
+      void runSearch(1, false, {
+        scope: 'nearby',
+        center,
+        keepMapCenter: true,
+      });
     });
-  }, [query, categoryFilter, searchReady, runSearch]);
+  }, [runSearch, openSearchPanel]);
 
   // ============== 핀업 ==============
   const addPinFromPlace = useCallback(
@@ -1017,8 +1112,24 @@ export default function PlannerPage() {
     }
     setMobileSheet(null);
     setMaterialsPanelOpen(false);
+    setPanelTab('route');
+    setPanelOpen(true);
+    setMobileSheetTab('route');
+    setMobileSheetLevel('half');
     setRouteOptionsOpen(true);
   }, [pinned.length, selectedPinIds.size]);
+
+  const openPlannerTab = useCallback((tab: PlannerPanelTab) => {
+    setPanelTab(tab);
+    setPanelOpen(true);
+    if (tab === 'route') setRouteOptionsOpen(true);
+  }, []);
+
+  const cycleMobileSheet = useCallback(() => {
+    setMobileSheetLevel((prev) =>
+      prev === 'peek' ? 'half' : prev === 'half' ? 'full' : 'peek'
+    );
+  }, []);
 
   const handleUpdateStayMinutes = useCallback(
     (placeId: string, minutes: number) => {
@@ -1122,6 +1233,10 @@ export default function PlannerPage() {
       const base = generateRoute(routePins, opts);
       setRouteForDay(currentDay, base);
       setRouteOptionsOpen(false);
+      setPanelOpen(false);
+      setDockCollapsed(false);
+      setMobileSheetTab('route');
+      setMobileSheetLevel('half');
 
       if (opts.autoOrder) {
         const syncedPins: PinnedPlace[] = base.stops.map((s, i) => ({
@@ -1180,35 +1295,6 @@ export default function PlannerPage() {
     setRouteOptions({ ...routeOptions, origin });
     await buildAndGenerate(origin);
   }, [routePins, pinned, selectedPinIds, routeOptions, currentDay]);
-
-  // ============== 동선 요약에서 순서 변경 → 즉시 재계산 ==============
-  const handleReorderRoute = useCallback(
-    async (orderedIds: string[]) => {
-      const idMap = new Map(pinned.map((p) => [p.id, p]));
-      const reordered = orderedIds
-        .map((id, i) => {
-          const p = idMap.get(id);
-          if (!p) return null;
-          return { ...p, order: i + 1 };
-        })
-        .filter((p): p is PinnedPlace => !!p);
-      setPinnedForDay(currentDay, reordered);
-
-      // 순서 변경 시 autoOrder를 false로 자동 전환 (사용자 의도 존중)
-      const opts: RouteOptions = { ...routeOptions, autoOrder: false };
-      setRouteOptions(opts);
-
-      const base = generateRoute(reordered, opts);
-      setRouteForDay(currentDay, base);
-      try {
-        const refined = await refineRouteWithRealLegs(base, fetchLegs);
-        setRouteForDay(currentDay, refined);
-      } catch {
-        /* noop */
-      }
-    },
-    [pinned, routeOptions, currentDay]
-  );
 
   // ============== 다일정 ==============
   function selectDay(day: number) {
@@ -1285,7 +1371,7 @@ export default function PlannerPage() {
   );
 
   const handleNewTrip = useCallback(async () => {
-    if (!canCreateTrip(plan, tripSummaries.length)) {
+    if (!canCreateTrip(plan, tripSummaries.length, isAdmin)) {
       showToast(tb('limits.tripCount', { max: FREE_MAX_TRIPS }));
       setUpgradeOpen(true);
       return;
@@ -1308,7 +1394,7 @@ export default function PlannerPage() {
     setRouteOptionsOpen(false);
     setMapCenter(DEFAULT_CENTER);
     await refreshTripList(userId);
-  }, [trip, user?.id, refreshTripList, plan, tripSummaries.length, tb]);
+  }, [trip, user?.id, refreshTripList, plan, isAdmin, tripSummaries.length, tb]);
 
   const handleDeleteTrip = useCallback(async () => {
     const userId = user?.id ?? null;
@@ -1426,15 +1512,6 @@ export default function PlannerPage() {
     [trip, user, showToast]
   );
 
-  const handleSaveExplicit = useCallback(async () => {
-    const userId = user?.id ?? null;
-    await tripsRepo.save({ ...trip, ownerId: userId ?? undefined, updatedAt: Date.now() });
-    await refreshTripList(userId);
-    setLastSavedAt(Date.now());
-    setSavePending(false);
-    showToast(authConfigured && user ? '클라우드에 저장되었습니다' : '로컬에 저장되었습니다');
-  }, [trip, user, authConfigured, refreshTripList]);
-
   const countsByDay = useMemo(() => {
     const counts: Record<number, number> = {};
     for (let d = 1; d <= trip.totalDays; d++) {
@@ -1443,14 +1520,15 @@ export default function PlannerPage() {
     return counts;
   }, [trip.pinnedByDay, trip.totalDays]);
 
-  const displayResults = useMemo(
-    () => filterPlacesByFoodRestrictions(results, trip.foodRestrictions),
-    [results, trip.foodRestrictions]
-  );
+  const displayResults = useMemo(() => {
+    const selected =
+      categoryFilter === 'FD6'
+        ? (trip.foodRestrictions ?? [])
+        : categorySubFilters;
+    return filterPlacesBySubFilters(results, categoryFilter, selected);
+  }, [results, categoryFilter, categorySubFilters, trip.foodRestrictions]);
 
   const pinnedIds = new Set(pinned.map((p) => p.id));
-  const routeTargetCount =
-    selectedPinIds.size > 0 ? selectedPinIds.size : pinned.length;
   const totalPinCount = useMemo(
     () =>
       Object.values(trip.pinnedByDay).reduce(
@@ -1474,7 +1552,13 @@ export default function PlannerPage() {
     (query.trim().length > 0 || searching || results.length > 0);
 
   const toggleMobileSheet = useCallback((sheet: 'search' | 'pins') => {
-    setMobileSheet((prev) => (prev === sheet ? null : sheet));
+    if (sheet === 'search') {
+      setMobileSheet((prev) => (prev === 'search' ? null : 'search'));
+      return;
+    }
+    setMobileSheet(null);
+    setMobileSheetTab('pins');
+    setMobileSheetLevel((prev) => (prev === 'peek' ? 'half' : prev));
   }, []);
 
   useEffect(() => {
@@ -1490,10 +1574,22 @@ export default function PlannerPage() {
     return () => window.removeEventListener('keydown', onKey);
   }, [presentationMode]);
 
+  const rootClass = [
+    'waymeld-root',
+    panelOpen && !useMobileChrome ? 'panel-open' : '',
+    !panelOpen && !useMobileChrome ? 'panel-collapsed' : '',
+    materialsPanelOpen ? 'materials-open' : '',
+    generatedRoute ? 'dock-open' : '',
+    presentationMode ? 'presentation-mode' : '',
+    searchExpanded ? 'search-expanded' : '',
+    useMobileChrome ? 'mobile-layout' : '',
+    mobileSheet === 'search' ? 'mobile-search-open mobile-sheet-open' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <div
-      className={`tripasist-root ${routeOptionsOpen || materialsPanelOpen ? 'panel-open' : ''} ${presentationMode ? 'presentation-mode' : ''} ${searchExpanded ? 'search-expanded' : ''} ${useMobileChrome ? 'mobile-layout' : ''} ${mobileSheet ? 'mobile-sheet-open' : ''}`}
-    >
+    <div className={rootClass}>
       {(mapProviderBooting ||
         !((mapProvider === 'kakao' && kakaoReady) ||
           (mapProvider === 'google' && googleReady))) && (
@@ -1505,247 +1601,423 @@ export default function PlannerPage() {
       {!mapProviderBooting &&
         ((mapProvider === 'kakao' && kakaoReady) ||
           (mapProvider === 'google' && googleReady)) && (
-      <MapView
-        provider={mapProvider}
-        mapsReady={kakaoReady}
-        googleMapsReady={googleReady}
-        center={mapCenter}
-        searchResults={displayResults}
-        pinned={mapPins}
-        pinCategoryFilter={mapPinCategoryFilter}
-        origin={routeOptions.origin}
-        generatedRoute={generatedRoute}
-        nearbySearchCenter={searchScope === 'nearby' ? nearbySearchCenter : null}
-        fitSearchBounds={fitSearchBounds}
-        pickingOriginFromMap={pickingOriginFromMap}
-        pickingPinFromMap={pickingPinFromMap}
-        onOriginPicked={handleOriginPicked}
-        onPinLocationPicked={handlePinLocationPicked}
-        draftPinLocation={pendingManualPin}
-        highlightPlaceId={selectedPlaceId}
-        pinSelectionFilter={pinSelectionActive ? selectedPinIds : undefined}
-        onSelectPlace={handleSelectPlace}
-        onPinnedMarkerClick={handlePinnedMarkerClick}
-        infoWindowPlace={infoWindowPlace}
-        pinnedIds={pinnedIds}
-        onCloseInfoWindow={handleCloseInfoWindow}
-        onTogglePinFromInfo={handleTogglePinFromInfo}
-        onOpenRoadviewFromInfo={(p) => setRoadviewTarget(p)}
-        onOpenPlacePhotosFromInfo={handleOpenPlacePhotos}
-        onShowTaxiCardFromInfo={(p) => setTaxiCardPlace(p)}
-        onMapRightClick={handleMapRightClick}
-        onMapCenterChange={handleMapCenterChange}
-      />
+        <MapView
+          key={mapProvider}
+          provider={mapProvider}
+          mapsReady={kakaoReady}
+          googleMapsReady={googleReady}
+          center={mapCenter}
+          level={mapLevel}
+          levelTick={mapLevelTick}
+          searchResults={displayResults}
+          pinned={mapPins}
+          pinCategoryFilter={mapPinCategoryFilter}
+          origin={routeOptions.origin}
+          generatedRoute={generatedRoute}
+          nearbySearchCenter={searchScope === 'nearby' ? nearbySearchCenter : null}
+          fitSearchBounds={fitSearchBounds}
+          pickingOriginFromMap={pickingOriginFromMap}
+          pickingPinFromMap={pickingPinFromMap}
+          onOriginPicked={handleOriginPicked}
+          onPinLocationPicked={handlePinLocationPicked}
+          draftPinLocation={pendingManualPin}
+          highlightPlaceId={selectedPlaceId}
+          pinSelectionFilter={pinSelectionActive ? selectedPinIds : undefined}
+          onSelectPlace={handleSelectPlace}
+          onPinnedMarkerClick={handlePinnedMarkerClick}
+          infoWindowPlace={infoWindowPlace}
+          pinnedIds={pinnedIds}
+          onCloseInfoWindow={handleCloseInfoWindow}
+          onTogglePinFromInfo={handleTogglePinFromInfo}
+          onOpenRoadviewFromInfo={(p) => setRoadviewTarget(p)}
+          onOpenPlacePhotosFromInfo={handleOpenPlacePhotos}
+          onShowTaxiCardFromInfo={(p) => setTaxiCardPlace(p)}
+          onMapRightClick={handleMapRightClick}
+          onMapCenterChange={handleMapCenterChange}
+          onMapLevelChange={setMapLevel}
+        />
+      )}
+
+      {!useMobileChrome && (
+        <>
+          <PlannerAppBar
+            trip={trip}
+            summaries={tripSummaries}
+            countsByDay={countsByDay}
+            saveStatus={saveStatus}
+            lastSavedAt={lastSavedAt ?? trip.updatedAt}
+            onGuestSaveClick={() => navigate('/login')}
+            onTitleChange={handleTitleChange}
+            onSelectTrip={handleSelectTrip}
+            onSelectDay={selectDay}
+            onAddDay={addDay}
+            onRemoveDay={removeDay}
+            onOpenMaterials={handleOpenMaterialsPanel}
+            onNewTrip={handleNewTrip}
+            onDeleteTrip={() => void handleDeleteTrip()}
+            onShare={openShareModal}
+            presentationMode={presentationMode}
+            onTogglePresentation={handleTogglePresentation}
+            plazaNavVisible={plazaNavVisible}
+          />
+
+          <PlannerSidePanel
+            open={panelOpen && !presentationMode}
+            tab={panelTab}
+            pinCount={pinned.length}
+            onTabChange={openPlannerTab}
+            onCollapse={() => setPanelOpen(false)}
+            searchSlot={
+              <SearchPanel
+                results={displayResults}
+                pinnedIds={pinnedIds}
+                selectedId={selectedPlaceId}
+                loading={searching}
+                enrichingStats={enrichingStats}
+                searchEmpty={searchEmpty}
+                searchScope={searchScope}
+                onSearchScopeChange={handleSearchScopeChange}
+                categoryFilter={categoryFilter}
+                onCategoryFilterChange={handleCategoryFilterChange}
+                searchRadius={searchRadius}
+                onSearchRadiusChange={handleSearchRadiusChange}
+                onUseMyLocation={handleUseMyLocationForSearch}
+                query={query}
+                onQueryChange={setQuery}
+                onSearch={handleSearch}
+                onClear={handleResetSearch}
+                onResetResults={handleResetSearch}
+                onTogglePin={handleTogglePin}
+                onSelectResult={handleSelectPlace}
+                onOpenRoadview={(p) => setRoadviewTarget(p)}
+                onOpenPlacePhotos={handleOpenPlacePhotos}
+                hasMore={searchHasMore}
+                loadingMore={loadingMore}
+                onLoadMore={handleLoadMore}
+                searchError={searchError}
+                mapProvider={mapProvider}
+                onMapProviderChange={handleMapProviderChange}
+                onSearchCandidate={handleSearchCandidate}
+                foodRestrictions={trip.foodRestrictions ?? []}
+                onFoodRestrictionsChange={handleFoodRestrictionsChange}
+                categorySubFilters={categorySubFilters}
+                onCategorySubFiltersChange={setCategorySubFilters}
+              />
+            }
+            pinsSlot={
+              <>
+                <div className="trip-preferences-bar planner-prefs-inline">
+                  <ThemePreferenceChips
+                    selected={trip.preferences ?? []}
+                    onChange={handlePreferencesChange}
+                    compact
+                  />
+                </div>
+                <PinupBar
+                  variant="panel"
+                  hideHeader
+                  pinned={pinned}
+                  tripTitle={trip.title}
+                  currentDay={currentDay}
+                  totalDays={trip.totalDays}
+                  pinnedByDay={trip.pinnedByDay}
+                  onExportNotify={showToast}
+                  onUpgradeRequest={() => setUpgradeOpen(true)}
+                  onImportPins={handleImportPins}
+                  mapCategoryFilter={mapPinCategoryFilter}
+                  onToggleMapCategoryFilter={handleToggleMapCategoryFilter}
+                  onRemove={handleRemovePin}
+                  onReorder={handleReorderPinned}
+                  onSelectPin={handleSelectPlace}
+                  selectedPinIds={selectedPinIds}
+                  onTogglePinSelection={handleTogglePinSelection}
+                  onClearAll={handleClearAllPins}
+                  onOpenRouteOptions={handleOpenRouteOptions}
+                  routeOptionsOpen={routeOptionsOpen}
+                  mustVisitOnly={mustVisitOnly}
+                  onToggleMustVisitOnly={() => setMustVisitOnly((v) => !v)}
+                  onToggleRequired={handleToggleRequired}
+                />
+              </>
+            }
+            routeSlot={
+              <RouteOptionsPanel
+                embedded
+                open
+                pinned={routePins}
+                currentDay={currentDay}
+                totalDays={trip.totalDays}
+                options={routeOptions}
+                hasExistingRoute={!!generatedRoute}
+                onChange={setRouteOptions}
+                onUpdateStayMinutes={handleUpdateStayMinutes}
+                onCopyFromPreviousDay={() => {
+                  setTrip((prev) => copyRouteOptionsFromDay(prev, currentDay - 1, currentDay));
+                  showToast(`${currentDay - 1}일차 출발 설정을 복사했습니다`);
+                }}
+                onClose={() => setPanelOpen(false)}
+                onGenerate={() => void handleGenerate()}
+                onPickOriginFromMap={handlePickOriginFromMap}
+                pickingOriginFromMap={pickingOriginFromMap}
+              />
+            }
+          />
+
+          <PanelIconRail
+            visible={!panelOpen && !presentationMode}
+            pinCount={pinned.length}
+            activeTab={null}
+            onOpen={openPlannerTab}
+          />
+
+          {generatedRoute && !presentationMode && (
+            <RouteTimelineDock
+              route={generatedRoute}
+              currentDay={currentDay}
+              panelOpen={panelOpen}
+              collapsed={dockCollapsed}
+              onToggleCollapsed={() => setDockCollapsed((v) => !v)}
+              onReoptimize={handleOpenRouteOptions}
+              selectedStopId={selectedPlaceId}
+              onSelectStop={(id) => {
+                const p = pinned.find((x) => x.id === id);
+                if (p) handleSelectPlace(p);
+              }}
+              refining={refining}
+            />
+          )}
+
+          <div className="overview-chrome">
+            <span style={{ fontWeight: 700, fontSize: 13 }}>Overview · 조감</span>
+            <button
+              type="button"
+              className={`overview-chrome-btn ${!mapPinCategoryFilter ? 'active' : ''}`}
+              onClick={() => setMapPinCategoryFilter(null)}
+            >
+              All
+            </button>
+            <button
+              type="button"
+              className="overview-chrome-exit"
+              onClick={handleTogglePresentation}
+            >
+              Exit
+            </button>
+          </div>
+          <div className="overview-legend">
+            {(
+              [
+                ['food', '#c2410c', 'Food'],
+                ['tour', '#0e7490', 'Sights'],
+                ['stay', '#475569', 'Stay'],
+                ['shop', '#4d7c0f', 'Mart'],
+              ] as const
+            ).map(([cat, color, label]) => (
+              <button
+                key={cat}
+                type="button"
+                className={`overview-legend-chip ${
+                  mapPinCategoryFilter === cat || !mapPinCategoryFilter ? 'on' : ''
+                }`}
+                style={{ background: color }}
+                onClick={() =>
+                  setMapPinCategoryFilter((prev) => (prev === cat ? null : cat))
+                }
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="overlay-map-tools desktop-only-overlay">
+            <button
+              type="button"
+              className={`map-tool-btn ${pickingPinFromMap ? 'active' : ''}`}
+              onClick={handleTogglePinFromMap}
+              title={tp('trip.pinFromMap')}
+            >
+              <Icon name="pinPlus" />
+              {tp('trip.pinFromMap')}
+            </button>
+          </div>
+        </>
       )}
 
       {useMobileChrome && (
         <>
-          <MobileTopBar
-            tripTitle={trip.title}
-            saveStatus={saveStatus}
-            lastSavedAt={lastSavedAt ?? trip.updatedAt}
-            onGuestSaveClick={() => navigate('/login')}
-            onOpenSearch={() => toggleMobileSheet('search')}
-          />
-          <MobileDock
-            activeSheet={mobileSheet}
-            pinCount={pinned.length}
-            routeDisabled={routeTargetCount < 2}
-            onOpenSearch={() => toggleMobileSheet('search')}
-            onOpenPins={() => toggleMobileSheet('pins')}
-            onOpenRoute={handleOpenRouteOptions}
-            onPinFromMap={handleTogglePinFromMap}
-            pickingPinFromMap={pickingPinFromMap}
-          />
-          <MobileSearchSheet
-            open={mobileSheet === 'search'}
-            onClose={() => setMobileSheet(null)}
-            results={displayResults}
-            pinnedIds={pinnedIds}
-            selectedId={selectedPlaceId}
-            loading={searching}
-            enrichingStats={enrichingStats}
-            searchEmpty={searchEmpty}
-            searchScope={searchScope}
-            onSearchScopeChange={handleSearchScopeChange}
-            categoryFilter={categoryFilter}
-            onCategoryFilterChange={handleCategoryFilterChange}
-            searchRadius={searchRadius}
-            onSearchRadiusChange={handleSearchRadiusChange}
-            onUseMyLocation={handleUseMyLocationForSearch}
-            query={query}
-            onQueryChange={setQuery}
-            onSearch={handleSearch}
-            onClear={handleResetSearch}
-            onResetResults={handleResetSearch}
-            onTogglePin={handleTogglePin}
-            onSelectResult={handleSelectPlace}
-            onOpenRoadview={(p) => setRoadviewTarget(p)}
-            onOpenPlacePhotos={handleOpenPlacePhotos}
-            hasMore={searchHasMore}
-            loadingMore={loadingMore}
-            onLoadMore={handleLoadMore}
-            searchError={searchError}
-            mapProvider={mapProvider}
-            onMapProviderChange={handleMapProviderChange}
-            onSearchCandidate={handleSearchCandidate}
-          />
-          <MobilePinSheet
-            open={mobileSheet === 'pins'}
-            onClose={() => setMobileSheet(null)}
-            trip={trip}
-            tripSummaries={tripSummaries}
-            onTitleChange={handleTitleChange}
-            onSelectTrip={handleSelectTrip}
-            pinned={pinned}
-            countsByDay={countsByDay}
-            currentDay={currentDay}
-            routeOptionsOpen={routeOptionsOpen}
-            onSelectDay={selectDay}
-            onAddDay={addDay}
-            onRemoveDay={removeDay}
-            onOpenRoute={handleOpenRouteOptions}
-            onOpenMaterials={handleOpenMaterialsPanel}
-            materialsCount={trip.materials?.length ?? 0}
-            onNewTrip={handleNewTrip}
-            onDeleteTrip={() => void handleDeleteTrip()}
-            onClearAll={handleClearAllPins}
-            onImportPins={handleImportPins}
-            onExportNotify={showToast}
-            onUpgradeRequest={() => setUpgradeOpen(true)}
-            mapCategoryFilter={mapPinCategoryFilter}
-            onToggleMapCategoryFilter={handleToggleMapCategoryFilter}
-            onRemove={handleRemovePin}
-            onReorder={handleReorderPinned}
-            onSelectPin={handleSelectPlace}
-            selectedPinIds={selectedPinIds}
-            onTogglePinSelection={handleTogglePinSelection}
-            presentationMode={presentationMode}
-            onTogglePresentation={handleTogglePresentation}
-            mustVisitOnly={mustVisitOnly}
-            onToggleMustVisitOnly={() => setMustVisitOnly((v) => !v)}
-            onToggleRequired={handleToggleRequired}
-            preferences={trip.preferences ?? []}
-            onPreferencesChange={handlePreferencesChange}
-            foodRestrictions={trip.foodRestrictions ?? []}
-            onFoodRestrictionsChange={handleFoodRestrictionsChange}
-          />
-        </>
-      )}
+          <div className="mobile-planner-top">
+            <div className="mobile-planner-search-row">
+              <button
+                type="button"
+                className="mobile-planner-search-pill"
+                onClick={() => setMobileSheet('search')}
+              >
+                <Icon name="search" size={18} />
+                Search places · 장소 검색
+              </button>
+              <button
+                type="button"
+                className="mobile-planner-menu-btn"
+                onClick={handleOpenMaterialsPanel}
+                aria-label={tp('trip.materials')}
+              >
+                <Icon name="folder" size={18} />
+              </button>
+            </div>
+            <div className="mobile-planner-days">
+              {Array.from({ length: trip.totalDays }, (_, i) => i + 1).map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  className={`mobile-planner-day ${d === currentDay ? 'active' : ''}`}
+                  onClick={() => selectDay(d)}
+                >
+                  Day {d}
+                  {(countsByDay[d] ?? 0) > 0 ? ` · ${countsByDay[d]}` : ''}
+                </button>
+              ))}
+              <button type="button" className="mobile-planner-day" onClick={addDay}>
+                + Day
+              </button>
+            </div>
+          </div>
 
-      <div className="overlay-left desktop-only-overlay">
-        <SearchPanel
-          results={displayResults}
-          pinnedIds={pinnedIds}
-          selectedId={selectedPlaceId}
-          loading={searching}
-          enrichingStats={enrichingStats}
-          searchEmpty={searchEmpty}
-          searchScope={searchScope}
-          onSearchScopeChange={handleSearchScopeChange}
-          categoryFilter={categoryFilter}
-          onCategoryFilterChange={handleCategoryFilterChange}
-          searchRadius={searchRadius}
-          onSearchRadiusChange={handleSearchRadiusChange}
-          onUseMyLocation={handleUseMyLocationForSearch}
-          query={query}
-          onQueryChange={setQuery}
-          onSearch={handleSearch}
-          onClear={handleResetSearch}
-          onResetResults={handleResetSearch}
-          onTogglePin={handleTogglePin}
-          onSelectResult={handleSelectPlace}
-          onOpenRoadview={(p) => setRoadviewTarget(p)}
-          onOpenPlacePhotos={handleOpenPlacePhotos}
-          hasMore={searchHasMore}
-          loadingMore={loadingMore}
-          onLoadMore={handleLoadMore}
-          searchError={searchError}
-          mapProvider={mapProvider}
-          onMapProviderChange={handleMapProviderChange}
-          onSearchCandidate={handleSearchCandidate}
-        />
-      </div>
-
-      <div className="overlay-map-header desktop-only-overlay">
-        <div className="trip-day-card">
-          <TripBar
-            trip={trip}
-            summaries={tripSummaries}
-            materialsCount={trip.materials?.length ?? 0}
-            onOpenMaterials={handleOpenMaterialsPanel}
-            onTitleChange={handleTitleChange}
-            onSelectTrip={handleSelectTrip}
-            onDeleteTrip={() => void handleDeleteTrip()}
-            onNewTrip={handleNewTrip}
-          />
-          <div className="trip-day-card-tail">
-            <DayTabs
-              totalDays={trip.totalDays}
-              currentDay={trip.currentDay}
-              countsByDay={countsByDay}
-              onSelect={selectDay}
-              onAddDay={addDay}
-              onRemoveDay={removeDay}
-            />
+          <div
+            className={`mobile-planner-sheet sheet-${mobileSheetLevel} ${
+              mobileSheetLevel === 'peek' ? 'mobile-sheet-peek-only' : ''
+            }`}
+          >
             <button
               type="button"
-              className="trip-share-btn"
-              onClick={openShareModal}
-              title={tp('trip.shareTitle')}
+              className="mobile-sheet-handle-btn"
+              onClick={cycleMobileSheet}
             >
-              <Icon name="share" />
-              {tp('trip.share')}
+              <span className="mobile-sheet-handle-bar" />
             </button>
-            {plazaNavVisible && (
-              <Link to="/plaza" className="trip-plaza-nav-btn" title={tp('plazaNav')}>
-                {tp('plazaNav')}
-              </Link>
-            )}
-            <Link to="/setup" className="trip-plaza-nav-btn">{tp('nav.setup')}</Link>
-            <Link to="/help" className="trip-plaza-nav-btn">{tp('nav.help')}</Link>
-            <Link to="/themes" className="trip-plaza-nav-btn">{tp('nav.themes')}</Link>
+            <div className="mobile-sheet-head">
+              <span className="mobile-sheet-head-title">
+                {mobileSheetTab === 'route' && generatedRoute
+                  ? `Day ${currentDay} route · ${currentDay}일차 동선`
+                  : trip.title}
+              </span>
+              <span className="mobile-sheet-head-summary">
+                {mobileSheetTab === 'route' && generatedRoute
+                  ? `${generatedRoute.totalDistanceKm} km · ${generatedRoute.totalTravelMinutes}m`
+                  : `${pinned.length} pins · Day ${currentDay}`}
+              </span>
+            </div>
+            <div className="mobile-sheet-tabs">
+              <button
+                type="button"
+                className={`mobile-sheet-tab ${mobileSheetTab === 'pins' ? 'active' : ''}`}
+                onClick={() => setMobileSheetTab('pins')}
+              >
+                Pins 핀 {pinned.length}
+              </button>
+              <button
+                type="button"
+                className={`mobile-sheet-tab ${mobileSheetTab === 'route' ? 'active' : ''}`}
+                onClick={() => {
+                  setMobileSheetTab('route');
+                  setRouteOptionsOpen(true);
+                }}
+              >
+                Route 동선
+              </button>
+            </div>
+            <div className="mobile-sheet-content">
+              {mobileSheetTab === 'pins' ? (
+                <PinupBar
+                  variant="panel"
+                  hideHeader
+                  pinned={pinned}
+                  tripTitle={trip.title}
+                  currentDay={currentDay}
+                  totalDays={trip.totalDays}
+                  pinnedByDay={trip.pinnedByDay}
+                  onExportNotify={showToast}
+                  onUpgradeRequest={() => setUpgradeOpen(true)}
+                  onImportPins={handleImportPins}
+                  mapCategoryFilter={mapPinCategoryFilter}
+                  onToggleMapCategoryFilter={handleToggleMapCategoryFilter}
+                  onRemove={handleRemovePin}
+                  onReorder={handleReorderPinned}
+                  onSelectPin={(p) => {
+                    handleSelectPlace(p);
+                    setMobileSheetLevel('peek');
+                  }}
+                  selectedPinIds={selectedPinIds}
+                  onTogglePinSelection={handleTogglePinSelection}
+                  onClearAll={handleClearAllPins}
+                  onOpenRouteOptions={handleOpenRouteOptions}
+                  routeOptionsOpen={routeOptionsOpen}
+                  mustVisitOnly={mustVisitOnly}
+                  onToggleMustVisitOnly={() => setMustVisitOnly((v) => !v)}
+                  onToggleRequired={handleToggleRequired}
+                />
+              ) : (
+                <RouteOptionsPanel
+                  embedded
+                  open
+                  pinned={routePins}
+                  currentDay={currentDay}
+                  totalDays={trip.totalDays}
+                  options={routeOptions}
+                  hasExistingRoute={!!generatedRoute}
+                  onChange={setRouteOptions}
+                  onUpdateStayMinutes={handleUpdateStayMinutes}
+                  onClose={() => setMobileSheetLevel('peek')}
+                  onGenerate={() => void handleGenerate()}
+                  onPickOriginFromMap={handlePickOriginFromMap}
+                  pickingOriginFromMap={pickingOriginFromMap}
+                />
+              )}
+            </div>
           </div>
-        </div>
-        <div className="trip-preferences-bar desktop-only-overlay">
-          <ThemePreferenceChips
-            selected={trip.preferences ?? []}
-            onChange={handlePreferencesChange}
-            compact
-          />
-          <FoodRestrictionChips
-            selected={trip.foodRestrictions ?? []}
-            onChange={handleFoodRestrictionsChange}
-          />
-        </div>
-        <div className="overlay-map-pinup">
-          <PinupBar
-            pinned={pinned}
-            tripTitle={trip.title}
-            currentDay={currentDay}
-            totalDays={trip.totalDays}
-            pinnedByDay={trip.pinnedByDay}
-            onExportNotify={showToast}
-            onUpgradeRequest={() => setUpgradeOpen(true)}
-            onImportPins={handleImportPins}
-            mapCategoryFilter={mapPinCategoryFilter}
-            onToggleMapCategoryFilter={handleToggleMapCategoryFilter}
-            onRemove={handleRemovePin}
-            onReorder={handleReorderPinned}
-            onSelectPin={handleSelectPlace}
-            selectedPinIds={selectedPinIds}
-            onTogglePinSelection={handleTogglePinSelection}
-            onClearAll={handleClearAllPins}
-            onOpenRouteOptions={handleOpenRouteOptions}
-            routeOptionsOpen={routeOptionsOpen}
-            presentationMode={presentationMode}
-            onTogglePresentation={handleTogglePresentation}
-            mustVisitOnly={mustVisitOnly}
-            onToggleMustVisitOnly={() => setMustVisitOnly((v) => !v)}
-            onToggleRequired={handleToggleRequired}
-          />
-        </div>
-      </div>
+
+          {mobileSheet === 'search' && (
+            <div className="mobile-search-overlay">
+              <MobileSearchSheet
+                open
+                onClose={() => setMobileSheet(null)}
+                results={displayResults}
+                pinnedIds={pinnedIds}
+                selectedId={selectedPlaceId}
+                loading={searching}
+                enrichingStats={enrichingStats}
+                searchEmpty={searchEmpty}
+                searchScope={searchScope}
+                onSearchScopeChange={handleSearchScopeChange}
+                categoryFilter={categoryFilter}
+                onCategoryFilterChange={handleCategoryFilterChange}
+                searchRadius={searchRadius}
+                onSearchRadiusChange={handleSearchRadiusChange}
+                onUseMyLocation={handleUseMyLocationForSearch}
+                query={query}
+                onQueryChange={setQuery}
+                onSearch={handleSearch}
+                onClear={handleResetSearch}
+                onResetResults={handleResetSearch}
+                onTogglePin={handleTogglePin}
+                onSelectResult={handleSelectPlace}
+                onOpenRoadview={(p) => setRoadviewTarget(p)}
+                onOpenPlacePhotos={handleOpenPlacePhotos}
+                hasMore={searchHasMore}
+                loadingMore={loadingMore}
+                onLoadMore={handleLoadMore}
+                searchError={searchError}
+                mapProvider={mapProvider}
+                onMapProviderChange={handleMapProviderChange}
+                onSearchCandidate={handleSearchCandidate}
+                foodRestrictions={trip.foodRestrictions ?? []}
+                onFoodRestrictionsChange={handleFoodRestrictionsChange}
+                categorySubFilters={categorySubFilters}
+                onCategorySubFiltersChange={setCategorySubFilters}
+              />
+            </div>
+          )}
+        </>
+      )}
 
       <MapContextMenu
         open={!!mapContextMenu}
@@ -1753,39 +2025,6 @@ export default function PlannerPage() {
         y={mapContextMenu?.y ?? 0}
         onSetSearchCenter={handleSetSearchCenterFromMap}
         onClose={() => setMapContextMenu(null)}
-      />
-
-      <div className="overlay-top-right">
-        <SaveStatusBadge
-          status={saveStatus}
-          lastSavedAt={lastSavedAt ?? trip.updatedAt}
-          onGuestClick={() => navigate('/login')}
-        />
-        <AuthBar />
-      </div>
-
-      <RouteOptionsPanel
-        open={routeOptionsOpen}
-        pinned={routePins}
-        currentDay={currentDay}
-        totalDays={trip.totalDays}
-        options={routeOptions}
-        hasExistingRoute={!!generatedRoute}
-        onChange={setRouteOptions}
-        onUpdateStayMinutes={handleUpdateStayMinutes}
-        onCopyFromPreviousDay={() => {
-          setTrip((prev) => copyRouteOptionsFromDay(prev, currentDay - 1, currentDay));
-          showToast(`${currentDay - 1}일차 출발 설정을 복사했습니다`);
-        }}
-        onClose={() => {
-          setRouteOptionsOpen(false);
-          setPickingOriginFromMap(false);
-          setPickingPinFromMap(false);
-          setPendingManualPin(null);
-        }}
-        onGenerate={() => void handleGenerate()}
-        onPickOriginFromMap={handlePickOriginFromMap}
-        pickingOriginFromMap={pickingOriginFromMap}
       />
 
       <TripMaterialsPanel
@@ -1802,36 +2041,6 @@ export default function PlannerPage() {
         authConfigured={authConfigured}
         onNotify={showToast}
       />
-
-      {generatedRoute && (
-        <div className="overlay-bottom-left">
-          {refining && (
-            <div className="refining-toast">
-              <Icon name="loader" spin /> 실제 길찾기 적용 중…
-            </div>
-          )}
-          <RouteSummary
-            route={generatedRoute}
-            tripTitle={trip.title}
-            onReorder={handleReorderRoute}
-            onShare={openShareModal}
-            onSave={handleSaveExplicit}
-            onClose={() => setRouteForDay(currentDay, null)}
-          />
-        </div>
-      )}
-
-      <div className="overlay-map-tools desktop-only-overlay">
-        <button
-          type="button"
-          className={`map-tool-btn ${pickingPinFromMap ? 'active' : ''}`}
-          onClick={handleTogglePinFromMap}
-          title={tp('trip.pinFromMap')}
-        >
-          <Icon name="pinPlus" />
-          {tp('trip.pinFromMap')}
-        </button>
-      </div>
 
       {pickingOriginFromMap && (
         <div className="picking-toast">

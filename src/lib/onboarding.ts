@@ -1,5 +1,5 @@
-const STORAGE_KEY = 'tripasist:onboarding-v1';
-const SHARE_STORAGE_KEY = 'tripasist:share-onboarding-v1';
+const STORAGE_KEY = 'waymeld:onboarding-v1';
+const SHARE_STORAGE_KEY = 'waymeld:share-onboarding-v1';
 
 export function isOnboardingDismissed(): boolean {
   try {
@@ -43,7 +43,7 @@ export function shouldShowShareOnboarding(tripReady: boolean): boolean {
   return !isShareOnboardingDismissed();
 }
 
-const PLAZA_NAV_KEY = 'tripasist:plaza-nav-unlocked-v1';
+const PLAZA_NAV_KEY = 'waymeld:plaza-nav-unlocked-v1';
 
 export function isPlazaNavUnlocked(): boolean {
   try {

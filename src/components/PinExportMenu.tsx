@@ -33,7 +33,7 @@ export function PinExportMenu({
   label,
 }: Props) {
   const { t } = useTranslation('planner');
-  const { plan } = useAuth();
+  const { plan, isAdmin } = useAuth();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const exportLabel = label ?? t('export.send');
@@ -53,7 +53,7 @@ export function PinExportMenu({
   if (!canExport) return null;
 
   async function runExport(scope: PinExportScope, format: PinExportFormat) {
-    if (!canExportItinerary(plan)) {
+    if (!canExportItinerary(plan, isAdmin)) {
       onUpgradeRequest?.();
       setOpen(false);
       return;

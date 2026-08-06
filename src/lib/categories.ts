@@ -1,5 +1,5 @@
 import type { CategoryCode, SearchCategoryFilter, SearchRadiusMeters, SimpleCategory } from '../types';
-import type { IconName } from '../icons/tripasist-icons';
+import type { IconName } from '../icons/waymeld-icons';
 
 // =============================================
 // 카카오 카테고리 코드 → UI 카테고리 매핑
@@ -12,15 +12,15 @@ export const CATEGORY_MAP: Record<CategoryCode, {
   bgColor: string;    // 마커/배지 배경
   iconColor: string;  // 아이콘 색상
 }> = {
-  AT4:   { category: 'tour',    label: '관광지', icon: 'catTour',    bgColor: '#facc15', iconColor: '#1f2937' },
-  FD6:   { category: 'food',    label: '맛집',   icon: 'catFood',    bgColor: '#fca5a5', iconColor: '#7f1d1d' },
-  CE7:   { category: 'cafe',    label: '카페',   icon: 'catCafe',    bgColor: '#bfdbfe', iconColor: '#1e3a8a' },
-  AD5:   { category: 'stay',    label: '숙소',   icon: 'catStay',    bgColor: '#c4b5fd', iconColor: '#4c1d95' },
-  CT1:   { category: 'culture', label: '문화',   icon: 'catCulture', bgColor: '#fdba74', iconColor: '#7c2d12' },
-  MT1:   { category: 'shop',    label: '쇼핑',   icon: 'catShop',    bgColor: '#86efac', iconColor: '#14532d' },
-  CS2:   { category: 'shop',    label: '편의점', icon: 'catCart',    bgColor: '#86efac', iconColor: '#14532d' },
-  PK6:   { category: 'other',   label: '주차장', icon: 'catParking', bgColor: '#e5e7eb', iconColor: '#374151' },
-  OTHER: { category: 'other',   label: '기타',   icon: 'mapPin',     bgColor: '#e5e7eb', iconColor: '#374151' },
+  AT4:   { category: 'tour',    label: '관광지', icon: 'catTour',    bgColor: '#0e7490', iconColor: '#ffffff' },
+  FD6:   { category: 'food',    label: '맛집',   icon: 'catFood',    bgColor: '#c2410c', iconColor: '#ffffff' },
+  CE7:   { category: 'cafe',    label: '카페',   icon: 'catCafe',    bgColor: '#b45309', iconColor: '#ffffff' },
+  AD5:   { category: 'stay',    label: '숙소',   icon: 'catStay',    bgColor: '#475569', iconColor: '#ffffff' },
+  CT1:   { category: 'culture', label: '문화',   icon: 'catCulture', bgColor: '#7c3aed', iconColor: '#ffffff' },
+  MT1:   { category: 'shop',    label: '쇼핑',   icon: 'catShop',    bgColor: '#4d7c0f', iconColor: '#ffffff' },
+  CS2:   { category: 'shop',    label: '편의점', icon: 'catCart',    bgColor: '#4d7c0f', iconColor: '#ffffff' },
+  PK6:   { category: 'other',   label: '주차장', icon: 'catParking', bgColor: '#64748b', iconColor: '#ffffff' },
+  OTHER: { category: 'other',   label: '기타',   icon: 'mapPin',     bgColor: '#64748b', iconColor: '#ffffff' },
 };
 
 /** PRD 확장 카테고리 (수동·필터용) */
@@ -28,30 +28,11 @@ export const EXTENDED_CATEGORY_META: Record<
   Extract<SimpleCategory, 'beauty' | 'market' | 'transport' | 'road'>,
   { label: string; icon: IconName; bgColor: string; iconColor: string; category: SimpleCategory }
 > = {
-  beauty:    { category: 'beauty',    label: '뷰티',   icon: 'catCulture', bgColor: '#fbcfe8', iconColor: '#9d174d' },
-  market:    { category: 'market',    label: '시장',   icon: 'catShop',    bgColor: '#fde68a', iconColor: '#92400e' },
-  transport: { category: 'transport', label: '교통', icon: 'transportBus', bgColor: '#a5f3fc', iconColor: '#155e75' },
-  road:      { category: 'road',      label: '거리',   icon: 'mapPin',     bgColor: '#d1d5db', iconColor: '#374151' },
+  beauty:    { category: 'beauty',    label: '뷰티',   icon: 'catCulture', bgColor: '#be185d', iconColor: '#ffffff' },
+  market:    { category: 'market',    label: '시장',   icon: 'catShop',    bgColor: '#4d7c0f', iconColor: '#ffffff' },
+  transport: { category: 'transport', label: '교통', icon: 'transportBus', bgColor: '#0e7490', iconColor: '#ffffff' },
+  road:      { category: 'road',      label: '거리',   icon: 'mapPin',     bgColor: '#64748b', iconColor: '#ffffff' },
 };
-
-export function getCategoryMeta(
-  code: CategoryCode | string | undefined,
-  simpleCategory?: SimpleCategory
-) {
-  if (simpleCategory && simpleCategory in EXTENDED_CATEGORY_META) {
-    return EXTENDED_CATEGORY_META[simpleCategory as keyof typeof EXTENDED_CATEGORY_META];
-  }
-  if (!code) return CATEGORY_MAP.OTHER;
-  return CATEGORY_MAP[code as CategoryCode] ?? CATEGORY_MAP.OTHER;
-}
-
-export function getSimpleCategoryMeta(category: SimpleCategory) {
-  if (category in EXTENDED_CATEGORY_META) {
-    return EXTENDED_CATEGORY_META[category as keyof typeof EXTENDED_CATEGORY_META];
-  }
-  const code = DEFAULT_CODE_BY_SIMPLE_CATEGORY[category];
-  return getCategoryMeta(code, category);
-}
 
 /** SimpleCategory → 대표 카카오 categoryCode */
 export const DEFAULT_CODE_BY_SIMPLE_CATEGORY: Record<SimpleCategory, CategoryCode> = {
@@ -67,6 +48,38 @@ export const DEFAULT_CODE_BY_SIMPLE_CATEGORY: Record<SimpleCategory, CategoryCod
   road: 'OTHER',
   other: 'OTHER',
 };
+
+export function getCategoryMeta(
+  code: CategoryCode | string | undefined,
+  simpleCategory?: SimpleCategory
+) {
+  if (simpleCategory && simpleCategory in EXTENDED_CATEGORY_META) {
+    return EXTENDED_CATEGORY_META[simpleCategory as keyof typeof EXTENDED_CATEGORY_META];
+  }
+  if (code && code !== 'OTHER' && code in CATEGORY_MAP) {
+    return CATEGORY_MAP[code as CategoryCode];
+  }
+  if (simpleCategory) {
+    const fallback = DEFAULT_CODE_BY_SIMPLE_CATEGORY[simpleCategory];
+    if (fallback && fallback !== 'OTHER') return CATEGORY_MAP[fallback];
+  }
+  if (code && code in CATEGORY_MAP) return CATEGORY_MAP[code as CategoryCode];
+  return CATEGORY_MAP.OTHER;
+}
+
+/** 검색 카테고리 칩·결과 썸네일 공통 강조색 */
+export function getSearchCategoryAccent(code: SearchCategoryFilter): string {
+  if (!code) return '#64748b';
+  return getCategoryMeta(code).bgColor;
+}
+
+export function getSimpleCategoryMeta(category: SimpleCategory) {
+  if (category in EXTENDED_CATEGORY_META) {
+    return EXTENDED_CATEGORY_META[category as keyof typeof EXTENDED_CATEGORY_META];
+  }
+  const code = DEFAULT_CODE_BY_SIMPLE_CATEGORY[category];
+  return getCategoryMeta(code, category);
+}
 
 export function applySimpleCategory<T extends { category: SimpleCategory; categoryCode: CategoryCode | 'OTHER'; categoryLabel: string }>(
   place: T,
@@ -119,7 +132,7 @@ export const SORT_LABELS = {
 
 export const SORT_FILTER_KEYS = ['distance', 'rating', 'review'] as const;
 
-/** 검색 패널 카테고리 칩 (카카오 category_group_code) */
+/** 검색 패널 카테고리 칩 (카카오 category_group_code) — 시안 4+전체 */
 export const SEARCH_CATEGORY_FILTERS: Array<{
   code: SearchCategoryFilter;
   label: string;
@@ -127,11 +140,20 @@ export const SEARCH_CATEGORY_FILTERS: Array<{
 }> = [
   { code: null, label: '전체', icon: 'catAll' },
   { code: 'FD6', label: '맛집', icon: 'catFood' },
-  { code: 'CE7', label: '카페', icon: 'catCafe' },
   { code: 'AT4', label: '관광', icon: 'catTour' },
   { code: 'AD5', label: '숙소', icon: 'catStay' },
-  { code: 'CT1', label: '문화', icon: 'catCulture' },
   { code: 'MT1', label: '마트', icon: 'catShop' },
+];
+
+/** 확장 필터(카페·문화·주차) — 필요 시 사용 */
+export const SEARCH_CATEGORY_FILTERS_EXTENDED: Array<{
+  code: SearchCategoryFilter;
+  label: string;
+  icon: IconName;
+}> = [
+  ...SEARCH_CATEGORY_FILTERS,
+  { code: 'CE7', label: '카페', icon: 'catCafe' },
+  { code: 'CT1', label: '문화', icon: 'catCulture' },
   { code: 'PK6', label: '주차', icon: 'catParking' },
 ];
 

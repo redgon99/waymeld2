@@ -3,7 +3,7 @@ import type { Place, PinnedPlace, GeneratedRoute, Origin, SimpleCategory } from 
 import { getCategoryMeta } from '../lib/categories';
 import { coordsToAddress } from '../lib/kakao';
 import { createMapInfoCardElement } from '../lib/mapInfoCard';
-import { iconSvgMarkup } from '../icons/tripasist-icons';
+import { iconSvgMarkup } from '../icons/waymeld-icons';
 import {
   renderPlaceMarkerHtml,
   renderSearchCenterMarkerHtml,
@@ -17,6 +17,8 @@ interface Props {
   googleMapsReady?: boolean;
   center: { lat: number; lng: number };
   level?: number;
+  /** level 적용을 강제할 때 증가 (같은 level로 재클릭해도 setLevel) */
+  levelTick?: number;
   searchResults: Place[];
   pinned: PinnedPlace[];
   pinCategoryFilter?: SimpleCategory | null;
@@ -39,6 +41,8 @@ interface Props {
   onShowTaxiCardFromInfo?: (place: Place) => void;
   onMapRightClick?: (lat: number, lng: number, clientX: number, clientY: number) => void;
   onMapCenterChange?: (lat: number, lng: number) => void;
+  /** 사용자 줌 변경 시 카카오 레벨로 동기화 */
+  onMapLevelChange?: (level: number) => void;
   fitRouteBounds?: boolean;
   fitSearchBounds?: boolean;
   highlightPlaceId?: string | null;
@@ -54,8 +58,50 @@ export function MapView({
   provider = 'kakao',
   mapsReady = false,
   googleMapsReady = false,
+  ...rest
+}: Props) {
+  if (provider === 'google') {
+    return (
+      <GoogleMapView
+        mapsReady={googleMapsReady}
+        center={rest.center}
+        level={rest.level}
+        levelTick={rest.levelTick}
+        searchResults={rest.searchResults}
+        pinned={rest.pinned}
+        pinCategoryFilter={rest.pinCategoryFilter}
+        origin={rest.origin}
+        generatedRoute={rest.generatedRoute}
+        nearbySearchCenter={rest.nearbySearchCenter}
+        pickingOriginFromMap={rest.pickingOriginFromMap}
+        pickingPinFromMap={rest.pickingPinFromMap}
+        onOriginPicked={rest.onOriginPicked}
+        onPinLocationPicked={rest.onPinLocationPicked}
+        draftPinLocation={rest.draftPinLocation}
+        onSelectPlace={rest.onSelectPlace}
+        onPinnedMarkerClick={rest.onPinnedMarkerClick}
+        onMapRightClick={rest.onMapRightClick}
+        onMapCenterChange={rest.onMapCenterChange}
+        onMapLevelChange={rest.onMapLevelChange}
+        fitRouteBounds={rest.fitRouteBounds}
+        fitSearchBounds={rest.fitSearchBounds}
+        highlightPlaceId={rest.highlightPlaceId}
+        pinSelectionFilter={rest.pinSelectionFilter}
+        plazaMarkers={rest.plazaMarkers}
+        highlightPlazaId={rest.highlightPlazaId}
+        onPlazaMarkerClick={rest.onPlazaMarkerClick}
+      />
+    );
+  }
+
+  return <KakaoMapView mapsReady={mapsReady} {...rest} />;
+}
+
+function KakaoMapView({
+  mapsReady = false,
   center,
   level = 5,
+  levelTick = 0,
   searchResults,
   pinned,
   pinCategoryFilter = null,
@@ -78,6 +124,7 @@ export function MapView({
   onShowTaxiCardFromInfo,
   onMapRightClick,
   onMapCenterChange,
+  onMapLevelChange,
   fitRouteBounds = false,
   fitSearchBounds = false,
   highlightPlaceId = null,
@@ -85,39 +132,7 @@ export function MapView({
   plazaMarkers = [],
   highlightPlazaId = null,
   onPlazaMarkerClick,
-}: Props) {
-  if (provider === 'google') {
-    return (
-      <GoogleMapView
-        mapsReady={googleMapsReady}
-        center={center}
-        level={level}
-        searchResults={searchResults}
-        pinned={pinned}
-        pinCategoryFilter={pinCategoryFilter}
-        origin={origin}
-        generatedRoute={generatedRoute}
-        nearbySearchCenter={nearbySearchCenter}
-        pickingOriginFromMap={pickingOriginFromMap}
-        pickingPinFromMap={pickingPinFromMap}
-        onOriginPicked={onOriginPicked}
-        onPinLocationPicked={onPinLocationPicked}
-        draftPinLocation={draftPinLocation}
-        onSelectPlace={onSelectPlace}
-        onPinnedMarkerClick={onPinnedMarkerClick}
-        onMapRightClick={onMapRightClick}
-        onMapCenterChange={onMapCenterChange}
-        fitRouteBounds={fitRouteBounds}
-        fitSearchBounds={fitSearchBounds}
-        highlightPlaceId={highlightPlaceId}
-        pinSelectionFilter={pinSelectionFilter}
-        plazaMarkers={plazaMarkers}
-        highlightPlazaId={highlightPlazaId}
-        onPlazaMarkerClick={onPlazaMarkerClick}
-      />
-    );
-  }
-
+}: Omit<Props, 'provider' | 'googleMapsReady'>) {
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const overlaysRef = useRef<any[]>([]);
@@ -177,7 +192,32 @@ export function MapView({
       window.removeEventListener('resize', relayout);
       window.removeEventListener('orientationchange', relayout);
       ro.disconnect();
+      overlaysRef.current.forEach((o) => {
+        try {
+          o.setMap(null);
+        } catch {
+          /* ignore */
+        }
+      });
+      overlaysRef.current = [];
+      for (const ref of [
+        polylineRef,
+        originMarkerRef,
+        searchCenterMarkerRef,
+        infoOverlayRef,
+      ] as const) {
+        if (ref.current) {
+          try {
+            ref.current.setMap(null);
+          } catch {
+            /* ignore */
+          }
+          ref.current = null;
+        }
+      }
       mapRef.current = null;
+      // StrictMode 재마운트·provider 전환 시 같은 컨테이너에 Map이 중첩되지 않도록 비움
+      if (mapEl.current) mapEl.current.innerHTML = '';
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapsReady]);
@@ -191,23 +231,30 @@ export function MapView({
   useEffect(() => {
     if (!mapRef.current) return;
     mapRef.current.setLevel(level);
-  }, [level]);
+  }, [level, levelTick]);
 
   // 사용자가 지도를 움직이면 중심 좌표 동기화 (카테고리·지도 주변 검색용)
   useEffect(() => {
-    if (!mapRef.current || !onMapCenterChange) return;
+    if (!mapRef.current || (!onMapCenterChange && !onMapLevelChange)) return;
     const map = mapRef.current;
-    const emit = () => {
+    const emitCenter = () => {
+      if (!onMapCenterChange) return;
       const c = map.getCenter();
       onMapCenterChange(c.getLat(), c.getLng());
     };
-    const dragEnd = window.kakao.maps.event.addListener(map, 'dragend', emit);
-    const zoomChanged = window.kakao.maps.event.addListener(map, 'zoom_changed', emit);
+    const emitLevel = () => {
+      onMapLevelChange?.(map.getLevel());
+    };
+    const dragEnd = window.kakao.maps.event.addListener(map, 'dragend', emitCenter);
+    const zoomChanged = window.kakao.maps.event.addListener(map, 'zoom_changed', () => {
+      emitCenter();
+      emitLevel();
+    });
     return () => {
       window.kakao.maps.event.removeListener(map, 'dragend', dragEnd);
       window.kakao.maps.event.removeListener(map, 'zoom_changed', zoomChanged);
     };
-  }, [onMapCenterChange]);
+  }, [onMapCenterChange, onMapLevelChange]);
 
   // 클릭으로 출발지·수동 핀 위치 선택
   useEffect(() => {

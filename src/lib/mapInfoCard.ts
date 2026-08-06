@@ -1,5 +1,5 @@
 import type { Place } from '../types';
-import { iconSvgMarkup } from '../icons/tripasist-icons';
+import { iconSvgMarkup } from '../icons/waymeld-icons';
 import { getCategoryMeta } from './categories';
 import { proxiedThumbnailUrl } from './kakaoPlaceApi';
 import { buildPlaceMapLinks } from './mapLinks';
@@ -71,8 +71,28 @@ export function createMapInfoCardElement(
         <div class="result-meta">
           ${place.categoryLabel ? `<span class="result-cat-badge">${escapeHtml(place.categoryLabel)}</span>` : ''}
           ${place.categoryDetail ? `<span class="result-cat-detail">${escapeHtml(place.categoryDetail)}</span>` : ''}
+          ${
+            place.rating != null
+              ? `<span class="result-rating">★ ${place.rating.toFixed(1)}${
+                  place.reviewCount != null ? ` · ${place.reviewCount}` : ''
+                }</span>`
+              : ''
+          }
           ${addr ? `<span class="result-addr">${escapeHtml(addr)}</span>` : ''}
         </div>
+        ${
+          place.rating != null && place.rating >= 4
+            ? `<div class="traveler-insight-box map-info-insight">
+                <div class="traveler-insight-label">✦ TRAVELER INSIGHT</div>
+                <div class="traveler-insight-text">Highly rated by travelers · 여행자 평점이 높은 장소입니다.</div>
+               </div>`
+            : place.rating != null && place.rating < 3.2
+              ? `<div class="traveler-insight-box map-info-insight">
+                <div class="traveler-insight-label">✦ TRAVELER INSIGHT</div>
+                <div class="traveler-insight-text">Mixed recent reviews — check hours & payment · 최근 후기를 확인해 보세요.</div>
+               </div>`
+              : ''
+        }
       </div>
       ${
         addr || opts.onShowTaxiCard

@@ -2,8 +2,8 @@
 
 > **문서 목적**: 현재 구현된 웹 서비스의 제품·UX·비주얼 현황을 한 파일에 정리하여, 외부 디자인 에이전트가 **리디자인·브랜딩·UI 시스템·화면 시안** 작업을 수행할 수 있도록 한다.  
 > **작성 기준**: 코드베이스 `waymeld` v0.2.0 (2026-06)  
-> **라이브 URL**: https://tripasist.netlify.app/  
-> **플래너 URL**: https://tripasist.netlify.app/plan
+> **라이브 URL**: https://waymeld.netlify.app/  
+> **플래너 URL**: https://waymeld.netlify.app/plan
 
 ---
 
@@ -50,7 +50,7 @@ Find → Collect → Map → Route
 |------|------|
 | **영문 서비스명** | WayMeld |
 | **한글 서비스명** | 여로담 |
-| **npm / 저장소명** | `waymeld` (레거시: TripAsist) |
+| **npm / 저장소명** | `waymeld` |
 | **영문 슬로건** | Collect places. Meld your route. |
 | **한글 슬로건** | 가고 싶은 곳을 담으면, 여행길이 됩니다. |
 
@@ -497,7 +497,7 @@ font-family: -apple-system, BlinkMacSystemFont, 'Pretendard',
 
 ### 9.6 아이콘
 
-- **커스텀 SVG 세트**: `src/icons/tripasist-icons.ts`
+- **커스텀 SVG 세트**: `src/icons/waymeld-icons.ts`
 - 24×24, stroke 1.75, `currentColor`
 - 카테고리·검색·핀·동선·자료함 등 50+ 아이콘
 
@@ -731,7 +731,7 @@ font-family: -apple-system, BlinkMacSystemFont, 'Pretendard',
 
 ### 🎨 디자인 개선이 필요한 영역 (에이전트 우선 검토 권장)
 
-1. **브랜드 아이덴티티 통일** — TripAsist 레거시 명칭·클래스명 잔존
+1. **브랜드·비주얼 시스템 강화** — 로고·워드마크·컬러 토큰 정리
 2. **디자인 토큰 체계화** — 현재 CSS 변수 산재, Figma 토큰화 필요
 3. **모바일 UX polish** — 도크·시트 전환, 제스처, 스냅 포인트
 4. **장소 상세 카드** — 정보 밀도·액션 버튼 계층
@@ -834,16 +834,16 @@ font-family: -apple-system, BlinkMacSystemFont, 'Pretendard',
 | `src/lib/categories.ts` | 카테고리 색상·아이콘 |
 | `src/locales/en/planner.json` | 영문 UI 카피 |
 | `src/locales/en/landing.json` | 영문 랜딩 카피 |
-| `src/icons/tripasist-icons.ts` | 아이콘 세트 |
+| `src/icons/waymeld-icons.ts` | 아이콘 세트 |
 
 ### 라이브 서비스
 
-- **랜딩**: https://tripasist.netlify.app/
-- **플래너**: https://tripasist.netlify.app/plan
-- **공유마당**: https://tripasist.netlify.app/plaza
-- **Setup**: https://tripasist.netlify.app/setup
-- **Help**: https://tripasist.netlify.app/help
-- **Themes**: https://tripasist.netlify.app/themes
+- **랜딩**: https://waymeld.netlify.app/
+- **플래너**: https://waymeld.netlify.app/plan
+- **공유마당**: https://waymeld.netlify.app/plaza
+- **Setup**: https://waymeld.netlify.app/setup
+- **Help**: https://waymeld.netlify.app/help
+- **Themes**: https://waymeld.netlify.app/themes
 
 ---
 

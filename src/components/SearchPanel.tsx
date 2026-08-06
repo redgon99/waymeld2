@@ -1,14 +1,16 @@
 import { Icon } from './Icon';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ClipboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { Place, SortKey, SearchScope, SearchCategoryFilter, SearchRadiusMeters } from '../types';
-import type { IconName } from '../icons/tripasist-icons';
-import {
-  useSearchCategoryFilters,
-  useSortLabels,
-  SORT_FILTER_KEYS,
-  useSearchRadiusOptions,
-} from '../lib/i18nCategories';
+import type {
+  Place,
+  SortKey,
+  SearchScope,
+  SearchCategoryFilter,
+  SearchRadiusMeters,
+  FoodRestriction,
+} from '../types';
+import { useSearchCategoryFilters } from '../lib/i18nCategories';
+import { getSearchCategoryAccent } from '../lib/categories';
 import { formatNumber } from '../lib/format';
 import { normalizeLocale } from '../lib/locale';
 import i18n from '../lib/i18n';
@@ -18,10 +20,14 @@ import {
   type LinkPlaceCandidate,
 } from '../lib/linkPlaces';
 import { detectLinkInput, type DetectedLink } from '../lib/linkPlatform';
+import { looksLikePastedPlaceList, splitSearchQueries } from '../lib/searchQueries';
+import {
+  getSearchSubFilterGroup,
+  type SearchSubFilterId,
+} from '../lib/searchSubFilters';
 import { PlaceThumb } from './PlaceThumb';
 import { OpenStatusBadge } from './OpenStatusBadge';
 import { MapProviderPicker } from './MapProviderPicker';
-import { PasteCollectPanel } from './PasteCollectPanel';
 import { LinkExtractResults } from './LinkExtractResults';
 import type { MapProvider } from '../lib/mapProvider';
 
@@ -55,14 +61,29 @@ interface Props {
   mapProvider: MapProvider;
   onMapProviderChange: (provider: MapProvider) => void;
   onSearchCandidate?: (query: string) => void;
+  /** 맛집(FD6) 음식 제약 — trip에 저장 */
+  foodRestrictions?: FoodRestriction[];
+  onFoodRestrictionsChange?: (next: FoodRestriction[]) => void;
+  /** 숙소·관광·마트 등 카테고리 하부 필터 */
+  categorySubFilters?: SearchSubFilterId[];
+  onCategorySubFiltersChange?: (next: SearchSubFilterId[]) => void;
   variant?: 'default' | 'compact';
 }
 
-const SORT_ICONS: Record<SortKey, IconName> = {
-  distance: 'mapPin',
-  rating: 'star',
-  review: 'message',
-};
+function insightBadge(place: Place): { kind: 'y' | 'g' | 'n'; label: string } | null {
+  const rating = place.rating;
+  const reviews = place.reviewCount ?? 0;
+  if (rating != null && rating >= 4.5 && reviews >= 500) {
+    return { kind: 'y', label: '#1 pick by visitors 방문자 1위' };
+  }
+  if (rating != null && rating >= 4.0 && reviews >= 50) {
+    return { kind: 'g', label: '92% positive reviews' };
+  }
+  if (rating != null && rating < 3.5 && reviews >= 20) {
+    return { kind: 'n', label: 'Long wait 웨이팅 김' };
+  }
+  return null;
+}
 
 export function SearchPanel({
   results,
@@ -94,16 +115,21 @@ export function SearchPanel({
   mapProvider,
   onMapProviderChange,
   onSearchCandidate,
+  foodRestrictions = [],
+  onFoodRestrictionsChange,
+  categorySubFilters = [],
+  onCategorySubFiltersChange,
   variant = 'default',
 }: Props) {
   const { t } = useTranslation('planner');
   const { t: tc } = useTranslation('common');
   const categoryFilters = useSearchCategoryFilters();
-  const sortLabels = useSortLabels();
-  const radiusOptions = useSearchRadiusOptions();
   const appLocale = normalizeLocale(i18n.language);
   const compact = variant === 'compact';
-  const [sortKey, setSortKey] = useState<SortKey>('distance');
+  const [sortKey] = useState<SortKey>('distance');
+  const subFilterGroup = getSearchSubFilterGroup(categoryFilter);
+  const activeSubFilters =
+    categoryFilter === 'FD6' ? foodRestrictions : categorySubFilters;
   const [linkExtracting, setLinkExtracting] = useState(false);
   const [linkPlaces, setLinkPlaces] = useState<LinkPlaceCandidate[]>([]);
   const [linkTitle, setLinkTitle] = useState<string | null>(null);
@@ -116,6 +142,7 @@ export function SearchPanel({
     DetectedLink['platform'] | null
   >(null);
   const [linkPreviewHref, setLinkPreviewHref] = useState<string | null>(null);
+  const [pasteHint, setPasteHint] = useState<string | null>(null);
 
   const linkEnabled = isLinkPlacesExtractConfigured() && Boolean(onSearchCandidate);
   const detectedLink = useMemo(
@@ -176,17 +203,9 @@ export function SearchPanel({
       setLinkPreviewKey(null);
       setLinkPreviewPlatform(null);
       setLinkPreviewHref(null);
+      setPasteHint(null);
     }
   }, [detectedLink, linkPreviewKey, query, t]);
-
-  const hasRatings = useMemo(
-    () => results.some((p) => p.rating !== undefined),
-    [results]
-  );
-  const hasReviews = useMemo(
-    () => results.some((p) => p.reviewCount !== undefined),
-    [results]
-  );
 
   const sorted = useMemo(() => {
     const list = [...results];
@@ -200,25 +219,10 @@ export function SearchPanel({
       const aOpen = openRank(a);
       const bOpen = openRank(b);
       if (aOpen !== bOpen) return aOpen - bOpen;
-      switch (sortKey) {
-        case 'rating':
-          return (b.rating ?? -1) - (a.rating ?? -1);
-        case 'review':
-          return (b.reviewCount ?? -1) - (a.reviewCount ?? -1);
-        case 'distance':
-        default:
-          return (a.distance ?? Infinity) - (b.distance ?? Infinity);
-      }
+      return (a.distance ?? Infinity) - (b.distance ?? Infinity);
     });
     return list;
-  }, [results, sortKey]);
-
-  const showDistanceHint =
-    sortKey === 'distance' && results.length > 0 && !loading;
-  const showRatingHint =
-    sortKey === 'rating' && results.length > 0 && !hasRatings && !enrichingStats;
-  const showReviewHint =
-    sortKey === 'review' && results.length > 0 && !hasReviews && !enrichingStats;
+  }, [results]);
 
   const canSubmitSearch =
     Boolean(query.trim()) || (searchScope === 'nearby' && categoryFilter !== null);
@@ -263,6 +267,22 @@ export function SearchPanel({
     }
   };
 
+  const normalizePasteIntoQuery = (raw: string) => {
+    const parts = splitSearchQueries(raw);
+    if (parts.length <= 1) return raw.trim();
+    setPasteHint(t('search.pasteExtracted', { count: parts.length }));
+    return parts.join(', ');
+  };
+
+  const handlePaste = (e: ClipboardEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const text = e.clipboardData.getData('text');
+    if (!text || !looksLikePastedPlaceList(text)) return;
+    if (detectLinkInput(text)?.extractable) return;
+    e.preventDefault();
+    const normalized = normalizePasteIntoQuery(text);
+    onQueryChange(normalized);
+  };
+
   const handleSubmit = () => {
     if (isExtractMode) {
       void handleLinkExtract();
@@ -271,6 +291,10 @@ export function SearchPanel({
     if (isSnsMode && detectedLink) {
       window.open(detectedLink.href, '_blank', 'noopener,noreferrer');
       return;
+    }
+    if (looksLikePastedPlaceList(query)) {
+      const normalized = normalizePasteIntoQuery(query);
+      if (normalized !== query) onQueryChange(normalized);
     }
     if (canSubmitSearch) onSearch();
   };
@@ -285,6 +309,7 @@ export function SearchPanel({
     setLinkPreviewKey(null);
     setLinkPreviewPlatform(null);
     setLinkPreviewHref(null);
+    setPasteHint(null);
     onClear();
   };
 
@@ -292,56 +317,111 @@ export function SearchPanel({
     onSearchCandidate?.(name);
   };
 
-  const submitLabel = isExtractMode
-    ? linkExtracting
-      ? t('collect.youtubeLoading')
-      : t('collect.youtubeExtract')
-    : isSnsMode
-      ? t('collect.linkOpenSource')
-      : tc('search');
+  const toggleSubFilter = (id: SearchSubFilterId) => {
+    if (categoryFilter === 'FD6') {
+      if (!onFoodRestrictionsChange) return;
+      const foodId = id as FoodRestriction;
+      if (foodRestrictions.includes(foodId)) {
+        onFoodRestrictionsChange(foodRestrictions.filter((s) => s !== foodId));
+      } else {
+        onFoodRestrictionsChange([...foodRestrictions, foodId]);
+      }
+      return;
+    }
+    if (!onCategorySubFiltersChange) return;
+    if (categorySubFilters.includes(id)) {
+      onCategorySubFiltersChange(categorySubFilters.filter((s) => s !== id));
+    } else {
+      onCategorySubFiltersChange([...categorySubFilters, id]);
+    }
+  };
+
+  const metaLine =
+    searchScope === 'nearby'
+      ? t('search.metaNearby', {
+          km: searchRadius / 1000,
+          count: results.length,
+          defaultValue: `Near map center · 지도 주변 ${searchRadius / 1000} km · ${results.length} results`,
+        })
+      : t('search.metaNationwide', {
+          count: results.length,
+          defaultValue: `Nationwide · 전국 · ${results.length} results`,
+        });
+
+  const categoryChipLabel = (code: SearchCategoryFilter, fallback: string) => {
+    if (code === null) return `All ${tc('category.all')}`;
+    if (code === 'FD6') return `Food ${tc('category.food')}`;
+    if (code === 'AT4') return `Sights ${tc('category.tour')}`;
+    if (code === 'AD5') return `Stay ${tc('category.stay')}`;
+    if (code === 'MT1') return `Mart ${tc('category.shop')}`;
+    return fallback;
+  };
 
   return (
-    <div className={`search-panel ${compact ? 'search-panel-compact' : ''}`}>
-      {onSearchCandidate && (
-        <PasteCollectPanel
-          onSearchCandidate={onSearchCandidate}
-          disabled={loading || linkExtracting}
+    <div className={`search-panel search-panel-v2 ${compact ? 'search-panel-compact' : ''}`}>
+      <div className={`search-pill ${isLinkMode ? 'is-link' : ''}`}>
+        <Icon name={isLinkMode ? 'attach' : 'search'} className="search-pill-icon" />
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => {
+            setPasteHint(null);
+            onQueryChange(e.target.value);
+          }}
+          onPaste={handlePaste}
+          onKeyDown={(e) => e.key === 'Enter' && canSubmit && handleSubmit()}
+          placeholder={t('search.placeholderDesign')}
+          aria-label={t('search.ariaLabel')}
         />
-      )}
-      <div
-        className={`search-box ${isLinkMode ? 'search-box-youtube search-box-link' : ''}`}
-      >
-        <div className="search-box-field">
-          <Icon name={isLinkMode ? 'attach' : 'search'} className="search-icon" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => onQueryChange(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && canSubmit && handleSubmit()}
-            placeholder={
-              linkEnabled ? t('search.placeholderWithLink') : t('search.placeholder')
-            }
-            aria-label={t('search.ariaLabel')}
-          />
-          {query && (
-            <button className="clear-btn" onClick={handleClear} aria-label={t('search.clearAria')}>
-              <Icon name="close" />
-            </button>
-          )}
-        </div>
-        <div className="search-box-actions">
-          <button
-            type="button"
-            className={`search-submit-btn ${isExtractMode ? 'search-submit-btn-youtube' : ''} ${isSnsMode ? 'search-submit-btn-sns' : ''}`}
-            onClick={handleSubmit}
-            disabled={!canSubmit || loading || linkExtracting}
-            aria-label={submitLabel}
-          >
-            {submitLabel}
+        {query && (
+          <button type="button" className="search-pill-clear" onClick={handleClear} aria-label={t('search.clearAria')}>
+            <Icon name="close" size={16} />
           </button>
-          <MapProviderPicker value={mapProvider} onChange={onMapProviderChange} />
-        </div>
+        )}
+        <button
+          type="button"
+          className="search-pill-go"
+          onClick={handleSubmit}
+          disabled={!canSubmit || loading || linkExtracting}
+          aria-label={tc('search')}
+        >
+          {linkExtracting ? <Icon name="loader" spin size={16} /> : <Icon name="search" size={16} />}
+        </button>
       </div>
+
+      <div className="search-pill-tools">
+        <MapProviderPicker value={mapProvider} onChange={onMapProviderChange} />
+        {onUseMyLocation && (
+          <button type="button" className="search-tool-chip" onClick={onUseMyLocation}>
+            <Icon name="location" size={14} /> {t('search.myLocation')}
+          </button>
+        )}
+        <button
+          type="button"
+          className={`search-tool-chip ${searchScope === 'nearby' ? 'active' : ''}`}
+          onClick={() => onSearchScopeChange(searchScope === 'nearby' ? 'nationwide' : 'nearby')}
+        >
+          {searchScope === 'nearby' ? t('search.scopeNearby') : t('search.scopeNationwide')}
+        </button>
+        {searchScope === 'nearby' && (
+          <select
+            className="search-tool-select"
+            value={searchRadius}
+            onChange={(e) =>
+              onSearchRadiusChange(Number(e.target.value) as SearchRadiusMeters)
+            }
+            aria-label={t('search.radiusAria')}
+          >
+            {[1000, 3000, 5000, 10000, 20000].map((v) => (
+              <option key={v} value={v}>
+                {v / 1000} km
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+
+      {pasteHint && <p className="search-paste-hint">{pasteHint}</p>}
 
       {linkEnabled && (
         <LinkExtractResults
@@ -361,75 +441,58 @@ export function SearchPanel({
         />
       )}
 
-      <p className="search-batch-hint">
-        {isExtractMode
-          ? t('search.linkExtractHint')
-          : isSnsMode
-            ? t('search.linkSnsHint')
-            : t('search.batchHint')}
-      </p>
-
-      <div className="search-category-row" role="group" aria-label={t('search.ariaLabel')}>
-        {categoryFilters.map((item) => (
-          <button
-            key={item.code ?? 'all'}
-            type="button"
-            className={`cat-filter-chip ${categoryFilter === item.code ? 'active' : ''}`}
-            data-cat={item.code ?? 'all'}
-            onClick={() => onCategoryFilterChange(item.code)}
-            title={item.label}
-          >
-            <Icon name={item.icon} />
-            {item.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="search-scope-row">
-        <button
-          type="button"
-          className={`scope-chip ${searchScope === 'nationwide' ? 'active' : ''}`}
-          onClick={() => onSearchScopeChange('nationwide')}
-        >
-          {t('search.scopeNationwide')}
-        </button>
-        <button
-          type="button"
-          className={`scope-chip ${searchScope === 'nearby' ? 'active' : ''}`}
-          onClick={() => onSearchScopeChange('nearby')}
-        >
-          {compact ? t('search.scopeNearbyShort') : t('search.scopeNearby')}
-        </button>
-        {searchScope === 'nearby' && onUseMyLocation && (
-          <button type="button" className="scope-locate" onClick={onUseMyLocation}>
-            <Icon name="location" /> {t('search.myLocation')}
-          </button>
-        )}
-        {searchScope === 'nearby' && (
-          <label className="radius-select-wrap">
-            <span className="radius-label">{t('search.radius')}</span>
-            <select
-              className="radius-select"
-              value={searchRadius}
-              onChange={(e) =>
-                onSearchRadiusChange(Number(e.target.value) as SearchRadiusMeters)
-              }
-              aria-label={t('search.radiusAria')}
+      <div className="search-cat-pills" role="group" aria-label={t('search.ariaLabel')}>
+        {categoryFilters.map((item) => {
+          const accent = getSearchCategoryAccent(item.code);
+          const active = categoryFilter === item.code;
+          return (
+            <button
+              key={item.code ?? 'all'}
+              type="button"
+              className={`search-cat-pill ${active ? 'active' : ''}`}
+              style={{
+                borderColor: accent,
+                ...(active
+                  ? { background: accent, color: '#fff' }
+                  : { color: accent }),
+              }}
+              onClick={() => onCategoryFilterChange(item.code)}
             >
-              {radiusOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
+              {categoryChipLabel(item.code, item.label)}
+            </button>
+          );
+        })}
       </div>
-      {!compact && searchScope === 'nationwide' && (
-        <p className="search-scope-hint">
-          {mapProvider === 'google'
-            ? t('search.hintNationwideGoogle')
-            : t('search.hintNationwideKakao')}
+
+      {subFilterGroup && (
+        <div className="search-subfilters">
+          <span className="search-subfilters-label">{subFilterGroup.label}</span>
+          <div className="search-subfilters-row" role="group" aria-label={subFilterGroup.label}>
+            {subFilterGroup.options.map((opt) => {
+              const active = activeSubFilters.includes(opt.id);
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  className={`search-subfilters-chip ${active ? 'active' : ''}`}
+                  aria-pressed={active}
+                  onClick={() => toggleSubFilter(opt.id)}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {(results.length > 0 || loading || enrichingStats) && (
+        <p className="search-meta-line">
+          {loading || enrichingStats
+            ? loading
+              ? t('search.loading')
+              : t('search.enriching')
+            : metaLine}
         </p>
       )}
 
@@ -440,198 +503,99 @@ export function SearchPanel({
       )}
 
       {searchEmpty && !loading && query.trim() && (
-        <div className="result-card result-empty">
-          <p>
-            {t('search.noResults')}
-            {searchScope === 'nearby'
-              ? ' 「전국」으로 바꾸거나 지도를 이동한 뒤 다시 검색해 보세요.'
-              : ' 다른 키워드로 시도해 보세요.'}
-          </p>
+        <div className="search-empty-msg">
+          {t('search.noResults')}
         </div>
       )}
 
-      {(results.length > 0 || loading) && (
-        <div className="result-card">
-          <div className="result-card-header">
-          <div className="sort-row sort-filter-row">
-            {compact ? (
-              <label className="sort-compact-select-wrap">
-                <span className="sr-only">정렬</span>
-                <select
-                  className="sort-compact-select"
-                  value={sortKey}
-                  onChange={(e) => setSortKey(e.target.value as SortKey)}
-                  aria-label="검색 결과 정렬"
-                >
-                  {SORT_FILTER_KEYS.map((key) => (
-                    <option key={key} value={key}>
-                      {sortLabels[key]}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : (
-              <div className="sort-chips" role="group" aria-label={t('search.ariaLabel')}>
-                {SORT_FILTER_KEYS.map((key) => (
-                  <button
-                    key={key}
-                    type="button"
-                    className={`sort-chip ${sortKey === key ? 'active' : ''}`}
-                    onClick={() => setSortKey(key)}
-                    aria-pressed={sortKey === key}
-                  >
-                    <Icon name={SORT_ICONS[key]} />
-                    {sortLabels[key]}
-                  </button>
-                ))}
-              </div>
-            )}
-            <span className="result-count">
-              {loading
-                ? t('search.loading')
-                : enrichingStats
-                  ? t('search.enriching')
-                  : formatNumber(results.length, appLocale)}
-            </span>
-            <button
-              type="button"
-              className="result-reset-btn"
-              onClick={() => {
-                setSortKey('distance');
-                onResetResults();
-              }}
-              disabled={loading}
-              aria-label="검색 결과 초기화"
-            >
-              <Icon name="refresh" />
-            </button>
-          </div>
-          {!compact && showDistanceHint && (
-            <p className="scope-hint">
-              거리순 · 지도 중심 기준
-              {searchScope === 'nearby' ? ` · 반경 ${searchRadius / 1000}km 이내` : ' 직선 거리'}
-            </p>
-          )}
-          {!compact && enrichingStats && (
-            <p className="scope-hint">카카오맵에서 사진·평점 정보를 불러오는 중…</p>
-          )}
-          {!compact && showRatingHint && (
-            <p className="scope-hint scope-hint-warn">평점 정보가 없어 기본 순서와 같을 수 있습니다</p>
-          )}
-          {!compact && showReviewHint && (
-            <p className="scope-hint scope-hint-warn">리뷰 수 정보가 없어 기본 순서와 같을 수 있습니다</p>
-          )}
-          </div>
+      {!loading && results.length === 0 && !searchEmpty && !query.trim() && categoryFilter === null && (
+        <div className="search-empty-msg muted">{t('search.emptyHint')}</div>
+      )}
 
-          <div className="result-card-body">
-          <ul className="result-list">
-            {sorted.map((place) => {
-              const isPinned = pinnedIds.has(place.id);
-              return (
-                <li
-                  key={place.id}
-                  className={`result-item ${isPinned ? 'pinned' : ''} ${selectedId === place.id ? 'selected' : ''}`}
-                  onClick={() => onSelectResult?.(place)}
-                >
+      {results.length > 0 && (
+        <ul className="search-result-list">
+          {sorted.map((place) => {
+            const isPinned = pinnedIds.has(place.id);
+            const badge = insightBadge(place);
+            const enHint = place.categoryDetail || place.categoryLabel || '';
+            return (
+              <li
+                key={place.id}
+                className={`search-result-card ${isPinned ? 'pinned' : ''} ${
+                  selectedId === place.id ? 'selected' : ''
+                }`}
+                onClick={() => onSelectResult?.(place)}
+              >
                   <PlaceThumb
                     place={place}
+                    variant="emoji"
                     onOpenPhotos={onOpenPlacePhotos ?? (() => {})}
                   />
-                  <div className="result-body">
-                    <div className="result-name-row">
-                      <span className="result-name">{place.name}</span>
-                      {(place.openingStatus === 'closed' || place.openingStatus === 'offday') && (
-                        <OpenStatusBadge
-                          status={place.openingStatus === 'offday' ? 'offday' : 'closed'}
-                        />
-                      )}
-                      {place.openingStatus === 'scheduled' && (
-                        <OpenStatusBadge status="scheduled" opensAt={place.opensAt} />
-                      )}
-                      {place.openingStatus === 'open' && (
-                        <OpenStatusBadge status="open" closesAt={place.closesAt} />
-                      )}
-                    </div>
-                    <div className="result-meta">
-                      {place.categoryLabel && (
-                        <span className="result-cat-badge">{place.categoryLabel}</span>
-                      )}
-                      {place.categoryDetail && (
-                        <span className="result-cat-detail">{place.categoryDetail}</span>
-                      )}
-                      {(place.roadAddress || place.address) && (
-                        <span className="result-addr">
-                          {place.roadAddress || place.address}
-                        </span>
-                      )}
-                      <div className="result-meta-row">
-                        {place.rating !== undefined && (
-                          <span className="result-rating">
-                            <Icon name="star" className="star" />
-                            {place.rating.toFixed(1)}
-                          </span>
-                        )}
-                        {place.reviewCount !== undefined && (
-                          <span>리뷰 {place.reviewCount.toLocaleString()}</span>
-                        )}
-                        {sortKey === 'distance' && place.distance !== undefined && (
-                          <span className="result-distance">
-                            {formatDistance(place.distance)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="result-actions">
-                    {onOpenRoadview && (
-                      <button
-                        type="button"
-                        className="result-aux-btn result-roadview-btn"
-                        title="로드뷰"
-                        aria-label={`${place.name} 로드뷰`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onOpenRoadview(place);
-                        }}
-                      >
-                        <Icon name="roadview" />
-                      </button>
+                <div className="search-result-body">
+                  <div className="search-result-title">
+                    <span className="search-result-name">{place.name}</span>
+                    {enHint && <span className="search-result-en">{enHint}</span>}
+                    {(place.openingStatus === 'closed' || place.openingStatus === 'offday') && (
+                      <OpenStatusBadge
+                        status={place.openingStatus === 'offday' ? 'offday' : 'closed'}
+                      />
                     )}
-                    <button
-                      className={`pin-btn ${isPinned ? 'pinned' : ''}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onTogglePin(place);
-                      }}
-                    >
-                      {isPinned ? (
-                        <>
-                          <Icon name="check" /> 핀업됨
-                        </>
-                      ) : (
-                        <>
-                          <Icon name="pin" /> 핀업
-                        </>
-                      )}
-                    </button>
                   </div>
-                </li>
-              );
-            })}
-          </ul>
+                  <div className="search-result-stats">
+                    {place.rating !== undefined && (
+                      <span>
+                        ★ {place.rating.toFixed(1)}
+                        {place.reviewCount !== undefined
+                          ? ` · ${formatNumber(place.reviewCount, appLocale)} reviews`
+                          : ''}
+                      </span>
+                    )}
+                    {place.distance !== undefined && (
+                      <span> · {formatDistance(place.distance)}</span>
+                    )}
+                  </div>
+                  {badge && (
+                    <span className={`insight-badge ${badge.kind}`}>{badge.label}</span>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  className={`search-pin-btn ${isPinned ? 'pinned' : ''}`}
+                  aria-label={isPinned ? t('search.unpin') : t('search.pin')}
+                  title={isPinned ? t('search.unpin') : t('search.pin')}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTogglePin(place);
+                  }}
+                >
+                  <Icon name={isPinned ? 'pin' : 'pinPlus'} size={18} />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
-          {hasMore && onLoadMore && (
-            <button
-              type="button"
-              className="load-more-btn"
-              disabled={loadingMore}
-              onClick={onLoadMore}
-            >
-              {loadingMore ? '불러오는 중…' : '더보기'}
-            </button>
-          )}
-          </div>
-        </div>
+      {hasMore && onLoadMore && results.length > 0 && (
+        <button
+          type="button"
+          className="load-more-btn"
+          disabled={loadingMore}
+          onClick={onLoadMore}
+        >
+          {loadingMore ? '불러오는 중…' : '더보기'}
+        </button>
+      )}
+
+      {results.length > 0 && (
+        <button
+          type="button"
+          className="search-reset-link"
+          onClick={onResetResults}
+          disabled={loading}
+        >
+          <Icon name="refresh" size={14} /> 결과 초기화
+        </button>
       )}
     </div>
   );

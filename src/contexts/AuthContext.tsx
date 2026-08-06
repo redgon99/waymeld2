@@ -12,6 +12,7 @@ import { getSupabase, isSupabaseConfigured } from '../lib/supabase';
 import { tripsRepo } from '../lib/trips';
 import { formatAuthError, isGoogleAuthEnabled } from '../lib/authErrors';
 import { fetchUserProfile } from '../lib/profiles';
+import { isCurrentUserAdmin } from '../lib/admin';
 import type { PlanId } from '../lib/subscription';
 import type { Session, User } from '@supabase/supabase-js';
 
@@ -24,6 +25,8 @@ export interface AuthState {
 
 interface AuthContextValue extends AuthState {
   plan: PlanId;
+  /** admin_users / VITE_ADMIN_EMAILS — 플랜 한도·유료 기능 제한 없음 */
+  isAdmin: boolean;
   googleAuthEnabled: boolean;
   signInWithEmail: (email: string) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -47,15 +50,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
   const migratedForUserRef = useRef<string | null>(null);
   const [plan, setPlan] = useState<PlanId>('free');
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const refreshProfile = useCallback(async () => {
     const userId = state.user?.id;
     if (!userId) {
       setPlan('free');
+      setIsAdmin(false);
       return;
     }
     const profile = await fetchUserProfile(userId);
     setPlan(profile.plan);
+  }, [state.user?.id]);
+
+  const refreshAdmin = useCallback(async () => {
+    if (!isSupabaseConfigured || !state.user?.id) {
+      setIsAdmin(false);
+      return;
+    }
+    try {
+      const ok = await isCurrentUserAdmin();
+      setIsAdmin(ok);
+    } catch {
+      setIsAdmin(false);
+    }
   }, [state.user?.id]);
 
   const syncLocalTrips = useCallback(async () => {
@@ -99,10 +117,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!state.user?.id) return;
     void syncLocalTrips();
     void refreshProfile();
-  }, [state.user?.id, syncLocalTrips, refreshProfile]);
+    void refreshAdmin();
+  }, [state.user?.id, syncLocalTrips, refreshProfile, refreshAdmin]);
 
   useEffect(() => {
-    if (!state.user?.id) setPlan('free');
+    if (!state.user?.id) {
+      setPlan('free');
+      setIsAdmin(false);
+    }
   }, [state.user?.id]);
 
   const signInWithEmail = useCallback(async (email: string) => {
@@ -148,6 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       ...state,
       plan,
+      isAdmin,
       googleAuthEnabled: isGoogleAuthEnabled,
       signInWithEmail,
       signInWithGoogle,
@@ -155,7 +178,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       syncLocalTrips,
       refreshProfile,
     }),
-    [state, plan, signInWithEmail, signInWithGoogle, signOut, syncLocalTrips, refreshProfile]
+    [
+      state,
+      plan,
+      isAdmin,
+      signInWithEmail,
+      signInWithGoogle,
+      signOut,
+      syncLocalTrips,
+      refreshProfile,
+    ]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

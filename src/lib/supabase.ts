@@ -15,7 +15,7 @@ export function getSupabase(): SupabaseClient | null {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      storageKey: 'tripasist-auth',
+      storageKey: 'waymeld-auth',
     },
   });
   return _client;

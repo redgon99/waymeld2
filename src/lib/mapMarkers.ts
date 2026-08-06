@@ -1,4 +1,4 @@
-import { iconSvgMarkup } from '../icons/tripasist-icons';
+import { iconSvgMarkup } from '../icons/waymeld-icons';
 import { getCategoryMeta } from './categories';
 import type { Place, PinnedPlace } from '../types';
 
@@ -56,32 +56,25 @@ export function renderPlaceMarkerHtml(options: {
   const isPinned = !!pinned;
   const meta = getCategoryMeta(place.categoryCode);
   const themeBorder = darkenHex(meta.bgColor);
-  const borderColor = isPinned
-    ? 'var(--color-primary)'
-    : isSelected
-      ? '#1d4ed8'
-      : themeBorder;
-  const iconSize = isPinned ? 16 : SEARCH_MARKER_ICON_SIZE;
-  const markerShadow = isPinned
-    ? undefined
-    : `0 3px 12px ${hexToRgba(themeBorder, 0.48)}, 0 1px 4px rgba(15, 23, 42, 0.22)`;
+  const borderColor = isSelected ? '#1d4ed8' : themeBorder;
+  const iconSize = SEARCH_MARKER_ICON_SIZE;
+  const markerShadow = `0 3px 12px ${hexToRgba(themeBorder, 0.48)}, 0 1px 4px rgba(15, 23, 42, 0.22)`;
 
   return `
     <div class="map-marker ${isPinned ? 'pinned' : 'search'} ${isSelected ? 'selected' : ''}">
       ${
         isPinned
-          ? `<div class="marker-label">
-          <span class="marker-order" style="background:${meta.bgColor};color:${meta.iconColor}">${pinned!.order}</span>
-          ${escapeHtml(place.name)}
-        </div>`
-          : ''
-      }
-      <div class="marker-dot" style="background:${meta.bgColor};border-color:${borderColor}${markerShadow ? `;box-shadow:${markerShadow}` : ''}">
+          ? `<div class="marker-pin-circle" style="background:${meta.bgColor};border-color:#fff;box-shadow:0 2px 8px rgba(15,23,42,0.3)">
+          <span class="marker-order-num">${pinned!.order}</span>
+        </div>
+        <div class="marker-label marker-label-below">${escapeHtml(place.name)}</div>`
+          : `<div class="marker-dot" style="background:${meta.bgColor};border-color:${borderColor}${markerShadow ? `;box-shadow:${markerShadow}` : ''}">
         ${iconSvgMarkup(meta.icon, {
           size: iconSize,
           color: meta.iconColor,
         })}
-      </div>
+      </div>`
+      }
     </div>
   `;
 }

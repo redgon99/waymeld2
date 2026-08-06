@@ -247,57 +247,92 @@ export async function searchPlacesUnifiedWithGoogle(
   }
   const language = googleRequestLanguage();
   const keyword = params.keyword?.trim() ?? '';
-  const categoryType = mapKakaoCategoryToGoogleType(params.categoryGroupCode);
+  const category = params.categoryGroupCode ?? undefined;
+  const shopBundle = category === 'MT1';
   const nearby = params.scope === 'nearby';
   const center = params.center;
   const radius = params.radiusMeters ?? 5000;
-
   const page = Math.max(1, params.page ?? 1);
+  const size = params.size ?? 15;
 
-  if (!keyword && !categoryType) {
+  if (!keyword && !category) {
     return { places: [], page: 1, hasMore: false };
   }
 
-  let raw: { results: any[]; hasMore: boolean; pagination?: any };
-  if (nearby && center) {
-    raw = await nearbySearchOnce({
-      location: new window.google.maps.LatLng(center.lat, center.lng),
-      radius,
-      language,
-      ...(keyword ? { keyword } : {}),
-      ...(categoryType ? { type: categoryType } : {}),
-    });
-  } else {
-    const query = [keyword, categoryType].filter(Boolean).join(' ').trim();
-    if (!query) return { places: [], page: 1, hasMore: false };
-    raw = await textSearchOnce({
-      query,
-      language,
-      ...(center ? { location: new window.google.maps.LatLng(center.lat, center.lng), radius } : {}),
-    });
-  }
-
-  const places = raw.results
-    .map((r) => normalizeGooglePlace(r))
-    .filter((p): p is Place => Boolean(p))
-    .slice(0, params.size ?? 15);
-
-  let current = raw;
-  if (page > 1) {
-    for (let i = 2; i <= page; i++) {
-      if (!current.pagination?.hasNextPage) {
-        return { places: [], page, hasMore: false };
-      }
-      await wait(1200);
-      current = await fetchNextPage(current.pagination);
+  async function runOnce(type: string | undefined): Promise<GooglePlacesSearchResult> {
+    const categoryType = type;
+    if (!keyword && !categoryType) {
+      return { places: [], page: 1, hasMore: false };
     }
+
+    let raw: { results: any[]; hasMore: boolean; pagination?: any };
+    if (nearby && center) {
+      raw = await nearbySearchOnce({
+        location: new window.google.maps.LatLng(center.lat, center.lng),
+        radius,
+        language,
+        ...(keyword ? { keyword } : {}),
+        ...(categoryType ? { type: categoryType } : {}),
+      });
+    } else {
+      const query = [keyword, categoryType].filter(Boolean).join(' ').trim();
+      if (!query) return { places: [], page: 1, hasMore: false };
+      raw = await textSearchOnce({
+        query,
+        language,
+        ...(center
+          ? { location: new window.google.maps.LatLng(center.lat, center.lng), radius }
+          : {}),
+      });
+    }
+
+    let current = raw;
+    if (page > 1) {
+      for (let i = 2; i <= page; i++) {
+        if (!current.pagination?.hasNextPage) {
+          return { places: [], page, hasMore: false };
+        }
+        await wait(1200);
+        current = await fetchNextPage(current.pagination);
+      }
+    }
+
+    const pagePlaces = current.results
+      .map((r) => normalizeGooglePlace(r))
+      .filter((p): p is Place => Boolean(p));
+
+    return { places: pagePlaces, page, hasMore: current.hasMore };
   }
 
-  const pagePlaces = current.results
-    .map((r) => normalizeGooglePlace(r))
-    .filter((p): p is Place => Boolean(p))
-    .slice(0, params.size ?? 15);
+  if (shopBundle) {
+    const [marts, cvs] = await Promise.all([
+      runOnce('supermarket'),
+      runOnce('convenience_store'),
+    ]);
+    const seen = new Set<string>();
+    const merged: Place[] = [];
+    for (const p of [...marts.places, ...cvs.places]) {
+      if (seen.has(p.id)) continue;
+      seen.add(p.id);
+      merged.push(p);
+    }
+    merged.sort(
+      (a, b) =>
+        (a.distance ?? Number.POSITIVE_INFINITY) -
+        (b.distance ?? Number.POSITIVE_INFINITY)
+    );
+    return {
+      places: merged.slice(0, size),
+      page,
+      hasMore: marts.hasMore || cvs.hasMore || merged.length > size,
+    };
+  }
 
-  return { places: pagePlaces, page, hasMore: current.hasMore };
+  const single = await runOnce(mapKakaoCategoryToGoogleType(category));
+  return {
+    places: single.places.slice(0, size),
+    page: single.page,
+    hasMore: single.hasMore,
+  };
 }
 

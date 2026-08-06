@@ -3,30 +3,43 @@ export type PlanId = 'free' | 'plus' | 'team';
 export const FREE_MAX_TRIPS = 3;
 export const FREE_DAILY_GOOGLE_SEARCHES = 40;
 
-const SEARCH_COUNT_KEY = 'tripasist:google-search-count';
-const SEARCH_COUNT_DATE_KEY = 'tripasist:google-search-date';
+const SEARCH_COUNT_KEY = 'waymeld:google-search-count';
+const SEARCH_COUNT_DATE_KEY = 'waymeld:google-search-date';
 
 export function isPlusOrTeam(plan: PlanId): boolean {
   return plan === 'plus' || plan === 'team';
 }
 
-export function canCreateTrip(plan: PlanId, currentCount: number): boolean {
-  if (isPlusOrTeam(plan)) return true;
+/** Plus/Team 또는 관리자 — 유료 기능·한도 해제 */
+export function hasUnlimitedAccess(plan: PlanId, isAdmin = false): boolean {
+  return isAdmin || isPlusOrTeam(plan);
+}
+
+export function canCreateTrip(
+  plan: PlanId,
+  currentCount: number,
+  isAdmin = false
+): boolean {
+  if (hasUnlimitedAccess(plan, isAdmin)) return true;
   return currentCount < FREE_MAX_TRIPS;
 }
 
-export function canExportItinerary(plan: PlanId): boolean {
-  return isPlusOrTeam(plan);
+export function canExportItinerary(plan: PlanId, isAdmin = false): boolean {
+  return hasUnlimitedAccess(plan, isAdmin);
 }
 
-export function canUseCloudSync(plan: PlanId, isLoggedIn: boolean): boolean {
+export function canUseCloudSync(
+  plan: PlanId,
+  isLoggedIn: boolean,
+  isAdmin = false
+): boolean {
   if (!isLoggedIn) return false;
-  return isPlusOrTeam(plan);
+  return hasUnlimitedAccess(plan, isAdmin);
 }
 
-/** Free + Google 검색 일일 캡 */
-export function canRunGoogleSearch(plan: PlanId): boolean {
-  if (isPlusOrTeam(plan)) return true;
+/** Free + Google 검색 일일 캡 (관리자·Plus/Team 제외) */
+export function canRunGoogleSearch(plan: PlanId, isAdmin = false): boolean {
+  if (hasUnlimitedAccess(plan, isAdmin)) return true;
   const today = new Date().toISOString().slice(0, 10);
   try {
     const storedDate = localStorage.getItem(SEARCH_COUNT_DATE_KEY);
@@ -42,8 +55,8 @@ export function canRunGoogleSearch(plan: PlanId): boolean {
   }
 }
 
-export function recordGoogleSearch(plan: PlanId): void {
-  if (isPlusOrTeam(plan)) return;
+export function recordGoogleSearch(plan: PlanId, isAdmin = false): void {
+  if (hasUnlimitedAccess(plan, isAdmin)) return;
   const today = new Date().toISOString().slice(0, 10);
   try {
     const storedDate = localStorage.getItem(SEARCH_COUNT_DATE_KEY);
