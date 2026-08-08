@@ -8837,6 +8837,20 @@ button {
   max-height: none;
 }
 
+.planner-side-body > .pinup-bar.pinup-bar-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  height: 100%;
+  align-self: stretch;
+}
+
+.planner-side-body > .trip-preferences-bar,
+.planner-side-body > .planner-prefs-inline {
+  flex-shrink: 0;
+}
+
 .planner-side-collapse {
   position: absolute;
   top: 50%;
@@ -8932,9 +8946,18 @@ button {
   padding: 0;
 }
 
-.pinup-bar-panel .pinup-groups {
-  flex: 1;
+.pinup-bar-panel .pinup-panel-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
   overflow: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.pinup-bar-panel .pinup-groups {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: visible;
   padding: 12px 16px;
   display: flex;
   flex-direction: column;
@@ -8963,6 +8986,7 @@ button {
 }
 
 .pinup-panel-footer {
+  margin-top: auto;
   flex-shrink: 0;
   padding: 12px 16px 16px;
   border-top: 1px solid var(--color-border);
@@ -9224,6 +9248,168 @@ button {
 .waymeld-root.presentation-mode .route-timeline-dock,
 .waymeld-root.presentation-mode .overlay-map-tools {
   display: none !important;
+}
+
+.itinerary-table-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+}
+
+.itinerary-table-modal {
+  position: relative;
+  width: min(960px, 100%);
+  max-height: min(86vh, 900px);
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+  overflow: hidden;
+}
+
+.itinerary-table-modal-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  background: #fff;
+}
+
+.itinerary-table-modal-heading h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.itinerary-table-modal-sub {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: #64748b;
+}
+
+.itinerary-table-modal-close {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.itinerary-table-modal-close:hover {
+  background: #e2e8f0;
+}
+
+.itinerary-table-day-filters {
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 18px 12px;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  background: #f8fafc;
+}
+
+.itinerary-table-day-chip {
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 99px;
+  background: #fff;
+  color: #475569;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.itinerary-table-day-chip:hover {
+  border-color: rgba(15, 23, 42, 0.24);
+  background: #f1f5f9;
+}
+
+.itinerary-table-day-chip.active {
+  background: #0f172a;
+  border-color: #0f172a;
+  color: #fff;
+}
+
+.itinerary-table-modal-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 0 8px;
+}
+
+.table-view-empty {
+  margin: 48px auto;
+  text-align: center;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.itinerary-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 13.5px;
+}
+
+.itinerary-table th,
+.itinerary-table td {
+  border: 1px solid #cbd5e1;
+  padding: 10px 14px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.itinerary-table thead th {
+  background: #0f172a;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.itinerary-table tbody tr:nth-child(even) {
+  background: #f1f5f9;
+}
+
+.itinerary-table tbody tr {
+  cursor: pointer;
+  color: #0f172a;
+}
+
+.itinerary-table tbody tr:hover {
+  background: #e2e8f0;
+}
+
+.itinerary-table tbody tr.is-required {
+  color: #991b1b;
+}
+
+.itinerary-table tbody tr.is-selected {
+  background: var(--color-primary-soft, #fef9c3) !important;
+}
+
+.itinerary-table tbody tr.is-selected.is-required {
+  color: #991b1b;
 }
 
 .overview-chrome {

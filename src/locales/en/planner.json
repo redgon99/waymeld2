@@ -67,6 +67,23 @@
     "remove": "Remove day {{n}}",
     "removeTitle": "Remove this day"
   },
+  "view": {
+    "table": "Table view",
+    "tableExit": "Close table"
+  },
+  "table": {
+    "col": {
+      "day": "Day",
+      "time": "Time",
+      "place": "Place",
+      "district": "District"
+    },
+    "summary": "{{days}} days · {{count}} places",
+    "countPlaces": "{{count}} places",
+    "filterAll": "All",
+    "filterAria": "Filter by day",
+    "empty": "No itinerary yet. Pin places or generate a route."
+  },
   "pinup": {
     "title": "Pinned places",
     "titleShort": "Pins",

@@ -56,6 +56,23 @@
     "remove": "删除第{{n}}天",
     "removeTitle": "删除此天"
   },
+  "view": {
+    "table": "表格视图",
+    "tableExit": "关闭表格"
+  },
+  "table": {
+    "col": {
+      "day": "Day",
+      "time": "Time",
+      "place": "Place",
+      "district": "District"
+    },
+    "summary": "{{days}}天 · {{count}}处",
+    "countPlaces": "{{count}}处",
+    "filterAll": "全部",
+    "filterAria": "按天筛选",
+    "empty": "暂无行程。请先标记地点或生成路线。"
+  },
   "pinup": {
     "title": "已标记地点",
     "titleShort": "标记",

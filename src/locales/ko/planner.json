@@ -67,6 +67,23 @@
     "remove": "{{n}}일차 삭제",
     "removeTitle": "이 일차 삭제"
   },
+  "view": {
+    "table": "표로보기",
+    "tableExit": "표 닫기"
+  },
+  "table": {
+    "col": {
+      "day": "Day",
+      "time": "Time",
+      "place": "Place",
+      "district": "District"
+    },
+    "summary": "{{days}}일 · {{count}}곳",
+    "countPlaces": "{{count}}곳",
+    "filterAll": "전체",
+    "filterAria": "일차 필터",
+    "empty": "표시할 일정이 없습니다. 장소를 핀업하거나 동선을 만들어 주세요."
+  },
   "pinup": {
     "title": "핀업한 장소",
     "titleShort": "핀",

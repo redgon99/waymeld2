@@ -62,6 +62,7 @@ import {
 import type { ShareTripModalSubmit } from '../components/ShareTripModal';
 import { ShareTripModal } from '../components/ShareTripModal';
 import { PlannerAppBar } from '../components/PlannerAppBar';
+import { ItineraryTableView } from '../components/ItineraryTableView';
 import { PlannerSidePanel, type PlannerPanelTab } from '../components/PlannerSidePanel';
 import { PanelIconRail } from '../components/PanelIconRail';
 import { RouteTimelineDock } from '../components/RouteTimelineDock';
@@ -169,6 +170,7 @@ export default function PlannerPage() {
   const [routeOptionsOpen, setRouteOptionsOpen] = useState(false);
   const [materialsPanelOpen, setMaterialsPanelOpen] = useState(false);
   const [presentationMode, setPresentationMode] = useState(false);
+  const [tableViewMode, setTableViewMode] = useState(false);
   const [panelOpen, setPanelOpen] = useState(true);
   const [panelTab, setPanelTab] = useState<PlannerPanelTab>('search');
   const [dockCollapsed, setDockCollapsed] = useState(false);
@@ -1164,6 +1166,14 @@ export default function PlannerPage() {
     setPresentationMode((prev) => !prev);
   }, []);
 
+  const handleToggleTableView = useCallback(() => {
+    setTableViewMode((prev) => !prev);
+  }, []);
+
+  const handleCloseTableView = useCallback(() => {
+    setTableViewMode(false);
+  }, []);
+
   const handlePickOriginFromMap = useCallback(() => {
     setPickingPinFromMap(false);
     setPendingManualPin(null);
@@ -1569,13 +1579,13 @@ export default function PlannerPage() {
   }, [useMobileChrome]);
 
   useEffect(() => {
-    if (!presentationMode) return;
+    if (!presentationMode || tableViewMode) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setPresentationMode(false);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [presentationMode]);
+  }, [presentationMode, tableViewMode]);
 
   const rootClass = [
     'waymeld-root',
@@ -1661,6 +1671,8 @@ export default function PlannerPage() {
             onShare={openShareModal}
             presentationMode={presentationMode}
             onTogglePresentation={handleTogglePresentation}
+            tableViewMode={tableViewMode}
+            onToggleTableView={handleToggleTableView}
             plazaNavVisible={plazaNavVisible}
           />
 
@@ -1845,6 +1857,14 @@ export default function PlannerPage() {
           </div>
         </>
       )}
+
+      <ItineraryTableView
+        open={tableViewMode}
+        trip={trip}
+        selectedPlaceId={selectedPlaceId}
+        onSelectPlaceId={setSelectedPlaceId}
+        onClose={handleCloseTableView}
+      />
 
       {useMobileChrome && (
         <>

@@ -24,6 +24,8 @@ interface Props {
   onShare: () => void;
   presentationMode: boolean;
   onTogglePresentation: () => void;
+  tableViewMode?: boolean;
+  onToggleTableView?: () => void;
   plazaNavVisible?: boolean;
 }
 
@@ -45,6 +47,8 @@ export function PlannerAppBar({
   onShare,
   presentationMode,
   onTogglePresentation,
+  tableViewMode = false,
+  onToggleTableView,
   plazaNavVisible,
 }: Props) {
   const { t } = useTranslation('planner');
@@ -172,6 +176,19 @@ export function PlannerAppBar({
         <Icon name={presentationMode ? 'minimize' : 'presentation'} size={16} />
         Overview
       </button>
+
+      {onToggleTableView && (
+        <button
+          type="button"
+          className={`planner-bar-btn solid ${tableViewMode ? 'active' : ''}`}
+          onClick={onToggleTableView}
+          aria-pressed={tableViewMode}
+          aria-haspopup="dialog"
+        >
+          <Icon name="layoutList" size={16} />
+          {t('view.table')}
+        </button>
+      )}
 
       <button type="button" className="planner-bar-btn outline" onClick={onShare}>
         <Icon name="share" size={16} />

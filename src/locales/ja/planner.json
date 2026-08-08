@@ -56,6 +56,23 @@
     "remove": "{{n}}日目を削除",
     "removeTitle": "この日を削除"
   },
+  "view": {
+    "table": "表で見る",
+    "tableExit": "表を閉じる"
+  },
+  "table": {
+    "col": {
+      "day": "Day",
+      "time": "Time",
+      "place": "Place",
+      "district": "District"
+    },
+    "summary": "{{days}}日 · {{count}}か所",
+    "countPlaces": "{{count}}か所",
+    "filterAll": "すべて",
+    "filterAria": "日別フィルター",
+    "empty": "表示する日程がありません。場所をピンするか動線を作成してください。"
+  },
   "pinup": {
     "title": "ピンした場所",
     "titleShort": "ピン",

@@ -360,32 +360,44 @@ export function PinupBar({
       </div>
       )}
 
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        onDragCancel={handleDragCancel}
-      >
-        <SortableContext
-          items={ids}
-          strategy={panel ? verticalListSortingStrategy : horizontalListSortingStrategy}
+      {panel ? (
+        <>
+          <div className="pinup-panel-scroll">
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDragCancel={handleDragCancel}
+            >
+              <SortableContext items={ids} strategy={verticalListSortingStrategy}>
+                {groupsContent}
+              </SortableContext>
+            </DndContext>
+          </div>
+          <div className="pinup-panel-footer">
+            <button
+              type="button"
+              className={`route-cta panel-route-cta ${routeOptionsOpen ? 'active' : ''}`}
+              onClick={onOpenRouteOptions}
+              disabled={routeTargetCount < 2}
+            >
+              Set up route · 동선 만들기 →
+            </button>
+          </div>
+        </>
+      ) : (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          onDragCancel={handleDragCancel}
         >
-          {groupsContent}
-        </SortableContext>
-      </DndContext>
-
-      {panel && (
-        <div className="pinup-panel-footer">
-          <button
-            type="button"
-            className={`route-cta panel-route-cta ${routeOptionsOpen ? 'active' : ''}`}
-            onClick={onOpenRouteOptions}
-            disabled={routeTargetCount < 2}
-          >
-            Set up route · 동선 만들기 →
-          </button>
-        </div>
+          <SortableContext items={ids} strategy={horizontalListSortingStrategy}>
+            {groupsContent}
+          </SortableContext>
+        </DndContext>
       )}
     </div>
   );
