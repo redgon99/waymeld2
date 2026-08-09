@@ -1628,6 +1628,7 @@ export default function PlannerPage() {
           generatedRoute={generatedRoute}
           nearbySearchCenter={searchScope === 'nearby' ? nearbySearchCenter : null}
           fitSearchBounds={fitSearchBounds}
+          fitPinsBounds={presentationMode}
           pickingOriginFromMap={pickingOriginFromMap}
           pickingPinFromMap={pickingPinFromMap}
           onOriginPicked={handleOriginPicked}
@@ -1863,6 +1864,7 @@ export default function PlannerPage() {
         trip={trip}
         selectedPlaceId={selectedPlaceId}
         onSelectPlaceId={setSelectedPlaceId}
+        onOpenPlacePhotos={handleOpenPlacePhotos}
         onClose={handleCloseTableView}
       />
 

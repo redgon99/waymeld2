@@ -1,5 +1,5 @@
 import { Icon } from './Icon';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type {
   PinnedPlace,
   RouteOptions,
@@ -8,7 +8,7 @@ import type {
   OriginType,
   Origin,
 } from '../types';
-import { TRAVEL_MODE_META, suggestStayMinutes, getCategoryMeta, CATEGORY_MAP } from '../lib/categories';
+import { TRAVEL_MODE_META, suggestStayMinutes, getCategoryMeta } from '../lib/categories';
 import { generateRoute } from '../lib/planner';
 
 interface Props {
@@ -29,10 +29,22 @@ interface Props {
   embedded?: boolean;
 }
 
+const OPTIMIZE_LABELS: Record<OptimizeBy, string> = {
+  distance: '최단거리',
+  time: '최소시간',
+  'no-toll': '무료도로',
+};
+
+const OPTIMIZE_LABELS_EN: Record<OptimizeBy, string> = {
+  distance: 'Shortest',
+  time: 'Fastest',
+  'no-toll': 'Free roads',
+};
+
 export function RouteOptionsPanel({
   open,
   currentDay,
-  totalDays,
+  totalDays: _totalDays,
   pinned,
   options,
   onChange,
@@ -45,7 +57,8 @@ export function RouteOptionsPanel({
   onUpdateStayMinutes,
   embedded = false,
 }: Props) {
-  // 실시간 미리보기 계산
+  const [originMenuOpen, setOriginMenuOpen] = useState(false);
+
   const preview = useMemo(() => {
     if (pinned.length === 0) return null;
     try {
@@ -66,152 +79,146 @@ export function RouteOptionsPanel({
   function setOriginType(type: OriginType) {
     if (type === 'current') {
       patchOrigin({ type, label: '현재 위치' });
+      setOriginMenuOpen(false);
     } else if (type === 'map-click') {
       patchOrigin({ type, label: '지도에서 선택', lat: undefined, lng: undefined });
       onPickOriginFromMap();
+      setOriginMenuOpen(false);
     } else {
-      patchOrigin({ type, label: '', address: '' });
+      patchOrigin({ type, label: options.origin.address || '', address: options.origin.address || '' });
     }
   }
+
+  const originLabel = originDisplayLabel(options.origin, pickingOriginFromMap, pinned);
 
   if (!open && !embedded) return null;
 
   return (
     <aside
-      className={`route-panel ${open || embedded ? 'open' : ''} ${embedded ? 'route-panel-embedded' : ''}`}
+      className={`route-panel route-panel-v2 ${open || embedded ? 'open' : ''} ${
+        embedded ? 'route-panel-embedded' : ''
+      }`}
       aria-label="경로 설정"
     >
-      {/* 헤더 */}
-      <header className="route-panel-header">
-        <div>
-          <div className="panel-title">
-            <Icon name="route" />
-            <span>경로 설정</span>
+      {!embedded && (
+        <header className="route-panel-header">
+          <div>
+            <div className="panel-title">
+              <Icon name="route" />
+              <span>경로 설정</span>
+            </div>
+            <div className="panel-subtitle">
+              {currentDay}일차 · {pinned.length}개 장소
+            </div>
           </div>
-          <div className="panel-subtitle">
-            {currentDay}일차 · {pinned.length}개 장소 · 카테고리 {countCategories(pinned)}종
-          </div>
-        </div>
-        {!embedded && (
           <button className="icon-btn" onClick={onClose} aria-label="패널 닫기">
             <Icon name="close" />
           </button>
-        )}
-      </header>
+        </header>
+      )}
 
       <div className="route-panel-body">
-        {/* 출발지 */}
+        {/* DEPART 출발 */}
         <section className="route-section">
           <div className="section-header">
-            <span className="section-label">{currentDay}일차 출발지</span>
+            <span className="section-label route-v2-label">DEPART 출발</span>
             {currentDay > 1 && onCopyFromPreviousDay && (
               <button type="button" className="copy-day-btn" onClick={onCopyFromPreviousDay}>
                 {currentDay - 1}일차와 동일
               </button>
             )}
           </div>
-          <div className="origin-options">
-            <label
-              className={`origin-row ${options.origin.type === 'current' ? 'selected' : ''}`}
-            >
+          <div className="route-depart-row">
+            <label className="route-depart-chip">
+              <Icon name="clock" size={16} />
               <input
-                type="radio"
-                name="origin"
-                checked={options.origin.type === 'current'}
-                onChange={() => setOriginType('current')}
-              />
-              <Icon name="location" className="origin-icon" />
-              <span className="origin-label">현재 위치</span>
-              <span className="origin-hint">GPS 자동 감지</span>
-            </label>
-
-            <label
-              className={`origin-row ${options.origin.type === 'map-click' ? 'selected' : ''} ${pickingOriginFromMap ? 'picking' : ''}`}
-            >
-              <input
-                type="radio"
-                name="origin"
-                checked={options.origin.type === 'map-click'}
-                onChange={() => setOriginType('map-click')}
-              />
-              <Icon name="pinSelect" className="origin-icon" />
-              <span className="origin-label">
-                {pickingOriginFromMap
-                  ? '지도를 클릭하세요'
-                  : options.origin.type === 'map-click' && options.origin.lat
-                  ? options.origin.address || '선택됨'
-                  : '지도에서 클릭 선택'}
-              </span>
-            </label>
-
-            <label
-              className={`origin-row ${options.origin.type === 'address' ? 'selected' : ''}`}
-            >
-              <input
-                type="radio"
-                name="origin"
-                checked={options.origin.type === 'address'}
-                onChange={() => setOriginType('address')}
-              />
-              <Icon name="search" className="origin-icon" />
-              <input
-                type="text"
-                placeholder="주소·장소명 입력"
-                value={options.origin.type === 'address' ? options.origin.address ?? '' : ''}
-                onChange={(e) => patchOrigin({ address: e.target.value, label: e.target.value })}
-                onFocus={() => setOriginType('address')}
-                className="origin-input"
+                type="time"
+                value={options.departTime}
+                onChange={(e) => patch('departTime', e.target.value)}
+                aria-label="출발 시각"
               />
             </label>
+            <button
+              type="button"
+              className={`route-depart-chip origin ${originMenuOpen ? 'open' : ''} ${
+                pickingOriginFromMap ? 'picking' : ''
+              }`}
+              onClick={() => setOriginMenuOpen((v) => !v)}
+              aria-expanded={originMenuOpen}
+              aria-haspopup="listbox"
+            >
+              <Icon name="mapPin" size={16} />
+              <span className="route-depart-origin-text">{originLabel}</span>
+            </button>
           </div>
-          {options.travelMode === 'transit' && (
-            <p className="mode-hint">
-              대중교통은 REST API 키가 있으면 실제 경로를, 없으면 추정 시간을 사용합니다.
-            </p>
+
+          {originMenuOpen && (
+            <div className="route-origin-menu" role="listbox">
+              <button
+                type="button"
+                className={options.origin.type === 'current' ? 'active' : ''}
+                onClick={() => setOriginType('current')}
+              >
+                <Icon name="location" size={14} /> 현재 위치
+              </button>
+              <button
+                type="button"
+                className={options.origin.type === 'map-click' ? 'active' : ''}
+                onClick={() => setOriginType('map-click')}
+              >
+                <Icon name="pinSelect" size={14} /> 지도에서 선택
+              </button>
+              <div
+                className={`route-origin-address ${
+                  options.origin.type === 'address' ? 'active' : ''
+                }`}
+              >
+                <Icon name="search" size={14} />
+                <input
+                  type="text"
+                  placeholder="주소·장소명"
+                  value={
+                    options.origin.type === 'address' ? options.origin.address ?? '' : ''
+                  }
+                  onChange={(e) =>
+                    patchOrigin({
+                      type: 'address',
+                      address: e.target.value,
+                      label: e.target.value,
+                    })
+                  }
+                  onFocus={() => setOriginType('address')}
+                />
+              </div>
+            </div>
           )}
-        </section>
 
-        {/* 출발 시각 */}
-        <section className="route-section">
-          <div className="section-header">
-            <span className="section-label">출발 시각</span>
-            <label className="inline-toggle">
-              <input
-                type="checkbox"
-                checked={options.reflectMealTime}
-                onChange={(e) => patch('reflectMealTime', e.target.checked)}
-              />
-              <span className="toggle-label">
-                <Icon name="sparkles" /> 식사 시간 반영
-              </span>
-            </label>
-          </div>
-          <div className="time-input-row">
-            <Icon name="clock" />
+          <label className="route-mini-toggle">
             <input
-              type="time"
-              value={options.departTime}
-              onChange={(e) => patch('departTime', e.target.value)}
+              type="checkbox"
+              checked={options.reflectMealTime}
+              onChange={(e) => patch('reflectMealTime', e.target.checked)}
             />
-            {preview && (
-              <span className="finish-hint">~ {preview.finishAt} 완료 예정</span>
-            )}
-          </div>
+            <span>식사 시간 반영</span>
+          </label>
         </section>
 
-        {/* 이동수단 */}
+        {/* TRANSPORT 이동수단 */}
         <section className="route-section">
-          <div className="section-label">이동수단</div>
-          <div className="mode-grid">
+          <div className="section-label route-v2-label">TRANSPORT 이동수단</div>
+          <div className="route-mode-row">
             {(Object.keys(TRAVEL_MODE_META) as TravelMode[]).map((mode) => {
               const meta = TRAVEL_MODE_META[mode];
               return (
                 <button
                   key={mode}
-                  className={`mode-btn ${options.travelMode === mode ? 'selected' : ''}`}
+                  type="button"
+                  className={`route-mode-chip ${
+                    options.travelMode === mode ? 'selected' : ''
+                  }`}
                   onClick={() => patch('travelMode', mode)}
                 >
-                  <Icon name={meta.icon} />
+                  <Icon name={meta.icon} size={18} />
                   <span>{meta.label}</span>
                 </button>
               );
@@ -219,127 +226,109 @@ export function RouteOptionsPanel({
           </div>
         </section>
 
-        {/* 최적화 */}
+        {/* OPTIMIZE 최적화 */}
         <section className="route-section">
-          <div className="section-label">최적화</div>
-          <div className="optimize-grid">
-            {(['distance', 'time', 'no-toll'] as OptimizeBy[]).map((key) => {
-              const label = OPTIMIZE_LABELS[key];
-              return (
-                <button
-                  key={key}
-                  className={`optimize-btn ${options.optimizeBy === key ? 'selected' : ''}`}
-                  onClick={() => patch('optimizeBy', key)}
-                >
-                  {label}
-                </button>
-              );
-            })}
+          <div className="section-label route-v2-label">OPTIMIZE 최적화</div>
+          <div className="route-optimize-row">
+            {(['distance', 'time', 'no-toll'] as OptimizeBy[]).map((key) => (
+              <button
+                key={key}
+                type="button"
+                className={`route-optimize-chip ${
+                  options.optimizeBy === key ? 'selected' : ''
+                }`}
+                onClick={() => patch('optimizeBy', key)}
+                title={OPTIMIZE_LABELS_EN[key]}
+              >
+                {OPTIMIZE_LABELS[key]}
+              </button>
+            ))}
+          </div>
+          <div className="route-order-row">
+            <button
+              type="button"
+              className={`route-order-chip ${options.autoOrder ? 'selected' : ''}`}
+              onClick={() => patch('autoOrder', true)}
+            >
+              <Icon name="wand" size={12} /> 자동
+            </button>
+            <button
+              type="button"
+              className={`route-order-chip ${!options.autoOrder ? 'selected' : ''}`}
+              onClick={() => patch('autoOrder', false)}
+            >
+              <Icon name="grip" size={12} /> 핀 순서
+            </button>
           </div>
         </section>
 
-        {/* 체류시간 자동 추천 */}
+        {/* STAY TIME 체류 시간 */}
         <section className="route-section">
           <div className="section-header">
-            <span className="section-label">체류시간</span>
-            <label className="inline-toggle">
-              <input
-                type="checkbox"
-                checked={options.autoStayTime}
-                onChange={(e) => patch('autoStayTime', e.target.checked)}
-              />
-              <span className="toggle-label">
-                <Icon name="sparkles" /> AI 자동 추천
-              </span>
-            </label>
+            <span className="section-label route-v2-label">STAY TIME 체류 시간</span>
+            <button
+              type="button"
+              className={`route-ai-suggest ${options.autoStayTime ? 'active' : ''}`}
+              onClick={() => patch('autoStayTime', !options.autoStayTime)}
+              aria-pressed={options.autoStayTime}
+            >
+              <Icon name="sparkles" size={12} /> AI suggest 자동 추천
+            </button>
           </div>
-          <div className="stay-list">
+          <div className="route-stay-list">
             {(preview?.stops ?? pinned).map((p, idx) => {
               const meta = getCategoryMeta(p.categoryCode);
               const sug = suggestStayMinutes(p.category);
+              const minutes = p.stayMinutes ?? sug.minutes;
               return (
-                <div key={p.id} className="stay-row">
+                <div key={p.id} className="route-stay-card">
                   <span
-                    className="stay-order"
-                    style={{ background: meta.bgColor, color: meta.iconColor }}
+                    className="route-stay-num"
+                    style={{ background: meta.bgColor, color: '#fff' }}
                   >
                     {idx + 1}
                   </span>
-                  <div className="stay-body">
-                    <div className="stay-name">
-                      {p.name}
-                      <span className="stay-cat"> · {p.categoryLabel}</span>
+                  <div className="route-stay-body">
+                    <div className="route-stay-name">{p.name}</div>
+                    <div className="route-stay-hint">
+                      {options.autoStayTime ? sug.reason : p.categoryLabel}
                     </div>
-                    {options.autoStayTime && (
-                      <div className="stay-hint">
-                        <Icon name="sparkles" /> {sug.reason}
-                      </div>
-                    )}
                   </div>
-                  <label className="stay-minutes">
-                    <input
-                      type="number"
-                      className="stay-minutes-input"
-                      min={0}
-                      max={480}
-                      step={5}
-                      value={p.stayMinutes ?? sug.minutes}
-                      disabled={options.autoStayTime || !onUpdateStayMinutes}
-                      onChange={(e) => {
-                        const n = Number(e.target.value);
-                        if (!Number.isFinite(n) || !onUpdateStayMinutes) return;
-                        onUpdateStayMinutes(p.id, n);
-                      }}
-                      aria-label={`${p.name} 체류시간(분)`}
-                    />
-                    <span>분</span>
-                  </label>
+                  {options.autoStayTime || !onUpdateStayMinutes ? (
+                    <span className="route-stay-badge">{minutes} min</span>
+                  ) : (
+                    <label className="route-stay-edit">
+                      <input
+                        type="number"
+                        min={0}
+                        max={480}
+                        step={5}
+                        value={minutes}
+                        onChange={(e) => {
+                          const n = Number(e.target.value);
+                          if (!Number.isFinite(n) || !onUpdateStayMinutes) return;
+                          onUpdateStayMinutes(p.id, n);
+                        }}
+                        aria-label={`${p.name} 체류시간(분)`}
+                      />
+                      <span>min</span>
+                    </label>
+                  )}
                 </div>
               );
             })}
           </div>
         </section>
-
-        {/* 순서 */}
-        <section className="route-section">
-          <div className="section-label">순서</div>
-          <div className="order-grid">
-            <button
-              className={`order-btn ${options.autoOrder ? 'selected' : ''}`}
-              onClick={() => patch('autoOrder', true)}
-            >
-              <Icon name="wand" /> 자동 최적화
-            </button>
-            <button
-              className={`order-btn ${!options.autoOrder ? 'selected' : ''}`}
-              onClick={() => patch('autoOrder', false)}
-            >
-              <Icon name="grip" /> 핀업 순서
-            </button>
-          </div>
-        </section>
       </div>
 
-      {/* 푸터 요약 + 생성 버튼 */}
       <footer className="route-panel-footer">
         {preview && (
-          <div className="preview-stats">
-            <div>
-              <span className="stat-label">거리</span>
-              <span className="stat-value">{preview.totalDistanceKm}km</span>
-            </div>
-            <div>
-              <span className="stat-label">이동</span>
-              <span className="stat-value">{preview.totalTravelMinutes}분</span>
-            </div>
-            <div>
-              <span className="stat-label">체류</span>
-              <span className="stat-value">{formatHours(preview.totalStayMinutes)}</span>
-            </div>
-            <div>
-              <span className="stat-label">완료</span>
-              <span className="stat-value">{preview.finishAt}</span>
-            </div>
+          <div className="preview-stats route-preview-line">
+            <span className="stat-label">Preview 예상</span>
+            <span className="stat-value">
+              {preview.totalDistanceKm} km · {preview.totalTravelMinutes}분 · ends{' '}
+              {preview.finishAt}
+            </span>
           </div>
         )}
         <button
@@ -348,26 +337,27 @@ export function RouteOptionsPanel({
           disabled={pinned.length < 2}
         >
           <Icon name="sparkles" />
-          {hasExistingRoute ? '동선 다시 만들기' : '동선 만들기'}
+          {hasExistingRoute ? 'Rebuild route · 동선 다시 만들기' : 'Build route · 동선 만들기'}
         </button>
       </footer>
     </aside>
   );
 }
 
-const OPTIMIZE_LABELS: Record<OptimizeBy, string> = {
-  distance: '최단 거리',
-  time: '최소 시간',
-  'no-toll': '무료 도로',
-};
-
-function countCategories(pinned: PinnedPlace[]) {
-  return new Set(pinned.map((p) => p.category)).size;
-}
-
-function formatHours(min: number) {
-  if (min < 60) return `${min}분`;
-  const h = Math.floor(min / 60);
-  const m = min % 60;
-  return m === 0 ? `${h}시간` : `${h}시간 ${m}분`;
+function originDisplayLabel(
+  origin: Origin,
+  picking: boolean,
+  pinned: PinnedPlace[]
+): string {
+  if (picking) return '지도를 클릭하세요';
+  if (origin.type === 'current') return '현재 위치';
+  if (origin.type === 'map-click') {
+    if (origin.address || origin.label) return origin.address || origin.label;
+    return '지도에서 선택';
+  }
+  if (origin.type === 'address') {
+    return origin.address?.trim() || '주소·장소명 입력';
+  }
+  if (pinned[0]) return `${pinned[0].name} (stop 1)`;
+  return '출발지 선택';
 }

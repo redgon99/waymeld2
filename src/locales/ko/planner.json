@@ -62,14 +62,19 @@
     "deleteTripMenu": "여행 삭제"
   },
   "day": {
+    "tabsAria": "일차",
     "tab": "{{n}}일차",
     "tabShort": "{{n}}일",
+    "moreDays": "다른 일차 {{count}}개",
     "remove": "{{n}}일차 삭제",
     "removeTitle": "이 일차 삭제"
   },
   "view": {
+    "map": "지도",
     "table": "표로보기",
-    "tableExit": "표 닫기"
+    "tableShort": "표",
+    "tableExit": "표 닫기",
+    "segmentAria": "보기 전환"
   },
   "table": {
     "col": {
@@ -139,6 +144,30 @@
       "medium": "피로도 보통",
       "high": "피로도 높음"
     }
+  },
+  "dock": {
+    "dayTitle": "Day {{day}}",
+    "nextLabel": "다음",
+    "endsAt": "오늘 끝 {{time}}",
+    "departAt": "출발 {{time}}",
+    "arriveAt": "{{time}} 도착",
+    "stayMinutes": "약 {{n}}분",
+    "stayHours": "약 {{n}}시간",
+    "stayHoursMinutes": "약 {{h}}시간 {{m}}분",
+    "travelFromPrev": "이전에서 {{minutes}}분",
+    "focusBadge": "NEXT",
+    "editOnMap": "지도에서 보기",
+    "rebuild": "동선 다시 짜기",
+    "showDetails": "자세히",
+    "hideDetails": "간단히",
+    "more": "더보기",
+    "collapse": "타임라인 접기",
+    "stopsAria": "일정 순서",
+    "detailDistance": "{{km}} km",
+    "detailTravel": "이동 {{minutes}}분",
+    "detailStops": "{{count}}곳",
+    "pillTitle": "Day {{day}} · {{count}}곳",
+    "pillNext": "다음 {{name}} · {{finish}} 끝"
   },
   "taxi": {
     "title": "택시기사에게 보여주기",
@@ -218,7 +247,8 @@
   "nav": {
     "setup": "한국 준비",
     "help": "도움말",
-    "themes": "테마"
+    "themes": "테마",
+    "more": "더보기"
   },
   "setup": {
     "title": "한국 여행 준비",

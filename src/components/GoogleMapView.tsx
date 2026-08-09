@@ -7,7 +7,10 @@ import {
   renderPlaceMarkerHtml,
   renderSearchCenterMarkerHtml,
 } from '../lib/mapMarkers';
-import { createMapPlaceBubbleHtml } from '../lib/mapPlaceBubble';
+import {
+  createMapPlaceBubbleHtml,
+  isMapPlaceBubbleDetailClick,
+} from '../lib/mapPlaceBubble';
 import { kakaoLevelToGoogleZoom, googleZoomToKakaoLevel } from '../lib/mapZoom';
 
 interface Props {
@@ -33,8 +36,11 @@ interface Props {
   onMapLevelChange?: (level: number) => void;
   infoWindowPlace?: Place | null;
   onCloseInfoWindow?: () => void;
+  onOpenPlacePhotosFromInfo?: (place: Place) => void;
   fitRouteBounds?: boolean;
   fitSearchBounds?: boolean;
+  /** 조감(Overview) 등 — 보이는 핀(+출발지) 전체가 들어오도록 축척 맞춤 */
+  fitPinsBounds?: boolean;
   highlightPlaceId?: string | null;
   onHoverSearchPlace?: (place: Place) => void;
   pinSelectionFilter?: ReadonlySet<string>;
@@ -72,8 +78,10 @@ export function GoogleMapView({
   onMapLevelChange,
   infoWindowPlace = null,
   onCloseInfoWindow,
+  onOpenPlacePhotosFromInfo,
   fitRouteBounds = false,
   fitSearchBounds = false,
+  fitPinsBounds = false,
   highlightPlaceId = null,
   onHoverSearchPlace,
   pinSelectionFilter,
@@ -97,6 +105,8 @@ export function GoogleMapView({
   pinnedClickRef.current = onPinnedMarkerClick;
   hoverSearchRef.current = onHoverSearchPlace;
   const infoBubbleRef = useRef<GoogleHtmlMarker | null>(null);
+  const openPlacePhotosRef = useRef(onOpenPlacePhotosFromInfo);
+  openPlacePhotosRef.current = onOpenPlacePhotosFromInfo;
 
   const pinSelectionActive = pinSelectionFilter != null && pinSelectionFilter.size > 0;
   let visiblePinned = pinCategoryFilter
@@ -233,13 +243,21 @@ export function GoogleMapView({
     infoBubbleRef.current?.setMap(null);
     infoBubbleRef.current = null;
     if (!infoWindowPlace) return;
+    const place = infoWindowPlace;
     infoBubbleRef.current = new GoogleHtmlMarker(
       mapRef.current,
-      { lat: infoWindowPlace.lat, lng: infoWindowPlace.lng },
-      createMapPlaceBubbleHtml(infoWindowPlace),
+      { lat: place.lat, lng: place.lng },
+      createMapPlaceBubbleHtml(place),
       1.28,
-      undefined,
-      2000
+      {
+        zIndex: 2000,
+        onClick: (e) => {
+          if (isMapPlaceBubbleDetailClick(e.target)) {
+            e.preventDefault();
+            openPlacePhotosRef.current?.(place);
+          }
+        },
+      }
     );
   }, [infoWindowPlace]);
 
@@ -414,6 +432,45 @@ export function GoogleMapView({
     searchResults.forEach((p) => bounds.extend({ lat: p.lat, lng: p.lng }));
     mapRef.current.fitBounds(bounds);
   }, [searchResults, fitSearchBounds]);
+
+  useEffect(() => {
+    if (!mapRef.current || !fitPinsBounds) return;
+
+    let pins = pinCategoryFilter
+      ? pinned.filter(
+          (p) => getCategoryMeta(p.categoryCode).category === pinCategoryFilter
+        )
+      : pinned;
+    if (pinSelectionFilter != null && pinSelectionFilter.size > 0) {
+      pins = pins.filter((p) => pinSelectionFilter.has(p.id));
+    }
+
+    const points: Array<{ lat: number; lng: number }> = pins.map((p) => ({
+      lat: p.lat,
+      lng: p.lng,
+    }));
+    if (origin?.lat != null && origin?.lng != null) {
+      points.push({ lat: origin.lat, lng: origin.lng });
+    }
+    if (points.length === 0) return;
+
+    if (points.length === 1) {
+      mapRef.current.setCenter(points[0]);
+      mapRef.current.setZoom(14);
+      return;
+    }
+
+    const bounds = new window.google.maps.LatLngBounds();
+    points.forEach((p) => bounds.extend(p));
+    mapRef.current.fitBounds(bounds, { top: 96, right: 48, bottom: 96, left: 48 });
+  }, [
+    fitPinsBounds,
+    pinned,
+    pinCategoryFilter,
+    pinSelectionFilter,
+    origin?.lat,
+    origin?.lng,
+  ]);
 
   return (
     <div

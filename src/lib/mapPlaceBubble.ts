@@ -1,5 +1,7 @@
 import type { Place } from '../types';
 import { iconSvgMarkup } from '../icons/waymeld-icons';
+import { getCategoryMeta } from './categories';
+import { getPlaceEmoji } from './categoryEmoji';
 import { buildPlaceMapLinks } from './mapLinks';
 
 function escapeHtml(s: string): string {
@@ -10,7 +12,7 @@ function escapeHtml(s: string): string {
     .replace(/"/g, '&quot;');
 }
 
-/** 구글맵 POI 말풍선과 유사한 상세 보기 링크 */
+/** 구글맵 POI 말풍선과 유사한 상세 보기 링크 (외부 폴백용) */
 export function getPlaceDetailUrl(place: Place): string {
   if (place.placeUrl?.trim()) return place.placeUrl.trim();
   const links = buildPlaceMapLinks({
@@ -22,11 +24,31 @@ export function getPlaceDetailUrl(place: Place): string {
   return links.kakao;
 }
 
+/** 검색결과 칩 PlaceThumb(variant=emoji)와 동일한 미리보기 */
+function thumbInnerHtml(place: Place): string {
+  const meta = getCategoryMeta(place.categoryCode, place.category);
+  const accent = escapeHtml(meta.bgColor);
+  const emoji = escapeHtml(getPlaceEmoji(place));
+  const label = escapeHtml(`${place.name} 사진 보기`);
+
+  return `
+    <button
+      type="button"
+      class="result-thumb result-thumb-emoji map-place-bubble-thumb"
+      style="border-color:${accent}"
+      title="${label}"
+      aria-label="${label}"
+    >
+      <span class="result-thumb-fallback result-thumb-emoji-face" aria-hidden="true">${emoji}</span>
+    </button>
+  `;
+}
+
 function bubbleInnerHtml(place: Place): string {
   const addr = place.roadAddress || place.address || '';
-  const detailUrl = getPlaceDetailUrl(place);
   return `
     <div class="map-place-bubble-card">
+      ${thumbInnerHtml(place)}
       <div class="map-place-bubble-text">
         <div class="map-place-bubble-title">${escapeHtml(place.name)}</div>
         ${
@@ -35,16 +57,14 @@ function bubbleInnerHtml(place: Place): string {
             : ''
         }
       </div>
-      <a
+      <button
+        type="button"
         class="map-place-bubble-link"
-        href="${escapeHtml(detailUrl)}"
-        target="_blank"
-        rel="noopener noreferrer"
         title="상세 정보 보기"
         aria-label="상세 정보 보기"
       >
         ${iconSvgMarkup('externalLink', { size: 16, color: '#fff' })}
-      </a>
+      </button>
     </div>
     <div class="map-place-bubble-tail" aria-hidden="true"></div>
   `;
@@ -53,22 +73,26 @@ function bubbleInnerHtml(place: Place): string {
 /** 구글맵 스타일 대상물 상세 말풍선 (카카오 CustomOverlay용 DOM) */
 export function createMapPlaceBubbleElement(
   place: Place,
-  opts?: { onClose?: () => void }
+  opts?: { onClose?: () => void; onOpenDetail?: (place: Place) => void }
 ): HTMLElement {
   const root = document.createElement('div');
   root.className = 'map-place-bubble';
   root.innerHTML = bubbleInnerHtml(place);
 
-  root.querySelector('.map-place-bubble-link')?.addEventListener('click', (e) => {
+  const openDetail = (e: Event) => {
+    e.preventDefault();
     e.stopPropagation();
-  });
+    opts?.onOpenDetail?.(place);
+  };
+
+  root.querySelector('.map-place-bubble-thumb')?.addEventListener('click', openDetail);
+  root.querySelector('.map-place-bubble-link')?.addEventListener('click', openDetail);
 
   root.addEventListener('click', (e) => {
     e.stopPropagation();
   });
 
-  // 말풍선 바깥 클릭 닫기는 지도 click 리스너에서 처리
-  void opts;
+  void opts?.onClose;
 
   return root;
 }
@@ -76,4 +100,12 @@ export function createMapPlaceBubbleElement(
 /** GoogleHtmlMarker용 HTML 문자열 */
 export function createMapPlaceBubbleHtml(place: Place): string {
   return `<div class="map-place-bubble">${bubbleInnerHtml(place)}</div>`;
+}
+
+/** 말풍선에서 미리보기/상세 버튼 클릭인지 판별 */
+export function isMapPlaceBubbleDetailClick(target: EventTarget | null): boolean {
+  return Boolean(
+    target instanceof Element &&
+      target.closest('.map-place-bubble-thumb, .map-place-bubble-link')
+  );
 }

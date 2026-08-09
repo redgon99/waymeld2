@@ -1,9 +1,11 @@
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Icon } from './Icon';
 import { AuthBar } from './AuthBar';
 import { SaveStatusBadge, type SaveStatus } from './SaveStatusBadge';
 import { TripSelectMenu } from './TripSelectMenu';
+import { PlannerDayPills } from './PlannerDayPills';
 import type { Trip, TripSummary } from '../lib/trips';
 
 interface Props {
@@ -52,10 +54,52 @@ export function PlannerAppBar({
   plazaNavVisible,
 }: Props) {
   const { t } = useTranslation('planner');
-  const days = Array.from({ length: trip.totalDays }, (_, i) => i + 1);
+  const navigate = useNavigate();
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!moreOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      if (moreRef.current && !moreRef.current.contains(e.target as Node)) {
+        setMoreOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMoreOpen(false);
+    };
+    document.addEventListener('mousedown', onDoc);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [moreOpen]);
+
+  const mapActive = !presentationMode && !tableViewMode;
+
+  const handleSelectMapView = () => {
+    if (tableViewMode) onToggleTableView?.();
+    if (presentationMode) onTogglePresentation();
+  };
+
+  const moreItem = (label: string, action: () => void, danger = false) => (
+    <button
+      type="button"
+      role="menuitem"
+      className={`planner-more-item ${danger ? 'danger' : ''}`}
+      onClick={() => {
+        setMoreOpen(false);
+        action();
+      }}
+    >
+      {label}
+    </button>
+  );
 
   return (
     <header className="planner-app-bar desktop-only-overlay">
+      {/* 1. 브랜드 + 여행 */}
       <Link to="/" className="planner-brand" title="WayMeld">
         <span className="planner-brand-mark" aria-hidden>
           여
@@ -85,42 +129,58 @@ export function PlannerAppBar({
         )}
       </div>
 
-      <div className="planner-day-pills" role="tablist" aria-label={t('day.tabsAria', { defaultValue: '일차' })}>
-        {days.map((d) => {
-          const count = countsByDay[d] ?? 0;
-          const active = d === trip.currentDay;
-          return (
-            <button
-              key={d}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              className={`planner-day-pill ${active ? 'active' : ''}`}
-              onClick={() => onSelectDay(d)}
-            >
-              Day {d}
-              {count > 0 ? ` · ${count}` : ''}
-            </button>
-          );
-        })}
-        <button type="button" className="planner-day-add" onClick={onAddDay} aria-label={t('trip.addDay')}>
-          + Day
+      <div className="planner-app-bar-divider" aria-hidden />
+
+      {/* 2. 일정 */}
+      <PlannerDayPills
+        totalDays={trip.totalDays}
+        currentDay={trip.currentDay}
+        countsByDay={countsByDay}
+        onSelectDay={onSelectDay}
+        onAddDay={onAddDay}
+        onRemoveDay={onRemoveDay}
+      />
+
+      <div className="planner-app-bar-spacer" />
+
+      {/* 3. 보기 전환 */}
+      <div
+        className="planner-view-segment"
+        role="group"
+        aria-label={t('view.segmentAria', { defaultValue: '보기 전환' })}
+      >
+        <button
+          type="button"
+          className={`planner-view-segment-btn ${mapActive ? 'active' : ''}`}
+          aria-pressed={mapActive}
+          onClick={handleSelectMapView}
+        >
+          {t('view.map', { defaultValue: '지도' })}
         </button>
-        {trip.totalDays > 1 && (
+        <button
+          type="button"
+          className={`planner-view-segment-btn ${presentationMode ? 'active' : ''}`}
+          aria-pressed={presentationMode}
+          onClick={onTogglePresentation}
+        >
+          Overview
+        </button>
+        {onToggleTableView && (
           <button
             type="button"
-            className="planner-day-remove"
-            onClick={() => onRemoveDay(trip.currentDay)}
-            aria-label={t('day.remove', { n: trip.currentDay })}
-            title={t('day.removeTitle')}
+            className={`planner-view-segment-btn ${tableViewMode ? 'active' : ''}`}
+            aria-pressed={tableViewMode}
+            aria-haspopup="dialog"
+            onClick={onToggleTableView}
           >
-            <Icon name="trash" size={14} />
+            {t('view.tableShort', { defaultValue: '표' })}
           </button>
         )}
       </div>
 
-      <div className="planner-app-bar-spacer" />
+      <div className="planner-app-bar-divider" aria-hidden />
 
+      {/* 4. 액션 */}
       <SaveStatusBadge
         status={saveStatus}
         lastSavedAt={lastSavedAt}
@@ -129,71 +189,59 @@ export function PlannerAppBar({
 
       <button
         type="button"
-        className="planner-bar-btn ghost"
+        className="planner-bar-icon-btn"
         onClick={onOpenMaterials}
         title={t('trip.materials')}
+        aria-label={t('trip.materials')}
       >
-        <Icon name="folder" size={16} />
-        {t('trip.materials')}
+        <Icon name="folder" size={17} />
       </button>
-
-      {onNewTrip && (
-        <button type="button" className="planner-bar-btn ghost" onClick={onNewTrip}>
-          <Icon name="plus" size={16} />
-          {t('trip.newTrip')}
-        </button>
-      )}
-
-      {onDeleteTrip && summaries.length > 0 && (
-        <button
-          type="button"
-          className="planner-bar-btn ghost danger"
-          onClick={onDeleteTrip}
-          title={t('trip.deleteTitle', { title: trip.title })}
-        >
-          <Icon name="trash" size={16} />
-        </button>
-      )}
-
-      {plazaNavVisible && (
-        <Link to="/plaza" className="planner-bar-btn ghost">
-          {t('plazaNav')}
-        </Link>
-      )}
-      <Link to="/setup" className="planner-bar-btn ghost">
-        {t('nav.setup')}
-      </Link>
-      <Link to="/help" className="planner-bar-btn ghost">
-        {t('nav.help')}
-      </Link>
 
       <button
         type="button"
-        className={`planner-bar-btn solid ${presentationMode ? 'active' : ''}`}
-        onClick={onTogglePresentation}
-        aria-pressed={presentationMode}
+        className="planner-bar-icon-btn"
+        onClick={onShare}
+        title={t('trip.share')}
+        aria-label={t('trip.share')}
       >
-        <Icon name={presentationMode ? 'minimize' : 'presentation'} size={16} />
-        Overview
+        <Icon name="share" size={17} />
       </button>
 
-      {onToggleTableView && (
+      <div className="planner-bar-more" ref={moreRef}>
         <button
           type="button"
-          className={`planner-bar-btn solid ${tableViewMode ? 'active' : ''}`}
-          onClick={onToggleTableView}
-          aria-pressed={tableViewMode}
-          aria-haspopup="dialog"
+          className={`planner-bar-icon-btn ${moreOpen ? 'active' : ''}`}
+          onClick={() => setMoreOpen((v) => !v)}
+          aria-expanded={moreOpen}
+          aria-haspopup="menu"
+          aria-label={t('nav.more', { defaultValue: '더보기' })}
+          title={t('nav.more', { defaultValue: '더보기' })}
         >
-          <Icon name="layoutList" size={16} />
-          {t('view.table')}
+          <span className="planner-bar-more-dots" aria-hidden>
+            ⋯
+          </span>
         </button>
-      )}
-
-      <button type="button" className="planner-bar-btn outline" onClick={onShare}>
-        <Icon name="share" size={16} />
-        {t('trip.share')}
-      </button>
+        {moreOpen && (
+          <div className="planner-more-menu" role="menu">
+            {onNewTrip &&
+              moreItem(t('trip.newTrip'), onNewTrip)}
+            {plazaNavVisible &&
+              moreItem(t('plazaNav'), () => navigate('/plaza'))}
+            {moreItem(t('nav.setup'), () => navigate('/setup'))}
+            {moreItem(t('nav.help'), () => navigate('/help'))}
+            {onDeleteTrip && summaries.length > 0 && (
+              <>
+                <div className="planner-more-sep" aria-hidden />
+                {moreItem(
+                  t('trip.deleteTripMenu', { defaultValue: '여행 삭제' }),
+                  onDeleteTrip,
+                  true
+                )}
+              </>
+            )}
+          </div>
+        )}
+      </div>
 
       <AuthBar />
     </header>

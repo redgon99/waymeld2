@@ -25,9 +25,8 @@ export function AuthBar() {
 
   if (user) {
     return (
-      <div className="auth-bar signed-in">
+      <div className="auth-bar signed-in" title={user.email ?? undefined}>
         <Icon name="cloudOk" />
-        <span className="auth-email">{user.email}</span>
         <LocaleSwitcher compact />
         {isAdmin && (
           <Link to={adminPath} className="auth-link">
@@ -44,8 +43,8 @@ export function AuthBar() {
   return (
     <div className="auth-bar">
       <LocaleSwitcher compact />
-      <Link to={loginPath} className="auth-link">
-        <Icon name="cloud" /> {t('auth.cloudLogin')}
+      <Link to={loginPath} className="auth-link" title={t('auth.cloudLogin')}>
+        <Icon name="cloud" /> <span className="auth-link-label">{t('auth.cloudLogin')}</span>
       </Link>
     </div>
   );

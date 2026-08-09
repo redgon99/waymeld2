@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from './Icon';
+import { PlaceThumb } from './PlaceThumb';
+import type { Place } from '../types';
 import type { Trip } from '../lib/trips';
 import {
   buildItineraryTableRows,
@@ -14,6 +16,7 @@ interface Props {
   trip: Trip;
   selectedPlaceId?: string | null;
   onSelectPlaceId?: (placeId: string) => void;
+  onOpenPlacePhotos?: (place: Place) => void;
   onClose: () => void;
 }
 
@@ -22,6 +25,7 @@ export function ItineraryTableView({
   trip,
   selectedPlaceId = null,
   onSelectPlaceId,
+  onOpenPlacePhotos,
   onClose,
 }: Props) {
   const { t } = useTranslation('planner');
@@ -37,6 +41,13 @@ export function ItineraryTableView({
     () => Array.from({ length: trip.totalDays }, (_, i) => i + 1),
     [trip.totalDays]
   );
+  const placeById = useMemo(() => {
+    const map = new Map<string, Place>();
+    for (const dayPins of Object.values(trip.pinnedByDay)) {
+      for (const pin of dayPins) map.set(pin.id, pin);
+    }
+    return map;
+  }, [trip.pinnedByDay]);
 
   useEffect(() => {
     if (open) setDayFilter(null);
@@ -140,6 +151,7 @@ export function ItineraryTableView({
               <tbody>
                 {rows.map((row) => {
                   const selected = selectedPlaceId === row.placeId;
+                  const place = placeById.get(row.placeId);
                   return (
                     <tr
                       key={row.key}
@@ -160,7 +172,20 @@ export function ItineraryTableView({
                     >
                       <td>{row.dayLabel}</td>
                       <td>{row.time}</td>
-                      <td>{row.placeName}</td>
+                      <td>
+                        <div className="itinerary-table-place">
+                          {place && onOpenPlacePhotos && (
+                            <PlaceThumb
+                              place={place}
+                              variant="emoji"
+                              onOpenPhotos={onOpenPlacePhotos}
+                            />
+                          )}
+                          <span className="itinerary-table-place-name">
+                            {row.placeName}
+                          </span>
+                        </div>
+                      </td>
                       <td>{row.district || '—'}</td>
                     </tr>
                   );

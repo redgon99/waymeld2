@@ -51,14 +51,19 @@
     "deleteTripMenu": "删除旅行"
   },
   "day": {
+    "tabsAria": "行程天数",
     "tab": "第{{n}}天",
     "tabShort": "{{n}}天",
+    "moreDays": "其他 {{count}} 天",
     "remove": "删除第{{n}}天",
     "removeTitle": "删除此天"
   },
   "view": {
+    "map": "地图",
     "table": "表格视图",
-    "tableExit": "关闭表格"
+    "tableShort": "表格",
+    "tableExit": "关闭表格",
+    "segmentAria": "切换视图"
   },
   "table": {
     "col": {
@@ -101,6 +106,30 @@
     "openOptions": "路线选项",
     "summary": "路线摘要",
     "realRouteBadge": "实际路线 {{pct}}%"
+  },
+  "dock": {
+    "dayTitle": "Day {{day}}",
+    "nextLabel": "下一个",
+    "endsAt": "今天结束 {{time}}",
+    "departAt": "出发 {{time}}",
+    "arriveAt": "{{time}} 到达",
+    "stayMinutes": "约 {{n}} 分钟",
+    "stayHours": "约 {{n}} 小时",
+    "stayHoursMinutes": "约 {{h}} 小时 {{m}} 分",
+    "travelFromPrev": "从上一点 {{minutes}} 分钟",
+    "focusBadge": "NEXT",
+    "editOnMap": "在地图上查看",
+    "rebuild": "重新规划路线",
+    "showDetails": "详情",
+    "hideDetails": "简洁",
+    "more": "更多",
+    "collapse": "收起时间线",
+    "stopsAria": "行程顺序",
+    "detailDistance": "{{km}} km",
+    "detailTravel": "移动 {{minutes}} 分钟",
+    "detailStops": "{{count}} 处",
+    "pillTitle": "Day {{day}} · {{count}} 处",
+    "pillNext": "下一个 {{name}} · {{finish}} 结束"
   },
   "save": {
     "saved": "已保存",

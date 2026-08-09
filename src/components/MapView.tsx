@@ -45,6 +45,8 @@ interface Props {
   onMapLevelChange?: (level: number) => void;
   fitRouteBounds?: boolean;
   fitSearchBounds?: boolean;
+  /** 조감(Overview) 등 — 보이는 핀(+출발지) 전체가 들어오도록 축척 맞춤 */
+  fitPinsBounds?: boolean;
   highlightPlaceId?: string | null;
   /** 검색 결과 마커 호버 → 결과 칩 하이라이트 (지도 이동·말풍선 없음) */
   onHoverSearchPlace?: (place: Place) => void;
@@ -87,8 +89,10 @@ export function MapView({
         onMapLevelChange={rest.onMapLevelChange}
         infoWindowPlace={rest.infoWindowPlace}
         onCloseInfoWindow={rest.onCloseInfoWindow}
+        onOpenPlacePhotosFromInfo={rest.onOpenPlacePhotosFromInfo}
         fitRouteBounds={rest.fitRouteBounds}
         fitSearchBounds={rest.fitSearchBounds}
+        fitPinsBounds={rest.fitPinsBounds}
         highlightPlaceId={rest.highlightPlaceId}
         onHoverSearchPlace={rest.onHoverSearchPlace}
         pinSelectionFilter={rest.pinSelectionFilter}
@@ -132,6 +136,7 @@ function KakaoMapView({
   onMapLevelChange,
   fitRouteBounds = false,
   fitSearchBounds = false,
+  fitPinsBounds = false,
   highlightPlaceId = null,
   onHoverSearchPlace,
   pinSelectionFilter,
@@ -571,6 +576,7 @@ function KakaoMapView({
     const place = infoWindowPlace;
     const content = createMapPlaceBubbleElement(place, {
       onClose: () => infoHandlersRef.current.onCloseInfoWindow?.(),
+      onOpenDetail: (p) => infoHandlersRef.current.onOpenPlacePhotosFromInfo?.(p),
     });
 
     const overlay = new window.kakao.maps.CustomOverlay({
@@ -593,6 +599,55 @@ function KakaoMapView({
     );
     mapRef.current.setBounds(bounds);
   }, [searchResults, fitSearchBounds]);
+
+  // 조감 모드 — 보이는 핀(+출발지) 전체가 들어오도록 축척 맞춤
+  useEffect(() => {
+    if (!mapRef.current || !fitPinsBounds) return;
+
+    let pins = pinCategoryFilter
+      ? pinned.filter(
+          (p) => getCategoryMeta(p.categoryCode).category === pinCategoryFilter
+        )
+      : pinned;
+    if (pinSelectionFilter != null && pinSelectionFilter.size > 0) {
+      pins = pins.filter((p) => pinSelectionFilter.has(p.id));
+    }
+
+    const points: Array<{ lat: number; lng: number }> = pins.map((p) => ({
+      lat: p.lat,
+      lng: p.lng,
+    }));
+    if (origin?.lat != null && origin?.lng != null) {
+      points.push({ lat: origin.lat, lng: origin.lng });
+    }
+    if (points.length === 0) return;
+
+    if (points.length === 1) {
+      mapRef.current.setCenter(
+        new window.kakao.maps.LatLng(points[0].lat, points[0].lng)
+      );
+      mapRef.current.setLevel(5);
+      return;
+    }
+
+    const bounds = new window.kakao.maps.LatLngBounds();
+    points.forEach((p) =>
+      bounds.extend(new window.kakao.maps.LatLng(p.lat, p.lng))
+    );
+    // top/right/bottom/left — Overview 크롬·범례 여백
+    try {
+      mapRef.current.setBounds(bounds, 96, 48, 96, 48);
+    } catch {
+      mapRef.current.setBounds(bounds);
+    }
+  }, [
+    fitPinsBounds,
+    pinned,
+    pinCategoryFilter,
+    pinSelectionFilter,
+    origin?.lat,
+    origin?.lng,
+  ]);
 
   // 출발지 마커
   useEffect(() => {

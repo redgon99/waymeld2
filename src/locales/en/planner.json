@@ -62,14 +62,19 @@
     "deleteTripMenu": "Delete trip"
   },
   "day": {
+    "tabsAria": "Days",
     "tab": "Day {{n}}",
     "tabShort": "D{{n}}",
+    "moreDays": "{{count}} more days",
     "remove": "Remove day {{n}}",
     "removeTitle": "Remove this day"
   },
   "view": {
+    "map": "Map",
     "table": "Table view",
-    "tableExit": "Close table"
+    "tableShort": "Table",
+    "tableExit": "Close table",
+    "segmentAria": "Switch view"
   },
   "table": {
     "col": {
@@ -139,6 +144,30 @@
       "medium": "Medium fatigue",
       "high": "High fatigue"
     }
+  },
+  "dock": {
+    "dayTitle": "Day {{day}}",
+    "nextLabel": "Next",
+    "endsAt": "Ends {{time}}",
+    "departAt": "Depart {{time}}",
+    "arriveAt": "Arrive {{time}}",
+    "stayMinutes": "About {{n}} min",
+    "stayHours": "About {{n}} hr",
+    "stayHoursMinutes": "About {{h}} hr {{m}} min",
+    "travelFromPrev": "{{minutes}} min from previous",
+    "focusBadge": "NEXT",
+    "editOnMap": "Show on map",
+    "rebuild": "Rebuild route",
+    "showDetails": "Details",
+    "hideDetails": "Simple",
+    "more": "More",
+    "collapse": "Collapse timeline",
+    "stopsAria": "Stop order",
+    "detailDistance": "{{km}} km",
+    "detailTravel": "{{minutes}} min travel",
+    "detailStops": "{{count}} stops",
+    "pillTitle": "Day {{day}} · {{count}} stops",
+    "pillNext": "Next {{name}} · ends {{finish}}"
   },
   "taxi": {
     "title": "Show to taxi driver",
@@ -218,7 +247,8 @@
   "nav": {
     "setup": "Korea setup",
     "help": "Help",
-    "themes": "Themes"
+    "themes": "Themes",
+    "more": "More"
   },
   "setup": {
     "title": "Korea travel setup",

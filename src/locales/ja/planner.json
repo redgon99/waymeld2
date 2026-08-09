@@ -51,14 +51,19 @@
     "deleteTripMenu": "旅行を削除"
   },
   "day": {
+    "tabsAria": "日程",
     "tab": "{{n}}日目",
     "tabShort": "{{n}}日",
+    "moreDays": "他の日 {{count}}件",
     "remove": "{{n}}日目を削除",
     "removeTitle": "この日を削除"
   },
   "view": {
+    "map": "地図",
     "table": "表で見る",
-    "tableExit": "表を閉じる"
+    "tableShort": "表",
+    "tableExit": "表を閉じる",
+    "segmentAria": "表示切替"
   },
   "table": {
     "col": {
@@ -101,6 +106,30 @@
     "openOptions": "ルートオプション",
     "summary": "ルート概要",
     "realRouteBadge": "実ルート {{pct}}%"
+  },
+  "dock": {
+    "dayTitle": "Day {{day}}",
+    "nextLabel": "次",
+    "endsAt": "今日の終了 {{time}}",
+    "departAt": "出発 {{time}}",
+    "arriveAt": "{{time}} 到着",
+    "stayMinutes": "約{{n}}分",
+    "stayHours": "約{{n}}時間",
+    "stayHoursMinutes": "約{{h}}時間{{m}}分",
+    "travelFromPrev": "前から{{minutes}}分",
+    "focusBadge": "NEXT",
+    "editOnMap": "地図で見る",
+    "rebuild": "ルートを作り直す",
+    "showDetails": "詳しく",
+    "hideDetails": "かんたん",
+    "more": "その他",
+    "collapse": "タイムラインを閉じる",
+    "stopsAria": "訪問順",
+    "detailDistance": "{{km}} km",
+    "detailTravel": "移動 {{minutes}}分",
+    "detailStops": "{{count}}か所",
+    "pillTitle": "Day {{day}} · {{count}}か所",
+    "pillNext": "次 {{name}} · {{finish}} 終了"
   },
   "save": {
     "saved": "保存済み",
