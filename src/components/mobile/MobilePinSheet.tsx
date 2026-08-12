@@ -193,6 +193,7 @@ export function MobilePinSheet({
                       currentDay={currentDay}
                       totalDays={trip.totalDays}
                       pinnedByDay={trip.pinnedByDay}
+                      generatedRouteByDay={trip.generatedRouteByDay}
                       onNotify={onExportNotify}
                       onUpgradeRequest={onUpgradeRequest}
                     />

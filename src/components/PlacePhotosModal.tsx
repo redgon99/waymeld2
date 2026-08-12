@@ -1,10 +1,12 @@
 import { Icon } from './Icon';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { Place } from '../types';
 import { buildKakaoPhotosUrl } from '../lib/kakaoPlaceUrls';
 import { proxiedThumbnailUrl } from '../lib/kakaoPlaceApi';
 import {
   fetchPlacePanelDetail,
+  placePanelTabI18nKey,
   type PlacePanelTab,
   type PlacePanelTabId,
 } from '../lib/placePanelTabs';
@@ -20,11 +22,14 @@ interface Props {
   onShowTaxiCard?: (place: Place) => void;
 }
 
+const DEFAULT_TABS: PlacePanelTab[] = [
+  { id: 'PHOTO', label: 'PHOTO' },
+  { id: 'SUMMARY', label: 'SUMMARY' },
+];
+
 export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props) {
-  const [tabs, setTabs] = useState<PlacePanelTab[]>([
-    { id: 'PHOTO', label: '사진' },
-    { id: 'SUMMARY', label: '요약' },
-  ]);
+  const { t } = useTranslation('planner');
+  const [tabs, setTabs] = useState<PlacePanelTab[]>(DEFAULT_TABS);
   const [activeTab, setActiveTab] = useState<PlacePanelTabId>('PHOTO');
   const [panel, setPanel] = useState<Record<string, unknown> | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
@@ -36,10 +41,7 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
 
   useEffect(() => {
     if (!open || !place) {
-      setTabs([
-        { id: 'PHOTO', label: '사진' },
-        { id: 'SUMMARY', label: '요약' },
-      ]);
+      setTabs(DEFAULT_TABS);
       setActiveTab('PHOTO');
       setPanel(null);
       setPhotos([]);
@@ -54,10 +56,7 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
       ? [proxiedThumbnailUrl(place.thumbnailUrl) ?? place.thumbnailUrl]
       : [];
 
-    setTabs([
-      { id: 'PHOTO', label: '사진' },
-      { id: 'SUMMARY', label: '요약' },
-    ]);
+    setTabs(DEFAULT_TABS);
     setActiveTab('PHOTO');
     setPhotos(fallback);
     setActiveIndex(0);
@@ -74,34 +73,29 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
           placeUrl: place.placeUrl,
         }));
 
-    load.then(({ panel: p, tabs: t, photos: urls, placeUrl }) => {
-      if (cancelled) return;
-      setPanel(placeUrl ? { ...(p ?? {}), place_url: placeUrl } : p);
-      setTabs(
-        t.length > 0
-          ? t
-          : [
-              { id: 'PHOTO', label: '사진' },
-              { id: 'SUMMARY', label: '요약' },
-            ]
-      );
-      setLoading(false);
-      if (urls.length > 0) {
-        setPhotos(urls);
-        setActiveIndex(0);
-      } else if (fallback.length === 0) {
-        setPhotoError(true);
-      }
-    }).catch(() => {
-      if (cancelled) return;
-      setLoading(false);
-      if (fallback.length === 0) setPhotoError(true);
-    });
+    load
+      .then(({ panel: p, tabs: nextTabs, photos: urls, placeUrl }) => {
+        if (cancelled) return;
+        setPanel(placeUrl ? { ...(p ?? {}), place_url: placeUrl } : p);
+        setTabs(nextTabs.length > 0 ? nextTabs : DEFAULT_TABS);
+        setLoading(false);
+        if (urls.length > 0) {
+          setPhotos(urls);
+          setActiveIndex(0);
+        } else if (fallback.length === 0) {
+          setPhotoError(true);
+        }
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setLoading(false);
+        if (fallback.length === 0) setPhotoError(true);
+      });
 
     return () => {
       cancelled = true;
     };
-  }, [open, place?.id, place?.thumbnailUrl]);
+  }, [open, place?.id, place?.thumbnailUrl, isGooglePlace]);
 
   useEffect(() => {
     if (!open) return;
@@ -145,7 +139,7 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
       className="photos-overlay"
       role="dialog"
       aria-modal="true"
-      aria-label={`${place.name} 상세`}
+      aria-label={place.name}
       onClick={onClose}
     >
       <div className="photos-panel place-detail-panel" onClick={(e) => e.stopPropagation()}>
@@ -155,13 +149,13 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
             type="button"
             className="icon-btn"
             onClick={onClose}
-            aria-label="닫기"
+            aria-label={t('place.detail.close')}
           >
             <Icon name="close" />
           </button>
         </header>
 
-        <nav className="place-detail-tabs" role="tablist" aria-label="장소 정보 탭">
+        <nav className="place-detail-tabs" role="tablist" aria-label={t('place.detail.tabsAria')}>
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -171,7 +165,7 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
               aria-selected={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
             >
-              {tab.label}
+              {t(placePanelTabI18nKey(tab.id, panel), { defaultValue: tab.label })}
             </button>
           ))}
         </nav>
@@ -181,16 +175,18 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
           role="tabpanel"
         >
           {loading && isPhotoTab && photos.length === 0 && (
-            <p className="photos-status">불러오는 중…</p>
+            <p className="photos-status">{t('place.detail.loading')}</p>
           )}
 
           {isPhotoTab ? (
             <>
               {photoError && !loading && (
                 <div className="photos-empty">
-                  <p>표시할 사진이 없습니다.</p>
+                  <p>{t('place.detail.noPhotos')}</p>
                   <a href={placeExternalUrl} target="_blank" rel="noopener noreferrer">
-                    {isGooglePlace ? 'Google 지도에서 확인' : '카카오맵에서 확인'}
+                    {isGooglePlace
+                      ? t('place.detail.openOnGoogle')
+                      : t('place.detail.openOnKakao')}
                   </a>
                 </div>
               )}
@@ -200,7 +196,7 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
                     type="button"
                     className="photos-main-zoom"
                     onClick={openLightbox}
-                    aria-label={`${place.name} 사진 크게 보기`}
+                    aria-label={t('place.detail.zoomAria', { name: place.name })}
                   >
                     <img
                       key={active}
@@ -211,7 +207,7 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
                     />
                     <span className="photos-zoom-hint" aria-hidden="true">
                       <Icon name="zoomIn" />
-                      크게 보기
+                      {t('place.detail.zoom')}
                     </span>
                   </button>
                   {photos.length > 1 && (
@@ -221,7 +217,7 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
                         className="photos-nav photos-nav-prev"
                         disabled={activeIndex <= 0}
                         onClick={() => setActiveIndex((i) => Math.max(0, i - 1))}
-                        aria-label="이전 사진"
+                        aria-label={t('place.detail.prevPhoto')}
                       >
                         <Icon name="chevronLeft" />
                       </button>
@@ -232,7 +228,7 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
                         onClick={() =>
                           setActiveIndex((i) => Math.min(photos.length - 1, i + 1))
                         }
-                        aria-label="다음 사진"
+                        aria-label={t('place.detail.nextPhoto')}
                       >
                         <Icon name="chevronRight" />
                       </button>
@@ -252,7 +248,7 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
                       role="listitem"
                       className={`photos-thumb ${i === activeIndex ? 'active' : ''}`}
                       onClick={() => setActiveIndex(i)}
-                      aria-label={`${i + 1}번째 사진`}
+                      aria-label={t('place.detail.photoN', { n: i + 1 })}
                       aria-current={i === activeIndex}
                     >
                       <img src={url} alt="" referrerPolicy="no-referrer" />
@@ -264,7 +260,7 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
           ) : (
             <div className="place-detail-tab-scroll">
               {loading && !panel ? (
-                <p className="photos-status">정보 불러오는 중…</p>
+                <p className="photos-status">{t('place.detail.loading')}</p>
               ) : (
                 <PlaceDetailTabPanel tabId={activeTab} panel={panel} place={place} />
               )}
@@ -278,7 +274,9 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
         />
         <footer className="photos-footer">
           <a href={placeExternalUrl} target="_blank" rel="noopener noreferrer">
-            {isGooglePlace ? 'Google 지도에서 더보기' : '카카오맵에서 더보기'}
+            {isGooglePlace
+              ? t('place.detail.moreOnGoogle')
+              : t('place.detail.moreOnKakao')}
             <Icon name="externalLink" />
           </a>
         </footer>
@@ -289,14 +287,14 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
           className="photo-lightbox"
           role="dialog"
           aria-modal="true"
-          aria-label="사진 크게 보기"
+          aria-label={t('place.detail.lightboxAria')}
           onClick={() => setLightboxOpen(false)}
         >
           <button
             type="button"
             className="photo-lightbox-close"
             onClick={() => setLightboxOpen(false)}
-            aria-label="크게 보기 닫기"
+            aria-label={t('place.detail.close')}
           >
             <Icon name="close" />
           </button>
@@ -310,7 +308,7 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
                   e.stopPropagation();
                   setActiveIndex((i) => Math.max(0, i - 1));
                 }}
-                aria-label="이전 사진"
+                aria-label={t('place.detail.prevPhoto')}
               >
                 <Icon name="chevronLeft" />
               </button>
@@ -322,7 +320,7 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
                   e.stopPropagation();
                   setActiveIndex((i) => Math.min(photos.length - 1, i + 1));
                 }}
-                aria-label="다음 사진"
+                aria-label={t('place.detail.nextPhoto')}
               >
                 <Icon name="chevronRight" />
               </button>
@@ -333,7 +331,10 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
           )}
           <img
             src={active}
-            alt={`${place.name} 사진 ${activeIndex + 1}`}
+            alt={t('place.detail.photoAlt', {
+              name: place.name,
+              n: activeIndex + 1,
+            })}
             className="photo-lightbox-img"
             referrerPolicy="no-referrer"
             onClick={(e) => e.stopPropagation()}

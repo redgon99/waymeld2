@@ -1,7 +1,7 @@
 import { Icon } from './Icon';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { PinnedPlace } from '../types';
+import type { GeneratedRoute, PinnedPlace } from '../types';
 import {
   type PinExportFormat,
   type PinExportScope,
@@ -10,6 +10,7 @@ import {
   getPinGroupsForScope,
   hasExportablePins,
 } from '../lib/exportPins';
+import { exportMapFormat, type MapExportFormat } from '../lib/exportMapFormats';
 import { useAuth } from '../contexts/AuthContext';
 import { canExportItinerary } from '../lib/subscription';
 
@@ -18,6 +19,7 @@ interface Props {
   currentDay: number;
   totalDays: number;
   pinnedByDay: Record<number, PinnedPlace[]>;
+  generatedRouteByDay?: Record<number, GeneratedRoute | null>;
   onNotify?: (message: string) => void;
   onUpgradeRequest?: () => void;
   label?: string;
@@ -28,6 +30,7 @@ export function PinExportMenu({
   currentDay,
   totalDays,
   pinnedByDay,
+  generatedRouteByDay,
   onNotify,
   onUpgradeRequest,
   label,
@@ -52,6 +55,17 @@ export function PinExportMenu({
 
   if (!canExport) return null;
 
+  function buildCtx(scope: PinExportScope) {
+    return {
+      tripTitle,
+      currentDay,
+      totalDays,
+      pinnedByDay,
+      scope,
+      generatedRouteByDay,
+    };
+  }
+
   async function runExport(scope: PinExportScope, format: PinExportFormat) {
     if (!canExportItinerary(plan, isAdmin)) {
       onUpgradeRequest?.();
@@ -59,13 +73,7 @@ export function PinExportMenu({
       return;
     }
 
-    const ctx = {
-      tripTitle,
-      currentDay,
-      totalDays,
-      pinnedByDay,
-      scope,
-    };
+    const ctx = buildCtx(scope);
     if (!getPinGroupsForScope(ctx).length) {
       onNotify?.(t('export.noPins'));
       return;
@@ -100,6 +108,42 @@ export function PinExportMenu({
     setOpen(false);
   }
 
+  function runMapExport(scope: PinExportScope, format: MapExportFormat) {
+    if (!canExportItinerary(plan, isAdmin)) {
+      onUpgradeRequest?.();
+      setOpen(false);
+      return;
+    }
+
+    const ctx = buildCtx(scope);
+    if (!getPinGroupsForScope(ctx).length) {
+      onNotify?.(t('export.noPins'));
+      return;
+    }
+
+    const ok = exportMapFormat(ctx, format);
+    if (!ok) {
+      onNotify?.(t('export.noPins'));
+      setOpen(false);
+      return;
+    }
+
+    const scopeLabel =
+      scope === 'all'
+        ? t('export.scopeAll')
+        : t('export.scopeDay', { day: currentDay });
+    const formatLabel =
+      format === 'kml' ? t('export.formatKml') : t('export.formatGpx');
+    onNotify?.(
+      t('export.savedMapFile', {
+        scope: scopeLabel,
+        format: formatLabel,
+        defaultValue: `${scopeLabel} ${formatLabel} 파일을 저장했습니다 (구글 지도 등에서 가져오기)`,
+      })
+    );
+    setOpen(false);
+  }
+
   return (
     <div className="pin-export-menu" ref={rootRef}>
       <button
@@ -128,6 +172,12 @@ export function PinExportMenu({
             <button type="button" role="menuitem" onClick={() => runExport('current', 'json')}>
               JSON
             </button>
+            <button type="button" role="menuitem" onClick={() => runMapExport('current', 'kml')}>
+              KML · {t('export.mapAppsShort')}
+            </button>
+            <button type="button" role="menuitem" onClick={() => runMapExport('current', 'gpx')}>
+              GPX · {t('export.mapAppsShort')}
+            </button>
           </div>
 
           {showAllScope && (
@@ -142,8 +192,16 @@ export function PinExportMenu({
               <button type="button" role="menuitem" onClick={() => runExport('all', 'json')}>
                 JSON
               </button>
+              <button type="button" role="menuitem" onClick={() => runMapExport('all', 'kml')}>
+                KML · {t('export.mapAppsShort')}
+              </button>
+              <button type="button" role="menuitem" onClick={() => runMapExport('all', 'gpx')}>
+                GPX · {t('export.mapAppsShort')}
+              </button>
             </div>
           )}
+
+          <p className="pin-export-hint">{t('export.mapHint')}</p>
         </div>
       )}
     </div>

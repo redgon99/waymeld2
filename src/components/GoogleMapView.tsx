@@ -12,6 +12,8 @@ import {
   isMapPlaceBubbleDetailClick,
 } from '../lib/mapPlaceBubble';
 import { kakaoLevelToGoogleZoom, googleZoomToKakaoLevel } from '../lib/mapZoom';
+import { useLongPress } from '../hooks/useLongPress';
+import { mapCentersNear, shouldAnimateMapCenter, type MapLatLng } from '../lib/mapCenterMotion';
 
 interface Props {
   mapsReady?: boolean;
@@ -28,6 +30,7 @@ interface Props {
   pickingPinFromMap?: boolean;
   onOriginPicked?: (lat: number, lng: number, address: string) => void;
   onPinLocationPicked?: (lat: number, lng: number, address: string) => void;
+  onMapLongPress?: () => void;
   draftPinLocation?: { lat: number; lng: number } | null;
   onSelectPlace?: (place: Place) => void;
   onPinnedMarkerClick?: (place: Place) => void;
@@ -70,6 +73,7 @@ export function GoogleMapView({
   pickingPinFromMap = false,
   onOriginPicked,
   onPinLocationPicked,
+  onMapLongPress,
   draftPinLocation = null,
   onSelectPlace,
   onPinnedMarkerClick,
@@ -91,6 +95,7 @@ export function GoogleMapView({
 }: Props) {
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
+  const centerReadyRef = useRef(false);
   const markersRef = useRef<any[]>([]);
   const placeMarkersRef = useRef<GoogleHtmlMarker[]>([]);
   const routeLineRef = useRef<any>(null);
@@ -162,7 +167,23 @@ export function GoogleMapView({
 
   useEffect(() => {
     if (!mapRef.current) return;
-    mapRef.current.setCenter(center);
+    const target: MapLatLng = { lat: center.lat, lng: center.lng };
+    const isInitial = !centerReadyRef.current;
+
+    if (isInitial) {
+      mapRef.current.setCenter(target);
+      centerReadyRef.current = true;
+      return;
+    }
+
+    const c = mapRef.current.getCenter();
+    const current: MapLatLng = { lat: c.lat(), lng: c.lng() };
+
+    if (shouldAnimateMapCenter(current, target)) {
+      mapRef.current.panTo(target);
+    } else if (!mapCentersNear(current, target)) {
+      mapRef.current.setCenter(target);
+    }
   }, [center.lat, center.lng]);
 
   useEffect(() => {
@@ -472,6 +493,8 @@ export function GoogleMapView({
     origin?.lng,
   ]);
 
+  const longPress = useLongPress(() => onMapLongPress?.());
+
   return (
     <div
       ref={mapEl}
@@ -479,6 +502,7 @@ export function GoogleMapView({
       role="application"
       aria-label="지도"
       onContextMenu={(e) => e.preventDefault()}
+      {...longPress}
     />
   );
 }

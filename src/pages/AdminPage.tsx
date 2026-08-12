@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { AuthBar } from '../components/AuthBar';
+import { AdminHeader } from '../components/AdminHeader';
 import {
   createAdminNotice,
   deleteAdminNotice,
@@ -215,27 +215,13 @@ export default function AdminPage() {
   return (
     <main className="admin-page">
       <div className="admin-shell">
-        <header className="admin-header">
-          <div>
-            <h1>관리자 페이지</h1>
-            <p>현재 사용자확인 관리 / 공유자료 현황 관리 / 기타 공지사항 관리</p>
-          </div>
-          <div className="admin-header-actions">
-            <AuthBar />
-            <button type="button" className="admin-refresh-btn" onClick={() => void loadAll()}>
-              {refreshing ? '새로고침 중...' : '새로고침'}
-            </button>
-            <Link to="/admin/insights" className="admin-link-btn">
-              시장 인사이트
-            </Link>
-            <Link to="/admin/guides" className="admin-link-btn">
-              가이드 카드
-            </Link>
-            <Link to="/plan" className="admin-link-btn">
-              플래너로 이동
-            </Link>
-          </div>
-        </header>
+        <AdminHeader
+          title="관리자 페이지"
+          subtitle="현재 사용자확인 관리 / 공유자료 현황 관리 / 기타 공지사항 관리"
+          current="admin"
+          refreshing={refreshing}
+          onRefresh={() => void loadAll()}
+        />
 
         {error && <div className="admin-error">{error}</div>}
 

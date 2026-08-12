@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { AuthBar } from '../components/AuthBar';
+import { AdminHeader } from '../components/AdminHeader';
 import { isCurrentUserAdmin } from '../lib/admin';
 import { GUIDE_KIND_META, GUIDE_KINDS, type GuideKind } from '../lib/guideKinds';
 import {
@@ -31,8 +31,10 @@ export default function AdminGuidesPage() {
   const [kindFilter, setKindFilter] = useState<GuideKind | ''>('');
   const [editing, setEditing] = useState<GuideArticle | null>(null);
   const [saving, setSaving] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const loadList = useCallback(async () => {
+    setRefreshing(true);
     try {
       const rows = await listAdminGuides({
         status: statusFilter || undefined,
@@ -41,6 +43,8 @@ export default function AdminGuidesPage() {
       setGuides(rows);
     } catch (e) {
       setError(e instanceof Error ? e.message : '가이드 목록을 불러오지 못했습니다.');
+    } finally {
+      setRefreshing(false);
     }
   }, [statusFilter, kindFilter]);
 
@@ -148,21 +152,18 @@ export default function AdminGuidesPage() {
   return (
     <main className="admin-page">
       <div className="admin-shell">
-        <header className="admin-header">
-          <div>
-            <h1>가이드 카드</h1>
-            <p>종류별 초안을 검수·발행합니다. 추천 여행코스는 플래너 자동 동선과 연동됩니다.</p>
-          </div>
-          <div className="admin-header-actions">
-            <AuthBar />
-            <Link to="/admin/insights" className="admin-link-btn">
-              시장 인사이트
-            </Link>
+        <AdminHeader
+          title="가이드 카드"
+          subtitle="종류별 초안을 검수·발행합니다. 추천 여행코스는 플래너 자동 동선과 연동됩니다."
+          current="guides"
+          refreshing={refreshing}
+          onRefresh={() => void loadList()}
+          extraActions={
             <Link to="/guides" className="admin-link-btn">
-              공개 가이드
+              공개 가이드 보기
             </Link>
-          </div>
-        </header>
+          }
+        />
 
         {error && <div className="admin-error">{error}</div>}
 

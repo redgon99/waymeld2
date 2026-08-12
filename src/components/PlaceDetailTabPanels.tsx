@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from './Icon';
 import type { Place } from '../types';
 import { proxiedThumbnailUrl } from '../lib/kakaoPlaceApi';
@@ -13,6 +14,9 @@ import {
 import { OpenStatusBadge } from './OpenStatusBadge';
 import { parseStoreFacilities } from '../lib/storeFacilities';
 import type { GooglePlaceReview } from '../lib/googlePlaceDetail';
+import { glossKoreanMenuName, shouldShowMenuGloss } from '../lib/koreanMenuGloss';
+import { normalizeLocale } from '../lib/locale';
+import i18n from '../lib/i18n';
 
 interface TabProps {
   panel: Record<string, unknown> | null;
@@ -24,6 +28,7 @@ export function PlaceDetailTabPanel({
   panel,
   place,
 }: TabProps & { tabId: PlacePanelTabId }) {
+  const { t } = useTranslation('planner');
   switch (tabId) {
     case 'SUMMARY':
       return <SummaryTab panel={panel} place={place} />;
@@ -34,10 +39,10 @@ export function PlaceDetailTabPanel({
       return <KakaoReviewTab panel={panel} />;
     case 'MAP':
       if (panel?.provider === 'google') return <GoogleMapTab panel={panel} />;
-      return <EmptyTab message="지도 정보가 없습니다." />;
+      return <EmptyTab message={t('place.detail.empty.map')} />;
     case 'INFO':
       if (panel?.provider === 'google') return <GoogleInfoTab panel={panel} />;
-      return <EmptyTab message="추가 정보가 없습니다." />;
+      return <EmptyTab message={t('place.detail.empty.info')} />;
     case 'BLOG':
       return <BlogReviewTab panel={panel} />;
     case 'BOOKING':
@@ -51,7 +56,7 @@ export function PlaceDetailTabPanel({
     case 'HOME':
       return <HomeTab panel={panel} />;
     default:
-      return <EmptyTab message="이 탭의 정보를 표시할 수 없습니다." />;
+      return <EmptyTab message={t('place.detail.empty.tab')} />;
   }
 }
 
@@ -60,6 +65,7 @@ function EmptyTab({ message }: { message: string }) {
 }
 
 function SummaryTab({ panel, place }: TabProps) {
+  const { t } = useTranslation('planner');
   const provider = panel?.provider;
   if (provider === 'google') {
     return <GoogleSummaryTab panel={panel} place={place} />;
@@ -95,13 +101,13 @@ function SummaryTab({ panel, place }: TabProps) {
   const koName = place?.nameKo ?? place?.name;
 
   if (!summary && !address && phones.length === 0 && links.length === 0 && !koName) {
-    return <EmptyTab message="요약 정보가 없습니다." />;
+    return <EmptyTab message={t('place.detail.empty.summary')} />;
   }
 
   return (
     <div className="place-detail-summary">
       {koName && (
-        <SummaryRow icon="mapPin" copyText={koName} copyLabel="한국어 이름">
+        <SummaryRow icon="mapPin" copyText={koName} copyLabel={t('place.detail.koreanName')}>
           <p className="place-detail-summary-text place-detail-name-ko">{koName}</p>
         </SummaryRow>
       )}
@@ -136,13 +142,13 @@ function SummaryTab({ panel, place }: TabProps) {
       ))}
 
       {address && (
-        <SummaryRow icon="mapPin" copyText={address} copyLabel="주소">
+        <SummaryRow icon="mapPin" copyText={address} copyLabel={t('place.detail.address')}>
           <p className="place-detail-summary-text">{address}</p>
         </SummaryRow>
       )}
 
       {phones.map((tel) => (
-        <SummaryRow key={tel} icon="phone" copyText={tel} copyLabel="전화번호">
+        <SummaryRow key={tel} icon="phone" copyText={tel} copyLabel={t('place.detail.phone')}>
           <a href={`tel:${tel.replace(/\s/g, '')}`} className="place-detail-summary-text">
             {tel}
           </a>
@@ -164,6 +170,7 @@ function SummaryTab({ panel, place }: TabProps) {
 }
 
 function GoogleSummaryTab({ panel, place }: TabProps) {
+  const { t } = useTranslation('planner');
   const summary = (panel?.summary as Record<string, unknown> | undefined) ?? {};
   const address = pickStr(summary, 'address') ?? place?.roadAddress ?? place?.address;
   const phone = pickStr(summary, 'phone') ?? place?.phone;
@@ -199,7 +206,7 @@ function GoogleSummaryTab({ panel, place }: TabProps) {
   const hoursDisplay = todayHours ?? openingText;
 
   if (!address && !phone && !website && !hoursDisplay && rating == null && !editorial) {
-    return <EmptyTab message="요약 정보가 없습니다." />;
+    return <EmptyTab message={t('place.detail.empty.summary')} />;
   }
 
   return (
@@ -253,13 +260,13 @@ function GoogleSummaryTab({ panel, place }: TabProps) {
       )}
 
       {address && (
-        <SummaryRow icon="mapPin" copyText={address} copyLabel="주소">
+        <SummaryRow icon="mapPin" copyText={address} copyLabel={t('place.detail.address')}>
           <p className="place-detail-summary-text">{address}</p>
         </SummaryRow>
       )}
 
       {phone && (
-        <SummaryRow icon="phone" copyText={phone} copyLabel="전화번호">
+        <SummaryRow icon="phone" copyText={phone} copyLabel={t('place.detail.phone')}>
           <a href={`tel:${phone.replace(/\s/g, '')}`} className="place-detail-summary-text">
             {phone}
           </a>
@@ -284,6 +291,7 @@ function GoogleSummaryTab({ panel, place }: TabProps) {
 }
 
 function GoogleReviewTab({ panel }: TabProps) {
+  const { t } = useTranslation('planner');
   const summary = (panel?.summary as Record<string, unknown> | undefined) ?? {};
   const reviews = (panel?.reviews as GooglePlaceReview[] | undefined) ?? [];
   const ratingRaw = summary.rating;
@@ -298,7 +306,7 @@ function GoogleReviewTab({ panel }: TabProps) {
         : undefined;
 
   if (reviews.length === 0 && rating == null) {
-    return <EmptyTab message="리뷰가 없습니다." />;
+    return <EmptyTab message={t('place.detail.empty.reviews')} />;
   }
 
   return (
@@ -364,21 +372,22 @@ function GoogleReviewTab({ panel }: TabProps) {
         ))}
       </ul>
       <footer className="place-detail-google-attribution">
-        Google 리뷰 · 일부만 표시됩니다
+        {t('place.detail.googleReviewsPartial')}
       </footer>
     </div>
   );
 }
 
 function GoogleInfoTab({ panel }: TabProps) {
+  const { t } = useTranslation('planner');
   const options = (panel?.serviceOptions as Array<{ label?: string; available?: boolean }>) ?? [];
   if (options.length === 0) {
-    return <EmptyTab message="표시할 매장 정보가 없습니다." />;
+    return <EmptyTab message={t('place.detail.empty.googleInfo')} />;
   }
 
   return (
-    <section className="place-detail-google-service-block" aria-label="서비스 옵션">
-      <h4 className="place-detail-google-section-title">서비스 옵션</h4>
+    <section className="place-detail-google-service-block" aria-label={t('place.detail.serviceOptions')}>
+      <h4 className="place-detail-google-section-title">{t('place.detail.serviceOptions')}</h4>
       <ul className="place-detail-google-service-list">
         {options.map((opt) => (
           <li
@@ -395,24 +404,23 @@ function GoogleInfoTab({ panel }: TabProps) {
 }
 
 function GoogleMapTab({ panel }: TabProps) {
+  const { t } = useTranslation('planner');
   const mapEmbedUrl = panel?.map_embed_url as string | undefined;
   const placeUrl = panel?.place_url as string | undefined;
   if (!mapEmbedUrl) {
-    return <EmptyTab message="지도 미리보기를 사용할 수 없습니다." />;
+    return <EmptyTab message={t('place.detail.empty.mapPreview')} />;
   }
 
   return (
     <div className="place-detail-google-map-wrap">
       <iframe
-        title="Google 지도"
+        title={t('place.detail.tabs.map')}
         className="place-detail-google-map-embed"
         src={mapEmbedUrl}
         loading="lazy"
         referrerPolicy="no-referrer-when-downgrade"
       />
-      <p className="place-detail-google-map-hint">
-        Google Maps Embed · 길찾기·전체 정보는 하단 링크에서 확인하세요
-      </p>
+      <p className="place-detail-google-map-hint">{t('place.detail.googleMapHint')}</p>
       {placeUrl && (
         <a
           href={placeUrl}
@@ -420,7 +428,7 @@ function GoogleMapTab({ panel }: TabProps) {
           rel="noopener noreferrer"
           className="place-detail-google-map-link"
         >
-          Google 지도에서 열기
+          {t('place.detail.openOnGoogleShort')}
           <Icon name="externalLink" size={14} />
         </a>
       )}
@@ -433,9 +441,10 @@ function StoreFacilitySection({
 }: {
   section: ReturnType<typeof parseStoreFacilities>;
 }) {
+  const { t } = useTranslation('planner');
   return (
-    <section className="place-detail-store-section" aria-label="매장 정보">
-      <h4 className="place-detail-store-title">매장 정보</h4>
+    <section className="place-detail-store-section" aria-label={t('place.detail.storeInfo')}>
+      <h4 className="place-detail-store-title">{t('place.detail.storeInfo')}</h4>
       {section.chips.length > 0 && (
         <ul className="place-detail-facility-grid" role="list">
           {section.chips.map((chip) => (
@@ -472,6 +481,7 @@ function SummaryRow({
   copyText?: string;
   copyLabel?: string;
 }) {
+  const { t } = useTranslation('planner');
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -496,9 +506,11 @@ function SummaryRow({
           type="button"
           className="place-detail-copy-btn"
           onClick={() => void handleCopy()}
-          aria-label={`${copyLabel ?? '내용'} 복사`}
+          aria-label={t('place.detail.copyAria', {
+            label: copyLabel ?? t('place.detail.tabs.info'),
+          })}
         >
-          {copied ? '복사됨' : '복사'}
+          {copied ? t('place.detail.copied') : t('place.detail.copy')}
         </button>
       )}
     </div>
@@ -593,8 +605,9 @@ function collectHomepageLinks(
 }
 
 function HomeTab({ panel }: TabProps) {
+  const { t } = useTranslation('planner');
   const summary = panel?.summary as Record<string, unknown> | undefined;
-  if (!summary) return <EmptyTab message="홈 정보가 없습니다." />;
+  if (!summary) return <EmptyTab message={t('place.detail.empty.home')} />;
 
   const displayInfo = summary.display_info as Record<string, unknown> | undefined;
   const name = pickStr(displayInfo, 'display_name1') ?? pickStr(summary, 'name');
@@ -659,31 +672,43 @@ function HomeTab({ panel }: TabProps) {
 }
 
 function MenuTab({ panel }: TabProps) {
-  if (!hasMenu(panel)) return <EmptyTab message="메뉴 정보가 없습니다." />;
+  const { t } = useTranslation('planner');
+  if (!hasMenu(panel)) return <EmptyTab message={t('place.detail.empty.menu')} />;
 
   const menu = panel!.menu as Record<string, unknown>;
   const items =
     ((menu.menus as Record<string, unknown>)?.items as Array<Record<string, unknown>>) ??
     [];
+  const locale = normalizeLocale(i18n.language);
+  const showGloss = shouldShowMenuGloss(locale);
 
   return (
     <ul className="place-detail-menu-list">
       {items.map((item) => {
         const photo = item.photo_url as string | undefined;
         const proxied = photo ? proxiedThumbnailUrl(photo) ?? photo : undefined;
+        const name = String(item.name ?? '');
+        const gloss = showGloss ? glossKoreanMenuName(name) : null;
         return (
           <li key={String(item.product_id ?? item.name)} className="place-detail-menu-item">
             {proxied && (
               <img src={proxied} alt="" className="place-detail-menu-img" />
             )}
             <div className="place-detail-menu-text">
-              <span className="place-detail-menu-name">{String(item.name ?? '')}</span>
+              <span className="place-detail-menu-name">{name}</span>
+              {gloss && (
+                <span className="place-detail-menu-gloss" lang="en">
+                  {gloss}
+                </span>
+              )}
               {item.desc != null && String(item.desc).length > 0 && (
                 <span className="place-detail-menu-desc">{String(item.desc)}</span>
               )}
               {item.price !== undefined && (
                 <span className="place-detail-menu-price">
-                  {Number(item.price).toLocaleString()}원
+                  {locale === 'ko'
+                    ? `${Number(item.price).toLocaleString()}원`
+                    : `₩${Number(item.price).toLocaleString()}`}
                 </span>
               )}
             </div>
@@ -695,12 +720,13 @@ function MenuTab({ panel }: TabProps) {
 }
 
 function KakaoReviewTab({ panel }: TabProps) {
+  const { t } = useTranslation('planner');
   const block = panel?.kakaomap_review as Record<string, unknown> | undefined;
   const score = block?.score_set as Record<string, unknown> | undefined;
   const reviews = (block?.reviews as Array<Record<string, unknown>>) ?? [];
 
   if (reviews.length === 0 && !score?.average_score) {
-    return <EmptyTab message="카카오맵 후기가 없습니다." />;
+    return <EmptyTab message={t('place.detail.empty.kakaoReviews')} />;
   }
 
   return (
@@ -726,9 +752,9 @@ function KakaoReviewTab({ panel }: TabProps) {
                           string,
                           unknown
                         >
-                      ).nickname ?? '익명'
+                      ).nickname ?? t('place.detail.anonymous')
                     )
-                  : '익명'}
+                  : t('place.detail.anonymous')}
               </span>
               {r.star_rating !== undefined && (
                 <span className="place-detail-review-stars">
@@ -751,11 +777,12 @@ function KakaoReviewTab({ panel }: TabProps) {
 }
 
 function BlogReviewTab({ panel }: TabProps) {
+  const { t } = useTranslation('planner');
   const block = panel?.blog_review as Record<string, unknown> | undefined;
   const reviews = (block?.reviews as Array<Record<string, unknown>>) ?? [];
 
   if (reviews.length === 0) {
-    return <EmptyTab message="블로그 후기가 없습니다." />;
+    return <EmptyTab message={t('place.detail.empty.blog')} />;
   }
 
   return (
@@ -764,10 +791,14 @@ function BlogReviewTab({ panel }: TabProps) {
         <li key={String(r.review_id)} className="place-detail-blog-item">
           {r.origin_url ? (
             <a href={String(r.origin_url)} target="_blank" rel="noopener noreferrer">
-              <span className="place-detail-blog-title">{String(r.title ?? '블로그 글')}</span>
+              <span className="place-detail-blog-title">
+                {String(r.title ?? t('place.detail.blogPost'))}
+              </span>
             </a>
           ) : (
-            <span className="place-detail-blog-title">{String(r.title ?? '블로그 글')}</span>
+            <span className="place-detail-blog-title">
+              {String(r.title ?? t('place.detail.blogPost'))}
+            </span>
           )}
           {r.author != null && (
             <span className="place-detail-blog-author">{String(r.author)}</span>
@@ -782,32 +813,40 @@ function BlogReviewTab({ panel }: TabProps) {
 }
 
 function BookingTab({ panel }: TabProps) {
+  const { t } = useTranslation('planner');
   const notice = panel?.my_store_notice as Record<string, unknown> | undefined;
-  if (!notice) return <EmptyTab message="예약 정보가 없습니다." />;
+  if (!notice) return <EmptyTab message={t('place.detail.empty.booking')} />;
 
   const available = notice.is_available_booking === true;
   return (
     <div className="place-detail-booking">
       <p className={available ? 'place-detail-ok' : 'place-detail-muted'}>
-        {available ? '예약 가능한 매장입니다.' : '예약 정보를 확인할 수 없습니다.'}
+        {available
+          ? t('place.detail.bookingAvailable')
+          : t('place.detail.bookingUnknown')}
       </p>
       {notice.notice_count !== undefined && (
-        <p className="place-detail-meta">매장 소식 {Number(notice.notice_count)}건</p>
+        <p className="place-detail-meta">
+          {t('place.detail.storeNewsCount', { count: Number(notice.notice_count) })}
+        </p>
       )}
     </div>
   );
 }
 
 function NewsTab({ panel }: TabProps) {
+  const { t } = useTranslation('planner');
   const notice = panel?.my_store_notice as Record<string, unknown> | undefined;
   const channel = panel?.talk_channel as Record<string, unknown> | undefined;
 
-  if (!notice && !channel) return <EmptyTab message="소식이 없습니다." />;
+  if (!notice && !channel) return <EmptyTab message={t('place.detail.empty.news')} />;
 
   return (
     <div className="place-detail-news">
       {notice?.status != null && (
-        <p className="place-detail-meta">매장 상태: {String(notice.status)}</p>
+        <p className="place-detail-meta">
+          {t('place.detail.storeStatus', { status: String(notice.status) })}
+        </p>
       )}
       {channel?.name != null && (
         <p className="place-detail-row">
@@ -815,12 +854,13 @@ function NewsTab({ panel }: TabProps) {
           {String(channel.name)}
         </p>
       )}
-      <p className="place-detail-muted">자세한 소식은 카카오맵에서 확인해 주세요.</p>
+      <p className="place-detail-muted">{t('place.detail.newsSeeKakao')}</p>
     </div>
   );
 }
 
 function SpecialTab({ panel }: TabProps) {
+  const { t } = useTranslation('planner');
   const events = panel?.events as Record<string, unknown> | unknown[] | undefined;
   const list = Array.isArray(events)
     ? events
@@ -828,7 +868,7 @@ function SpecialTab({ panel }: TabProps) {
       ? ((events as Record<string, unknown>).items as unknown[])
       : [];
 
-  if (list.length === 0) return <EmptyTab message="기획전 정보가 없습니다." />;
+  if (list.length === 0) return <EmptyTab message={t('place.detail.empty.special')} />;
 
   return (
     <ul className="place-detail-special-list">
@@ -836,7 +876,7 @@ function SpecialTab({ panel }: TabProps) {
         const item = ev as Record<string, unknown>;
         return (
           <li key={String(item.id ?? i)} className="place-detail-special-item">
-            {item.title ? String(item.title) : `기획전 ${i + 1}`}
+            {item.title ? String(item.title) : t('place.detail.specialN', { n: i + 1 })}
           </li>
         );
       })}
@@ -845,18 +885,18 @@ function SpecialTab({ panel }: TabProps) {
 }
 
 function RankingTab({ panel }: TabProps) {
+  const { t } = useTranslation('planner');
   const rank = panel?.trend_rank as Record<string, unknown> | undefined;
   if (!rank?.show_ranking_card) {
-    return <EmptyTab message="랭킹 정보가 없습니다." />;
+    return <EmptyTab message={t('place.detail.empty.ranking')} />;
   }
 
   return (
     <div className="place-detail-ranking">
       <p className="place-detail-ok">
-        <Icon name="trophy" /> 이 장소는 카카오맵 랭킹에 포함되어
-        있습니다.
+        <Icon name="trophy" /> {t('place.detail.rankingIncluded')}
       </p>
-      <p className="place-detail-muted">상세 랭킹은 카카오맵에서 확인해 주세요.</p>
+      <p className="place-detail-muted">{t('place.detail.rankingSeeKakao')}</p>
     </div>
   );
 }

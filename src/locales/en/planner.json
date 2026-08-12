@@ -59,7 +59,10 @@
     "share": "Share",
     "shareTitle": "Create share link",
     "daysCount": "{{count}} days",
-    "deleteTripMenu": "Delete trip"
+    "deleteTripMenu": "Delete trip",
+    "hubAria": "Trip settings",
+    "hubMyTrips": "My trips",
+    "hubThisTrip": "This trip"
   },
   "day": {
     "tabsAria": "Days",
@@ -143,6 +146,52 @@
       "low": "Low fatigue",
       "medium": "Medium fatigue",
       "high": "High fatigue"
+    },
+    "options": {
+      "panelAria": "Route settings",
+      "title": "Route settings",
+      "subtitle": "Day {{day}} · {{count}} places",
+      "close": "Close panel",
+      "sectionDepart": "DEPART",
+      "sectionTransport": "TRANSPORT",
+      "sectionOptimize": "OPTIMIZE",
+      "sectionStay": "STAY TIME",
+      "copySameAsDay": "Same as day {{day}}",
+      "departTime": "Departure time",
+      "originBadge": "Start",
+      "originAria": "Start · {{label}}",
+      "originCurrent": "Current location",
+      "originMapPick": "Pick on map",
+      "originAddressPlaceholder": "Address or place",
+      "originClickMap": "Click the map",
+      "originEnterAddress": "Enter address or place",
+      "originSelect": "Choose start",
+      "originStop1": "{{name}} (stop 1)",
+      "reflectMeal": "Include meal times",
+      "optimizeDistance": "Shortest",
+      "optimizeTime": "Fastest",
+      "optimizeNoToll": "Free roads",
+      "orderAuto": "Auto",
+      "orderPins": "Pin order",
+      "aiSuggest": "AI suggest",
+      "stayMinutesAria": "{{name}} stay (min)",
+      "preview": "Preview",
+      "previewStats": "{{km}} km · {{minutes}} min · ends {{time}}",
+      "build": "Build route",
+      "rebuild": "Rebuild route",
+      "stayReason": {
+        "tour": "Suggested stroll ~90 min",
+        "food": "Suggested meal ~60 min",
+        "cafe": "Suggested café break ~45 min",
+        "stay": "Check-in / check-out",
+        "culture": "Suggested visit ~75 min",
+        "shop": "Suggested shopping ~30 min",
+        "beauty": "Suggested beauty stop ~60 min",
+        "market": "Suggested market ~45 min",
+        "transport": "Transfer ~15 min",
+        "road": "Suggested walk ~40 min",
+        "other": "Suggested stay ~30 min"
+      }
     }
   },
   "dock": {
@@ -158,6 +207,9 @@
     "focusBadge": "NEXT",
     "editOnMap": "Show on map",
     "rebuild": "Rebuild route",
+    "clearRoute": "Clear route",
+    "clearRouteConfirm": "Clear Day {{day}} route?\nPins stay; only the route is reset.",
+    "clearRouteDone": "Day {{day}} route cleared",
     "showDetails": "Details",
     "hideDetails": "Simple",
     "more": "More",
@@ -182,7 +234,77 @@
     "showCard": "Taxi card"
   },
   "place": {
-    "copyName": "Copy Korean name"
+    "copyName": "Copy Korean name",
+    "detail": {
+      "tabsAria": "Place info tabs",
+      "close": "Close",
+      "loading": "Loading…",
+      "noPhotos": "No photos to show",
+      "openOnKakao": "Open in Kakao Map",
+      "openOnGoogle": "Open in Google Maps",
+      "moreOnKakao": "More on Kakao Map",
+      "moreOnGoogle": "More on Google Maps",
+      "zoom": "Zoom",
+      "zoomAria": "View {{name}} photo larger",
+      "prevPhoto": "Previous photo",
+      "nextPhoto": "Next photo",
+      "photoN": "Photo {{n}}",
+      "lightboxAria": "Enlarged photo",
+      "photoAlt": "{{name}} photo {{n}}",
+      "copy": "Copy",
+      "copied": "Copied",
+      "copyAria": "Copy {{label}}",
+      "koreanName": "Korean name",
+      "address": "Address",
+      "phone": "Phone",
+      "anonymous": "Anonymous",
+      "blogPost": "Blog post",
+      "googleReviewsPartial": "Google reviews · showing a sample",
+      "serviceOptions": "Service options",
+      "storeInfo": "Store info",
+      "bookingAvailable": "This place accepts reservations.",
+      "bookingUnknown": "Reservation details unavailable.",
+      "storeNewsCount": "{{count}} store updates",
+      "storeStatus": "Store status: {{status}}",
+      "newsSeeKakao": "See more news on Kakao Map.",
+      "specialN": "Special {{n}}",
+      "rankingIncluded": "This place is on Kakao Map rankings.",
+      "rankingSeeKakao": "See full ranking on Kakao Map.",
+      "googleMapHint": "Google Maps Embed · directions and full details via the link below",
+      "openOnGoogleShort": "Open in Google Maps",
+      "empty": {
+        "map": "No map info",
+        "info": "No extra info",
+        "tab": "This tab has no content",
+        "summary": "No summary",
+        "reviews": "No reviews",
+        "googleInfo": "No store info to show",
+        "mapPreview": "Map preview unavailable",
+        "home": "No home info",
+        "menu": "No menu info",
+        "kakaoReviews": "No Kakao Map reviews",
+        "blog": "No blog reviews",
+        "booking": "No reservation info",
+        "news": "No news",
+        "special": "No specials",
+        "ranking": "No ranking info"
+      },
+      "tabs": {
+        "photo": "Photos",
+        "summary": "Summary",
+        "product": "Products",
+        "menu": "Menu",
+        "review": "Reviews",
+        "booking": "Booking",
+        "special": "Specials",
+        "news": "News",
+        "blog": "Blog",
+        "ranking": "Ranking",
+        "home": "Home",
+        "map": "Map",
+        "info": "Info"
+      }
+    }
   },
   "themes": {
     "label": "Interests",
@@ -248,7 +370,8 @@
     "setup": "Korea setup",
     "help": "Help",
     "themes": "Themes",
-    "more": "More"
+    "more": "More",
+    "plazaLead": "Browse other travelers’ itineraries and pull them into yours."
   },
   "setup": {
     "title": "Korea travel setup",
@@ -264,13 +387,68 @@
       "exchange": "Exchange some cash (KRW)",
       "emergency": "Save 1330 / 112 / 119"
     },
-    "cards": {
-      "tmoneyTitle": "Tmoney / Cashbee",
-      "tmoneyBody": "Buy at convenience stores or airport. Tap for buses and subway.",
-      "esimTitle": "eSIM",
-      "esimBody": "Activate before landing or at the airport for data on arrival.",
-      "appsTitle": "Maps & transit",
-      "appsBody": "Kakao Map for Korea navigation; Google Maps for familiar UI."
+    "expand": "Show more",
+    "collapse": "Collapse",
+    "details": {
+      "esim": {
+        "body": "Activate your eSIM before landing, or get connected at a carrier booth in the airport, so you have data right after immigration.",
+        "tip1": "Carrier booths in arrivals can activate service instantly",
+        "tip2": "eSIMs install via QR code ahead of time — just activate on arrival",
+        "tip3": "Pocket Wi-Fi routers can be reserved online and picked up/returned at the airport",
+        "links": [
+          { "label": "Incheon Airport – Roaming Center Info", "url": "https://www.airport.kr/ap/ko/svc/getFacilityMain.do?CTGRY_ID=12&UPPER_ID=127" }
+        ]
+      },
+      "tmoney": {
+        "body": "A prepaid transit card that works on buses, subway, and at convenience stores — much easier than counting cash every ride.",
+        "tip1": "Buy one at convenience stores (GS25, CU) or airport kiosks",
+        "tip2": "Top up with cash at the same convenience stores",
+        "tip3": "Tap on boarding, and tap again when transferring",
+        "links": [
+          { "label": "Tmoney Official Site", "url": "https://www.tmoney.co.kr/" }
+        ]
+      },
+      "maps": {
+        "body": "Google Maps' transit directions are limited in Korea. Install Kakao Map or Naver Map alongside it.",
+        "tip1": "Kakao Map — most accurate for transit and walking directions",
+        "tip2": "Naver Map — a similar alternative to Kakao Map",
+        "tip3": "Use Google Maps as a backup for place search and sharing abroad",
+        "links": [
+          { "label": "Kakao Map", "url": "https://map.kakao.com/" },
+          { "label": "Naver Map", "url": "https://map.naver.com/" },
+          { "label": "Google Maps", "url": "https://maps.google.com/" }
+        ]
+      },
+      "airport": {
+        "body": "Decide ahead of time whether you'll take the airport railroad (AREX), a limousine bus, or a taxi, based on where your lodging is.",
+        "tip1": "AREX express train is the fastest and cheapest option",
+        "tip2": "Limousine buses are easier with a lot of luggage, dropping closer to your lodging",
+        "tip3": "Save your lodging's address ahead of time to show a taxi driver",
+        "links": [
+          { "label": "Incheon International Airport Corporation", "url": "https://www.airport.kr/" },
+          { "label": "AREX Airport Railroad", "url": "https://www.arex.or.kr/" }
+        ]
+      },
+      "exchange": {
+        "body": "Cards are accepted almost everywhere, but traditional markets, some temples, and small taxis may be cash-only.",
+        "tip1": "Exchanging a small amount at the airport or a city bank is usually enough",
+        "tip2": "Foreign cards can withdraw cash at convenience-store ATMs marked \"Global\"",
+        "tip3": "Keep cash on hand for traditional market purchases and temple admission fees",
+        "links": [
+          { "label": "Korea Customs Service – Currency Declaration", "url": "https://www.customs.go.kr/kcs/cm/cntnts/cntntsView.do?mi=8458&cntntsId=2808" }
+        ]
+      },
+      "emergency": {
+        "body": "If something goes wrong during your trip, call one of these numbers right away. 1330 offers multilingual tourist assistance.",
+        "tip1": "1330 — tourist information and interpretation (multiple languages)",
+        "tip2": "112 — police",
+        "tip3": "119 — fire and ambulance",
+        "links": [
+          { "label": "Gov24 – 1330 Tourist Info Line", "url": "https://www.gov.kr/portal/service/serviceInfo/B55101100019" },
+          { "label": "112 Police Report Portal", "url": "https://www.112.go.kr/" },
+          { "label": "119 Safety Call (Fire Agency)", "url": "https://u119.nfa.go.kr/" }
+        ]
+      }
     }
   },
   "help": {
@@ -326,6 +504,12 @@
     "scopeDay": "day {{day}}",
     "formatCsv": "CSV",
     "formatJson": "JSON",
+    "formatKml": "KML",
+    "formatGpx": "GPX",
+    "mapAppsShort": "map apps",
+    "mapHint": "KML works best with Google My Maps / Earth; GPX suits hiking and nav apps. Generated routes are included as lines when available.",
+    "routeLine": "Route",
+    "savedMapFile": "Saved {{scope}} {{format}} file (import in Google Maps and similar apps)",
     "csvHeaders": {
       "trip": "Trip",
       "day": "Day",

@@ -80,14 +80,16 @@ export async function listInsightItems(filter: {
   limit?: number;
 } = {}): Promise<InsightItemWithAnalysis[]> {
   const sb = requireSupabase();
+  const analysisJoin = filter.category ? 'insight_analysis!inner' : 'insight_analysis';
   let query = sb
     .from('insight_raw_items')
     .select(
-      'id, source, external_id, title, content, author, url, source_created_at, collected_at, insight_analysis(id, category, sentiment, summary, mentioned_services, model_used, analyzed_at)'
+      `id, source, external_id, title, content, author, url, source_created_at, collected_at, ${analysisJoin}(id, category, sentiment, summary, mentioned_services, model_used, analyzed_at)`
     )
     .order('collected_at', { ascending: false })
     .limit(filter.limit ?? 100);
   if (filter.source) query = query.eq('source', filter.source);
+  if (filter.category) query = query.eq('insight_analysis.category', filter.category);
 
   const { data, error } = await query;
   if (error) throw error;
@@ -122,9 +124,6 @@ export async function listInsightItems(filter: {
     return { ...raw, analysis };
   });
 
-  if (filter.category) {
-    return items.filter((item) => item.analysis?.category === filter.category);
-  }
   return items;
 }
 

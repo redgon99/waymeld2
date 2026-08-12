@@ -1,12 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Icon } from './Icon';
 import { AuthBar } from './AuthBar';
 import { SaveStatusBadge, type SaveStatus } from './SaveStatusBadge';
 import { TripSelectMenu } from './TripSelectMenu';
 import { PlannerDayPills } from './PlannerDayPills';
+import { AppSheetModal } from './AppSheetModal';
+import { HelpContent } from './HelpContent';
+import { KoreaSetupContent } from './KoreaSetupContent';
+import { SharePlazaPanel } from './SharePlazaPanel';
 import type { Trip, TripSummary } from '../lib/trips';
+
+type AppSheet = 'plaza' | 'setup' | 'help';
 
 interface Props {
   trip: Trip;
@@ -54,8 +60,9 @@ export function PlannerAppBar({
   plazaNavVisible,
 }: Props) {
   const { t } = useTranslation('planner');
-  const navigate = useNavigate();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [sheet, setSheet] = useState<AppSheet | null>(null);
+  const [helpAirportFocus, setHelpAirportFocus] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -98,6 +105,7 @@ export function PlannerAppBar({
   );
 
   return (
+    <>
     <header className="planner-app-bar desktop-only-overlay">
       {/* 1. 브랜드 + 여행 */}
       <Link to="/" className="planner-brand" title="WayMeld">
@@ -119,14 +127,14 @@ export function PlannerAppBar({
           aria-label={t('trip.titleAria')}
           maxLength={60}
         />
-        {summaries.length > 0 && (
-          <TripSelectMenu
-            summaries={summaries}
-            currentTripId={trip.id}
-            onSelect={onSelectTrip}
-            compact
-          />
-        )}
+        <TripSelectMenu
+          summaries={summaries}
+          currentTripId={trip.id}
+          onSelect={onSelectTrip}
+          compact
+          onNewTrip={onNewTrip}
+          onDeleteTrip={onDeleteTrip}
+        />
       </div>
 
       <div className="planner-app-bar-divider" aria-hidden />
@@ -223,27 +231,63 @@ export function PlannerAppBar({
         </button>
         {moreOpen && (
           <div className="planner-more-menu" role="menu">
-            {onNewTrip &&
-              moreItem(t('trip.newTrip'), onNewTrip)}
             {plazaNavVisible &&
-              moreItem(t('plazaNav'), () => navigate('/plaza'))}
-            {moreItem(t('nav.setup'), () => navigate('/setup'))}
-            {moreItem(t('nav.help'), () => navigate('/help'))}
-            {onDeleteTrip && summaries.length > 0 && (
-              <>
-                <div className="planner-more-sep" aria-hidden />
-                {moreItem(
-                  t('trip.deleteTripMenu', { defaultValue: '여행 삭제' }),
-                  onDeleteTrip,
-                  true
-                )}
-              </>
-            )}
+              moreItem(t('plazaNav'), () => {
+                setHelpAirportFocus(false);
+                setSheet('plaza');
+              })}
+            {moreItem(t('nav.setup'), () => {
+              setHelpAirportFocus(false);
+              setSheet('setup');
+            })}
+            {moreItem(t('nav.help'), () => {
+              setHelpAirportFocus(false);
+              setSheet('help');
+            })}
           </div>
         )}
       </div>
 
       <AuthBar />
     </header>
+
+      <AppSheetModal
+        open={sheet === 'plaza'}
+        title={t('plazaNav')}
+        subtitle={t('nav.plazaLead', {
+          defaultValue: '다른 여행자의 일정을 둘러보고 내 여행으로 끌어오세요.',
+        })}
+        onClose={() => setSheet(null)}
+        wide
+      >
+        <SharePlazaPanel />
+      </AppSheetModal>
+
+      <AppSheetModal
+        open={sheet === 'setup'}
+        title={t('setup.title')}
+        subtitle={t('setup.lead')}
+        onClose={() => setSheet(null)}
+      >
+        <KoreaSetupContent
+          onOpenAirportHelp={() => {
+            setHelpAirportFocus(true);
+            setSheet('help');
+          }}
+        />
+      </AppSheetModal>
+
+      <AppSheetModal
+        open={sheet === 'help'}
+        title={t('help.title')}
+        subtitle={t('help.lead')}
+        onClose={() => {
+          setSheet(null);
+          setHelpAirportFocus(false);
+        }}
+      >
+        <HelpContent airportFocus={helpAirportFocus} />
+      </AppSheetModal>
+    </>
   );
 }

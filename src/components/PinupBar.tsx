@@ -18,7 +18,7 @@ import {
   horizontalListSortingStrategy,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import type { PinnedPlace, SimpleCategory } from '../types';
+import type { GeneratedRoute, PinnedPlace, SimpleCategory } from '../types';
 import { getCategoryMeta, DEFAULT_CODE_BY_SIMPLE_CATEGORY } from '../lib/categories';
 import { groupPinnedByCategory, movePinnedPlace, truncatePinTitle } from '../lib/pinGroups';
 import { SortableItem } from './Sortable';
@@ -32,6 +32,7 @@ interface Props {
   currentDay?: number;
   totalDays?: number;
   pinnedByDay?: Record<number, PinnedPlace[]>;
+  generatedRouteByDay?: Record<number, GeneratedRoute | null>;
   onExportNotify?: (message: string) => void;
   onUpgradeRequest?: () => void;
   onImportPins?: (result: PinImportResult) => void;
@@ -40,6 +41,7 @@ interface Props {
   mustVisitOnly?: boolean;
   onToggleMustVisitOnly?: () => void;
   onToggleRequired?: (id: string) => void;
+  onShowTaxiCard?: (place: PinnedPlace) => void;
   onRemove: (id: string) => void;
   onReorder: (next: PinnedPlace[]) => void;
   onSelectPin?: (place: PinnedPlace) => void;
@@ -79,6 +81,7 @@ export function PinupBar({
   currentDay = 1,
   totalDays = 1,
   pinnedByDay = {},
+  generatedRouteByDay,
   onExportNotify,
   onUpgradeRequest,
   onImportPins,
@@ -87,6 +90,7 @@ export function PinupBar({
   mustVisitOnly = false,
   onToggleMustVisitOnly,
   onToggleRequired,
+  onShowTaxiCard,
   onRemove,
   onReorder,
   onSelectPin,
@@ -127,6 +131,7 @@ export function PinupBar({
         currentDay={currentDay}
         totalDays={totalDays}
         pinnedByDay={pinnedByDay}
+        generatedRouteByDay={generatedRouteByDay}
         onNotify={onExportNotify}
         onUpgradeRequest={onUpgradeRequest}
       />
@@ -137,6 +142,7 @@ export function PinupBar({
       currentDay={currentDay}
       totalDays={totalDays}
       pinnedByDay={pinnedByDay}
+      generatedRouteByDay={generatedRouteByDay}
       onNotify={onExportNotify}
       onUpgradeRequest={onUpgradeRequest}
     />
@@ -284,6 +290,17 @@ export function PinupBar({
                               </span>
                             )}
                           </button>
+                          {onShowTaxiCard && (
+                            <button
+                              type="button"
+                              className="chip-taxi"
+                              onClick={() => onShowTaxiCard(p)}
+                              title={t('taxi.showCard')}
+                              aria-label={t('taxi.showCard')}
+                            >
+                              <Icon name="transportCar" />
+                            </button>
+                          )}
                           <button
                             type="button"
                             className="chip-delete"

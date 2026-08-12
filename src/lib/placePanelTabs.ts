@@ -26,6 +26,32 @@ export interface PlacePanelDetail {
   photos: string[];
 }
 
+const TAB_I18N_KEYS: Record<PlacePanelTabId, string> = {
+  PHOTO: 'place.detail.tabs.photo',
+  SUMMARY: 'place.detail.tabs.summary',
+  PRODUCT: 'place.detail.tabs.product',
+  REVIEW: 'place.detail.tabs.review',
+  BOOKING: 'place.detail.tabs.booking',
+  SPECIAL: 'place.detail.tabs.special',
+  NEWS: 'place.detail.tabs.news',
+  BLOG: 'place.detail.tabs.blog',
+  RANKING: 'place.detail.tabs.ranking',
+  HOME: 'place.detail.tabs.home',
+  MAP: 'place.detail.tabs.map',
+  INFO: 'place.detail.tabs.info',
+};
+
+/** UI 라벨용 i18n 키 (메뉴가 있으면 PRODUCT → menu) */
+export function placePanelTabI18nKey(
+  id: PlacePanelTabId,
+  panel?: Record<string, unknown> | null
+): string {
+  if (id === 'PRODUCT' && hasMenu(panel ?? null)) {
+    return 'place.detail.tabs.menu';
+  }
+  return TAB_I18N_KEYS[id];
+}
+
 const TAB_LABELS: Record<PlacePanelTabId, string> = {
   PHOTO: '사진',
   SUMMARY: '요약',

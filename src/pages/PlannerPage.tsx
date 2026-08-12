@@ -30,6 +30,12 @@ import {
 } from '../lib/mapProviderPreference';
 import { getApproximateLocation } from '../lib/geolocation';
 import { KAKAO_LEVEL_DEFAULT } from '../lib/mapZoom';
+import {
+  DEFAULT_MAP_CENTER,
+  readMapViewport,
+  writeMapViewport,
+} from '../lib/mapViewport';
+import { computeTripCenter } from '../lib/tripGeo';
 import { googleMapsLanguage, normalizeLocale } from '../lib/locale';
 import i18n from '../lib/i18n';
 import {
@@ -78,6 +84,7 @@ import { MapContextMenu } from '../components/MapContextMenu';
 import { ManualPinModal } from '../components/ManualPinModal';
 import { TripMaterialsPanel } from '../components/TripMaterialsPanel';
 import { MobileSearchSheet } from '../components/mobile/MobileSearchSheet';
+import { MobileMoreMenu } from '../components/mobile/MobileMoreMenu';
 import { useIsMobile } from '../hooks/useIsMobile';
 import { createManualPlace } from '../lib/manualPlace';
 import type { PinImportResult } from '../lib/importPins';
@@ -102,7 +109,36 @@ interface PendingManualPin {
   address: string;
 }
 
-const DEFAULT_CENTER = { lat: 33.5187, lng: 126.7780 };
+const DEFAULT_CENTER = DEFAULT_MAP_CENTER;
+
+function centerFromTrip(trip: Pick<Trip, 'pinnedByDay' | 'currentDay' | 'plazaCenterLat' | 'plazaCenterLng'>): {
+  lat: number;
+  lng: number;
+} | null {
+  const dayPins = trip.pinnedByDay?.[trip.currentDay] ?? [];
+  if (dayPins.length > 0) {
+    let sumLat = 0;
+    let sumLng = 0;
+    let n = 0;
+    for (const p of dayPins) {
+      if (typeof p.lat === 'number' && typeof p.lng === 'number') {
+        sumLat += p.lat;
+        sumLng += p.lng;
+        n++;
+      }
+    }
+    if (n > 0) return { lat: sumLat / n, lng: sumLng / n };
+  }
+  const all = computeTripCenter(trip);
+  if (all) return all;
+  if (
+    typeof trip.plazaCenterLat === 'number' &&
+    typeof trip.plazaCenterLng === 'number'
+  ) {
+    return { lat: trip.plazaCenterLat, lng: trip.plazaCenterLng };
+  }
+  return null;
+}
 
 function makeEmptyTrip(): Trip {
   return normalizeTrip({
@@ -187,8 +223,12 @@ export default function PlannerPage() {
   const [taxiCardPlace, setTaxiCardPlace] = useState<Place | null>(null);
 
   // 지도 중심 · 지도/검색 앱
-  const [mapCenter, setMapCenter] = useState(DEFAULT_CENTER);
-  const [mapLevel, setMapLevel] = useState(KAKAO_LEVEL_DEFAULT);
+  const [mapCenter, setMapCenter] = useState(
+    () => readMapViewport()?.center ?? DEFAULT_CENTER
+  );
+  const [mapLevel, setMapLevel] = useState(
+    () => readMapViewport()?.level ?? KAKAO_LEVEL_DEFAULT
+  );
   const [mapProviderBooting, setMapProviderBooting] = useState(
     () => !hasSavedMapProviderChoice()
   );
@@ -202,6 +242,19 @@ export default function PlannerPage() {
   const searchReady = mapProvider === 'google' ? googleReady : kakaoReady;
   const mapCenterRef = useRef(mapCenter);
   mapCenterRef.current = mapCenter;
+  const mapLevelRef = useRef(mapLevel);
+  mapLevelRef.current = mapLevel;
+
+  const focusMapOnTrip = useCallback(
+    (nextTrip: Trip, persist = true) => {
+      const center = centerFromTrip(nextTrip);
+      if (!center) return;
+      mapCenterRef.current = center;
+      setMapCenter(center);
+      if (persist) writeMapViewport(center, mapLevelRef.current);
+    },
+    []
+  );
   const [nearbySearchCenter, setNearbySearchCenter] = useState<{
     lat: number;
     lng: number;
@@ -284,6 +337,7 @@ export default function PlannerPage() {
   }, [mapProvider, i18n.language]);
 
   // 저장된 지도 선택이 없으면 시작 시 위치로 카카오/구글 자동 선택
+  // 이미 저장된 뷰포트가 있으면 지도 중심은 덮어쓰지 않음
   useEffect(() => {
     if (!mapProviderBooting) return;
     let cancelled = false;
@@ -291,7 +345,10 @@ export default function PlannerPage() {
       const pos = await getApproximateLocation();
       if (cancelled) return;
       if (pos) {
-        setMapCenter(pos);
+        if (!readMapViewport()) {
+          setMapCenter(pos);
+          writeMapViewport(pos, mapLevelRef.current);
+        }
         setMapProviderChoice(inferMapProviderFromLocation(pos));
       }
       setMapProviderBooting(false);
@@ -355,14 +412,14 @@ export default function PlannerPage() {
       await refreshTripList(userId);
       const loaded = await tripsRepo.load(userId);
       if (loaded) {
-        setTrip(
-          normalizeTrip({
-            ...makeEmptyTrip(),
-            ...loaded,
-            pinnedByDay: loaded.pinnedByDay ?? { 1: [] },
-            generatedRouteByDay: loaded.generatedRouteByDay ?? {},
-          })
-        );
+        const next = normalizeTrip({
+          ...makeEmptyTrip(),
+          ...loaded,
+          pinnedByDay: loaded.pinnedByDay ?? { 1: [] },
+          generatedRouteByDay: loaded.generatedRouteByDay ?? {},
+        });
+        setTrip(next);
+        focusMapOnTrip(next);
       } else {
         const fresh = makeEmptyTrip();
         setTrip(fresh);
@@ -372,7 +429,7 @@ export default function PlannerPage() {
       setLastSavedAt(loaded?.updatedAt ?? Date.now());
       setHydrated(true);
     })();
-  }, [user?.id, hydrated, refreshTripList]);
+  }, [user?.id, hydrated, refreshTripList, focusMapOnTrip]);
 
   const pendingOpenTripId = (location.state as { openTripId?: string } | null)?.openTripId;
 
@@ -385,20 +442,20 @@ export default function PlannerPage() {
       const userId = user?.id ?? null;
       const loaded = await tripsRepo.load(userId, tripId);
       if (loaded) {
-        setTrip(
-          normalizeTrip({
-            ...makeEmptyTrip(),
-            ...loaded,
-            pinnedByDay: loaded.pinnedByDay ?? { 1: [] },
-            generatedRouteByDay: loaded.generatedRouteByDay ?? {},
-          })
-        );
+        const next = normalizeTrip({
+          ...makeEmptyTrip(),
+          ...loaded,
+          pinnedByDay: loaded.pinnedByDay ?? { 1: [] },
+          generatedRouteByDay: loaded.generatedRouteByDay ?? {},
+        });
+        setTrip(next);
+        focusMapOnTrip(next);
         setLastSavedAt(loaded.updatedAt);
         await refreshTripList(userId);
         showToast(`「${loaded.title}」을 내 여행에 추가했습니다`);
       }
     })();
-  }, [hydrated, pendingOpenTripId, user?.id, navigate, location.pathname, refreshTripList]);
+  }, [hydrated, pendingOpenTripId, user?.id, navigate, location.pathname, refreshTripList, focusMapOnTrip]);
 
   const prevUserIdRef = useRef<string | null>(null);
   const authInitializedRef = useRef(false);
@@ -419,14 +476,14 @@ export default function PlannerPage() {
       await refreshTripList(userId);
       const loaded = await tripsRepo.load(userId);
       if (loaded) {
-        setTrip(
-          normalizeTrip({
-            ...makeEmptyTrip(),
-            ...loaded,
-            pinnedByDay: loaded.pinnedByDay ?? { 1: [] },
-            generatedRouteByDay: loaded.generatedRouteByDay ?? {},
-          })
-        );
+        const next = normalizeTrip({
+          ...makeEmptyTrip(),
+          ...loaded,
+          pinnedByDay: loaded.pinnedByDay ?? { 1: [] },
+          generatedRouteByDay: loaded.generatedRouteByDay ?? {},
+        });
+        setTrip(next);
+        focusMapOnTrip(next);
         setLastSavedAt(loaded.updatedAt);
       } else if (userId && !prev) {
         setTrip((prevTrip) => ({ ...prevTrip, ownerId: userId, updatedAt: Date.now() }));
@@ -435,7 +492,7 @@ export default function PlannerPage() {
         showToast('클라우드 계정과 동기화했습니다');
       }
     })();
-  }, [user?.id, hydrated, refreshTripList]);
+  }, [user?.id, hydrated, refreshTripList, focusMapOnTrip]);
 
   // ============== Trip 변경 자동 저장 (디바운스) ==============
   const saveTimerRef = useRef<number | null>(null);
@@ -822,6 +879,13 @@ export default function PlannerPage() {
     const next = { lat, lng };
     mapCenterRef.current = next;
     setMapCenter(next);
+    writeMapViewport(next, mapLevelRef.current);
+  }, []);
+
+  const handleMapLevelChange = useCallback((level: number) => {
+    mapLevelRef.current = level;
+    setMapLevel(level);
+    writeMapViewport(mapCenterRef.current, level);
   }, []);
 
   const handleCategoryFilterChange = useCallback(
@@ -1124,6 +1188,14 @@ export default function PlannerPage() {
     setRouteOptionsOpen(true);
   }, [pinned.length, selectedPinIds.size]);
 
+  const handleClearRoute = useCallback(() => {
+    if (!trip.generatedRouteByDay[currentDay]) return;
+    if (!confirm(tp('dock.clearRouteConfirm', { day: currentDay }))) return;
+    setRouteForDay(currentDay, null);
+    setDockCollapsed(false);
+    showToast(tp('dock.clearRouteDone', { day: currentDay }));
+  }, [trip.generatedRouteByDay, currentDay, tp]);
+
   const openPlannerTab = useCallback((tab: PlannerPanelTab) => {
     setPanelTab(tab);
     setPanelOpen(true);
@@ -1185,6 +1257,13 @@ export default function PlannerPage() {
     setPendingManualPin(null);
     setPickingPinFromMap((v) => !v);
   }, []);
+
+  /** 모바일 지도 롱프레스 — 토글이 아니라 항상 켜기(이미 픽 모드면 무시) */
+  const handleLongPressPin = useCallback(() => {
+    if (pickingOriginFromMap || pickingPinFromMap) return;
+    setPendingManualPin(null);
+    setPickingPinFromMap(true);
+  }, [pickingOriginFromMap, pickingPinFromMap]);
 
   const handlePinLocationPicked = useCallback((lat: number, lng: number, address: string) => {
     setPickingPinFromMap(false);
@@ -1365,14 +1444,14 @@ export default function PlannerPage() {
       await tripsRepo.save({ ...trip, ownerId: userId ?? undefined, updatedAt: Date.now() });
       const loaded = await tripsRepo.load(userId, tripId);
       if (loaded) {
-        setTrip(
-          normalizeTrip({
-            ...makeEmptyTrip(),
-            ...loaded,
-            pinnedByDay: loaded.pinnedByDay ?? { 1: [] },
-            generatedRouteByDay: loaded.generatedRouteByDay ?? {},
-          })
-        );
+        const next = normalizeTrip({
+          ...makeEmptyTrip(),
+          ...loaded,
+          pinnedByDay: loaded.pinnedByDay ?? { 1: [] },
+          generatedRouteByDay: loaded.generatedRouteByDay ?? {},
+        });
+        setTrip(next);
+        focusMapOnTrip(next);
         setResults([]);
         setQuery('');
         setSearchEmpty(false);
@@ -1380,7 +1459,7 @@ export default function PlannerPage() {
       }
       await refreshTripList(userId);
     },
-    [trip, user?.id, refreshTripList]
+    [trip, user?.id, refreshTripList, focusMapOnTrip]
   );
 
   const handleNewTrip = useCallback(async () => {
@@ -1406,6 +1485,7 @@ export default function PlannerPage() {
     setSearchEmpty(false);
     setRouteOptionsOpen(false);
     setMapCenter(DEFAULT_CENTER);
+    writeMapViewport(DEFAULT_CENTER, mapLevelRef.current);
     await refreshTripList(userId);
   }, [trip, user?.id, refreshTripList, plan, isAdmin, tripSummaries.length, tb]);
 
@@ -1433,20 +1513,22 @@ export default function PlannerPage() {
     if (nextSummary && nextSummary.id !== trip.id) {
       const loaded = await tripsRepo.load(userId, nextSummary.id);
       if (loaded) {
-        setTrip(
-          normalizeTrip({
-            ...makeEmptyTrip(),
-            ...loaded,
-            pinnedByDay: loaded.pinnedByDay ?? { 1: [] },
-            generatedRouteByDay: loaded.generatedRouteByDay ?? {},
-          })
-        );
+        const next = normalizeTrip({
+          ...makeEmptyTrip(),
+          ...loaded,
+          pinnedByDay: loaded.pinnedByDay ?? { 1: [] },
+          generatedRouteByDay: loaded.generatedRouteByDay ?? {},
+        });
+        setTrip(next);
+        focusMapOnTrip(next);
       }
     } else {
       const fresh = makeEmptyTrip();
       setTrip(fresh);
       await tripsRepo.save({ ...fresh, ownerId: userId ?? undefined });
       await refreshTripList(userId);
+      setMapCenter(DEFAULT_CENTER);
+      writeMapViewport(DEFAULT_CENTER, mapLevelRef.current);
     }
 
     setResults([]);
@@ -1458,7 +1540,7 @@ export default function PlannerPage() {
     setInfoWindowPlace(null);
     setMapPinCategoryFilter(null);
     showToast(`「${trip.title}」 여행을 삭제했습니다`);
-  }, [trip, tripSummaries, user?.id, refreshTripList]);
+  }, [trip, tripSummaries, user?.id, refreshTripList, focusMapOnTrip]);
 
   // ============== 공유 / 저장 ==============
   const openShareModal = useCallback(() => {
@@ -1633,6 +1715,7 @@ export default function PlannerPage() {
           pickingPinFromMap={pickingPinFromMap}
           onOriginPicked={handleOriginPicked}
           onPinLocationPicked={handlePinLocationPicked}
+          onMapLongPress={handleLongPressPin}
           draftPinLocation={pendingManualPin}
           highlightPlaceId={selectedPlaceId}
           pinSelectionFilter={pinSelectionActive ? selectedPinIds : undefined}
@@ -1648,7 +1731,7 @@ export default function PlannerPage() {
           onShowTaxiCardFromInfo={(p) => setTaxiCardPlace(p)}
           onMapRightClick={handleMapRightClick}
           onMapCenterChange={handleMapCenterChange}
-          onMapLevelChange={setMapLevel}
+          onMapLevelChange={handleMapLevelChange}
         />
       )}
 
@@ -1718,6 +1801,7 @@ export default function PlannerPage() {
                 onFoodRestrictionsChange={handleFoodRestrictionsChange}
                 categorySubFilters={categorySubFilters}
                 onCategorySubFiltersChange={setCategorySubFilters}
+                preferences={trip.preferences}
               />
             }
             pinsSlot={
@@ -1737,6 +1821,7 @@ export default function PlannerPage() {
                   currentDay={currentDay}
                   totalDays={trip.totalDays}
                   pinnedByDay={trip.pinnedByDay}
+                  generatedRouteByDay={trip.generatedRouteByDay}
                   onExportNotify={showToast}
                   onUpgradeRequest={() => setUpgradeOpen(true)}
                   onImportPins={handleImportPins}
@@ -1753,6 +1838,7 @@ export default function PlannerPage() {
                   mustVisitOnly={mustVisitOnly}
                   onToggleMustVisitOnly={() => setMustVisitOnly((v) => !v)}
                   onToggleRequired={handleToggleRequired}
+                  onShowTaxiCard={(p) => setTaxiCardPlace(p)}
                 />
               </>
             }
@@ -1794,11 +1880,13 @@ export default function PlannerPage() {
               collapsed={dockCollapsed}
               onToggleCollapsed={() => setDockCollapsed((v) => !v)}
               onReoptimize={handleOpenRouteOptions}
+              onClearRoute={handleClearRoute}
               selectedStopId={selectedPlaceId}
               onSelectStop={(id) => {
                 const p = pinned.find((x) => x.id === id);
                 if (p) handleSelectPlace(p);
               }}
+              onShowTaxiCard={(p) => setTaxiCardPlace(p)}
               refining={refining}
             />
           )}
@@ -1888,6 +1976,7 @@ export default function PlannerPage() {
               >
                 <Icon name="folder" size={18} />
               </button>
+              <MobileMoreMenu onShare={openShareModal} plazaNavVisible={plazaNavVisible} />
             </div>
             <div className="mobile-planner-days">
               {Array.from({ length: trip.totalDays }, (_, i) => i + 1).map((d) => (
@@ -1906,6 +1995,26 @@ export default function PlannerPage() {
               </button>
             </div>
           </div>
+
+          {generatedRoute && mobileSheetLevel === 'peek' && mobileSheet !== 'search' && (
+            <RouteTimelineDock
+              variant="mobile"
+              route={generatedRoute}
+              currentDay={currentDay}
+              panelOpen={false}
+              collapsed={dockCollapsed}
+              onToggleCollapsed={() => setDockCollapsed((v) => !v)}
+              onReoptimize={handleOpenRouteOptions}
+              onClearRoute={handleClearRoute}
+              selectedStopId={selectedPlaceId}
+              onSelectStop={(id) => {
+                const p = pinned.find((x) => x.id === id);
+                if (p) handleSelectPlace(p);
+              }}
+              onShowTaxiCard={(p) => setTaxiCardPlace(p)}
+              refining={refining}
+            />
+          )}
 
           <div
             className={`mobile-planner-sheet sheet-${mobileSheetLevel} ${
@@ -1960,6 +2069,7 @@ export default function PlannerPage() {
                   currentDay={currentDay}
                   totalDays={trip.totalDays}
                   pinnedByDay={trip.pinnedByDay}
+                  generatedRouteByDay={trip.generatedRouteByDay}
                   onExportNotify={showToast}
                   onUpgradeRequest={() => setUpgradeOpen(true)}
                   onImportPins={handleImportPins}
@@ -1979,6 +2089,7 @@ export default function PlannerPage() {
                   mustVisitOnly={mustVisitOnly}
                   onToggleMustVisitOnly={() => setMustVisitOnly((v) => !v)}
                   onToggleRequired={handleToggleRequired}
+                  onShowTaxiCard={(p) => setTaxiCardPlace(p)}
                 />
               ) : (
                 <RouteOptionsPanel
@@ -2038,6 +2149,7 @@ export default function PlannerPage() {
                 onFoodRestrictionsChange={handleFoodRestrictionsChange}
                 categorySubFilters={categorySubFilters}
                 onCategorySubFiltersChange={setCategorySubFilters}
+                preferences={trip.preferences}
               />
             </div>
           )}

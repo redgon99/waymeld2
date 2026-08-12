@@ -59,7 +59,10 @@
     "share": "공유",
     "shareTitle": "여행 공유 링크 만들기",
     "daysCount": "{{count}}일",
-    "deleteTripMenu": "여행 삭제"
+    "deleteTripMenu": "여행 삭제",
+    "hubAria": "여행 설정",
+    "hubMyTrips": "내 여행",
+    "hubThisTrip": "이 여행"
   },
   "day": {
     "tabsAria": "일차",
@@ -143,6 +146,52 @@
       "low": "피로도 낮음",
       "medium": "피로도 보통",
       "high": "피로도 높음"
+    },
+    "options": {
+      "panelAria": "경로 설정",
+      "title": "경로 설정",
+      "subtitle": "{{day}}일차 · {{count}}개 장소",
+      "close": "패널 닫기",
+      "sectionDepart": "DEPART 출발",
+      "sectionTransport": "TRANSPORT 이동수단",
+      "sectionOptimize": "OPTIMIZE 최적화",
+      "sectionStay": "STAY TIME 체류 시간",
+      "copySameAsDay": "{{day}}일차와 동일",
+      "departTime": "출발 시각",
+      "originBadge": "출발지",
+      "originAria": "출발지 · {{label}}",
+      "originCurrent": "현재 위치",
+      "originMapPick": "지도에서 선택",
+      "originAddressPlaceholder": "주소·장소명",
+      "originClickMap": "지도를 클릭하세요",
+      "originEnterAddress": "주소·장소명 입력",
+      "originSelect": "출발지 선택",
+      "originStop1": "{{name}} (stop 1)",
+      "reflectMeal": "식사 시간 반영",
+      "optimizeDistance": "최단거리",
+      "optimizeTime": "최소시간",
+      "optimizeNoToll": "무료도로",
+      "orderAuto": "자동",
+      "orderPins": "핀 순서",
+      "aiSuggest": "AI suggest 자동 추천",
+      "stayMinutesAria": "{{name}} 체류시간(분)",
+      "preview": "Preview 예상",
+      "previewStats": "{{km}} km · {{minutes}}분 · ends {{time}}",
+      "build": "Build route · 동선 만들기",
+      "rebuild": "Rebuild route · 동선 다시 만들기",
+      "stayReason": {
+        "tour": "평균 산책 90분 추천",
+        "food": "식사 60분 추천",
+        "cafe": "카페 휴식 45분 추천",
+        "stay": "숙소 체크인/아웃",
+        "culture": "관람 75분 추천",
+        "shop": "쇼핑 30분 추천",
+        "beauty": "뷰티 60분 추천",
+        "market": "시장 45분 추천",
+        "transport": "이동·환승 15분",
+        "road": "거리 산책 40분 추천",
+        "other": "체류 30분"
+      }
     }
   },
   "dock": {
@@ -158,6 +207,9 @@
     "focusBadge": "NEXT",
     "editOnMap": "지도에서 보기",
     "rebuild": "동선 다시 짜기",
+    "clearRoute": "동선 지우기",
+    "clearRouteConfirm": "{{day}}일차 동선을 지울까요?\n핀은 그대로 두고 동선만 초기화합니다.",
+    "clearRouteDone": "{{day}}일차 동선을 지웠습니다",
     "showDetails": "자세히",
     "hideDetails": "간단히",
     "more": "더보기",
@@ -182,7 +234,77 @@
     "showCard": "택시 카드"
   },
   "place": {
-    "copyName": "한국어 이름 복사"
+    "copyName": "한국어 이름 복사",
+    "detail": {
+      "tabsAria": "장소 정보 탭",
+      "close": "닫기",
+      "loading": "불러오는 중…",
+      "noPhotos": "표시할 사진이 없습니다.",
+      "openOnKakao": "카카오맵에서 확인",
+      "openOnGoogle": "Google 지도에서 확인",
+      "moreOnKakao": "카카오맵에서 더보기",
+      "moreOnGoogle": "Google 지도에서 더보기",
+      "zoom": "크게 보기",
+      "zoomAria": "{{name}} 사진 크게 보기",
+      "prevPhoto": "이전 사진",
+      "nextPhoto": "다음 사진",
+      "photoN": "{{n}}번째 사진",
+      "lightboxAria": "사진 크게 보기",
+      "photoAlt": "{{name}} 사진 {{n}}",
+      "copy": "복사",
+      "copied": "복사됨",
+      "copyAria": "{{label}} 복사",
+      "koreanName": "한국어 이름",
+      "address": "주소",
+      "phone": "전화번호",
+      "anonymous": "익명",
+      "blogPost": "블로그 글",
+      "googleReviewsPartial": "Google 리뷰 · 일부만 표시됩니다",
+      "serviceOptions": "서비스 옵션",
+      "storeInfo": "매장 정보",
+      "bookingAvailable": "예약 가능한 매장입니다.",
+      "bookingUnknown": "예약 정보를 확인할 수 없습니다.",
+      "storeNewsCount": "매장 소식 {{count}}건",
+      "storeStatus": "매장 상태: {{status}}",
+      "newsSeeKakao": "자세한 소식은 카카오맵에서 확인해 주세요.",
+      "specialN": "기획전 {{n}}",
+      "rankingIncluded": "이 장소는 카카오맵 랭킹에 포함되어 있습니다.",
+      "rankingSeeKakao": "상세 랭킹은 카카오맵에서 확인해 주세요.",
+      "googleMapHint": "Google Maps Embed · 길찾기·전체 정보는 하단 링크에서 확인하세요",
+      "openOnGoogleShort": "Google 지도에서 열기",
+      "empty": {
+        "map": "지도 정보가 없습니다.",
+        "info": "추가 정보가 없습니다.",
+        "tab": "이 탭의 정보를 표시할 수 없습니다.",
+        "summary": "요약 정보가 없습니다.",
+        "reviews": "리뷰가 없습니다.",
+        "googleInfo": "표시할 매장 정보가 없습니다.",
+        "mapPreview": "지도 미리보기를 사용할 수 없습니다.",
+        "home": "홈 정보가 없습니다.",
+        "menu": "메뉴 정보가 없습니다.",
+        "kakaoReviews": "카카오맵 후기가 없습니다.",
+        "blog": "블로그 후기가 없습니다.",
+        "booking": "예약 정보가 없습니다.",
+        "news": "소식이 없습니다.",
+        "special": "기획전 정보가 없습니다.",
+        "ranking": "랭킹 정보가 없습니다."
+      },
+      "tabs": {
+        "photo": "사진",
+        "summary": "요약",
+        "product": "상품",
+        "menu": "메뉴",
+        "review": "후기",
+        "booking": "예약",
+        "special": "기획전",
+        "news": "소식",
+        "blog": "블로그",
+        "ranking": "랭킹",
+        "home": "홈",
+        "map": "지도",
+        "info": "정보"
+      }
+    }
   },
   "themes": {
     "label": "관심 테마",
@@ -248,7 +370,8 @@
     "setup": "한국 준비",
     "help": "도움말",
     "themes": "테마",
-    "more": "더보기"
+    "more": "더보기",
+    "plazaLead": "다른 여행자의 일정을 둘러보고 내 여행으로 끌어오세요."
   },
   "setup": {
     "title": "한국 여행 준비",
@@ -264,13 +387,68 @@
       "exchange": "현금(원) 일부 준비",
       "emergency": "1330 / 112 / 119 저장"
     },
-    "cards": {
-      "tmoneyTitle": "티머니 / 캐시비",
-      "tmoneyBody": "편의점·공항에서 구매. 버스·지하철 태그 결제.",
-      "esimTitle": "eSIM",
-      "esimBody": "착륙 전 활성화하거나 공항에서 데이터 개통.",
-      "appsTitle": "지도·교통 앱",
-      "appsBody": "한국 내비는 카카오맵, 익숙한 UI는 구글맵."
+    "expand": "더보기",
+    "collapse": "접기",
+    "details": {
+      "esim": {
+        "body": "입국 심사 후 바로 데이터를 쓰려면 착륙 전 eSIM을 활성화하거나 공항 통신사 부스에서 개통하세요.",
+        "tip1": "공항 입국장 통신사 부스에서 즉시 개통 가능",
+        "tip2": "eSIM은 QR코드로 미리 설치, 도착 후 활성화만 하면 됨",
+        "tip3": "포켓와이파이는 사전 예약 후 공항에서 수령·반납",
+        "links": [
+          { "label": "인천국제공항공사 – 통신 로밍센터 안내", "url": "https://www.airport.kr/ap/ko/svc/getFacilityMain.do?CTGRY_ID=12&UPPER_ID=127" }
+        ]
+      },
+      "tmoney": {
+        "body": "버스·지하철·편의점 어디서나 쓰는 선불 교통카드입니다. 매번 현금을 세는 것보다 훨씬 편리해요.",
+        "tip1": "편의점(GS25, CU 등)이나 공항 매장에서 구매",
+        "tip2": "구매한 편의점에서 현금으로 충전 가능",
+        "tip3": "탑승 시 카드 리더기에 태그, 환승 시에도 다시 태그",
+        "links": [
+          { "label": "티머니 공식 홈페이지", "url": "https://www.tmoney.co.kr/" }
+        ]
+      },
+      "maps": {
+        "body": "한국에서는 구글맵의 대중교통·길찾기 정보가 제한적입니다. 카카오맵이나 네이버맵을 함께 설치해 두세요.",
+        "tip1": "카카오맵 — 대중교통·도보 길찾기 정확도가 가장 높음",
+        "tip2": "네이버맵 — 카카오맵과 비슷한 대체 앱",
+        "tip3": "구글맵은 장소 검색·해외 공유용 보조로 사용",
+        "links": [
+          { "label": "카카오맵", "url": "https://map.kakao.com/" },
+          { "label": "네이버맵", "url": "https://map.naver.com/" },
+          { "label": "Google 지도", "url": "https://maps.google.com/" }
+        ]
+      },
+      "airport": {
+        "body": "공항철도(AREX)·리무진버스·택시 중 숙소 위치에 맞는 이동수단을 미리 정해두세요.",
+        "tip1": "공항철도 직통열차가 가장 빠르고 저렴함",
+        "tip2": "짐이 많다면 리무진버스가 숙소 근처까지 편함",
+        "tip3": "택시 기사님께 보여드릴 숙소 주소를 미리 저장해두기",
+        "links": [
+          { "label": "인천국제공항공사 공식 홈페이지", "url": "https://www.airport.kr/" },
+          { "label": "공항철도(AREX) 공식 홈페이지", "url": "https://www.arex.or.kr/" }
+        ]
+      },
+      "exchange": {
+        "body": "카드 결제가 대부분 가능하지만, 전통시장·일부 사찰·소규모 택시는 현금만 받는 곳도 있어요.",
+        "tip1": "공항·시내 은행에서 소액만 환전해도 충분",
+        "tip2": "해외카드로 편의점 ATM(Global 표시)에서 인출 가능",
+        "tip3": "전통시장·사찰 입장료는 현금을 준비해 두세요",
+        "links": [
+          { "label": "관세청 – 출·입국 외환 신고 안내", "url": "https://www.customs.go.kr/kcs/cm/cntnts/cntntsView.do?mi=8458&cntntsId=2808" }
+        ]
+      },
+      "emergency": {
+        "body": "여행 중 문제가 생기면 아래 번호로 바로 전화하세요. 1330은 다국어 관광 상담을 제공합니다.",
+        "tip1": "1330 — 관광 안내·통역 (다국어 지원)",
+        "tip2": "112 — 경찰 신고",
+        "tip3": "119 — 화재·구급",
+        "links": [
+          { "label": "정부24 – 관광통역안내전화 1330", "url": "https://www.gov.kr/portal/service/serviceInfo/B55101100019" },
+          { "label": "경찰청 112 신고포털", "url": "https://www.112.go.kr/" },
+          { "label": "소방청 119안심콜", "url": "https://u119.nfa.go.kr/" }
+        ]
+      }
     }
   },
   "help": {
@@ -326,6 +504,12 @@
     "scopeDay": "{{day}}일차",
     "formatCsv": "CSV",
     "formatJson": "JSON",
+    "formatKml": "KML",
+    "formatGpx": "GPX",
+    "mapAppsShort": "지도 앱",
+    "mapHint": "KML은 Google 내 지도·Earth에, GPX는 하이킹·내비게이션 앱에 가져오기 좋습니다. 동선이 있으면 경로선도 포함됩니다.",
+    "routeLine": "동선",
+    "savedMapFile": "{{scope}} {{format}} 파일을 저장했습니다 (구글 지도 등에서 가져오기)",
     "csvHeaders": {
       "trip": "여행명",
       "day": "일차",

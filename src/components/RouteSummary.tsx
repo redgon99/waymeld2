@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Icon } from './Icon';
 import type { GeneratedRoute } from '../types';
 import { getCategoryMeta } from '../lib/categories';
-import { TRAVEL_MODE_META } from '../lib/categories';
+import { useTravelModeMeta } from '../lib/i18nCategories';
 import { buildKakaoMapDirectionsUrl, buildLegMapLinks } from '../lib/mapLinks';
 import { formatFullItinerary } from '../lib/itineraryExport';
 import { SortableContainer, SortableItem } from './Sortable';
@@ -30,7 +30,8 @@ export function RouteSummary({
   const { t } = useTranslation('planner');
   const [copied, setCopied] = useState(false);
   const directionsUrl = buildKakaoMapDirectionsUrl(route);
-  const modeMeta = TRAVEL_MODE_META[route.options.travelMode];
+  const travelModeMeta = useTravelModeMeta();
+  const modeMeta = travelModeMeta[route.options.travelMode];
   const legCount = route.legs.length;
   const apiLegCount = route.legs.filter((l) => l.source === 'api').length;
   const estimateLegCount = route.legs.filter((l) => l.source === 'estimate').length;

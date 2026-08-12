@@ -8,9 +8,11 @@ import type {
   SearchCategoryFilter,
   SearchRadiusMeters,
   FoodRestriction,
+  TripTheme,
 } from '../types';
 import { useSearchCategoryFilters, useSortLabels } from '../lib/i18nCategories';
 import { getSearchCategoryAccent } from '../lib/categories';
+import { TRIP_THEMES } from '../lib/themes';
 import { formatNumber } from '../lib/format';
 import { normalizeLocale } from '../lib/locale';
 import i18n from '../lib/i18n';
@@ -75,7 +77,17 @@ interface Props {
   /** 숙소·관광·마트 등 카테고리 하부 필터 */
   categorySubFilters?: SearchSubFilterId[];
   onCategorySubFiltersChange?: (next: SearchSubFilterId[]) => void;
+  /** 선택한 여행 테마 (K-food, K-pop 등) — 일치하는 카테고리를 우선 노출 */
+  preferences?: TripTheme[];
   variant?: 'default' | 'compact';
+}
+
+/** 선택한 테마 중 이 장소의 카테고리와 일치하는 테마들 */
+function matchedThemes(place: Place, preferences: TripTheme[]) {
+  if (!preferences.length) return [];
+  return TRIP_THEMES.filter(
+    (theme) => preferences.includes(theme.id) && theme.categories.includes(place.category)
+  );
 }
 
 function insightBadge(place: Place): { kind: 'y' | 'g' | 'n'; label: string } | null {
@@ -127,6 +139,7 @@ export function SearchPanel({
   onFoodRestrictionsChange,
   categorySubFilters = [],
   onCategorySubFiltersChange,
+  preferences = [],
   variant = 'default',
 }: Props) {
   const { t } = useTranslation('planner');
@@ -242,6 +255,11 @@ export function SearchPanel({
       const aOpen = openRank(a);
       const bOpen = openRank(b);
       if (aOpen !== bOpen) return aOpen - bOpen;
+      if (preferences.length) {
+        const aMatch = matchedThemes(a, preferences).length > 0 ? 0 : 1;
+        const bMatch = matchedThemes(b, preferences).length > 0 ? 0 : 1;
+        if (aMatch !== bMatch) return aMatch - bMatch;
+      }
       switch (sortKey) {
         case 'rating':
           return (b.rating ?? -1) - (a.rating ?? -1);
@@ -253,7 +271,7 @@ export function SearchPanel({
       }
     });
     return list;
-  }, [results, sortKey]);
+  }, [results, sortKey, preferences]);
 
   const canSubmitSearch =
     Boolean(query.trim()) || (searchScope === 'nearby' && categoryFilter !== null);
@@ -573,13 +591,14 @@ export function SearchPanel({
             const isPinned = pinnedIds.has(place.id);
             const badge = insightBadge(place);
             const enHint = place.categoryDetail || place.categoryLabel || '';
+            const themeMatches = matchedThemes(place, preferences);
             return (
               <li
                 key={place.id}
                 data-place-id={place.id}
                 className={`search-result-card ${isPinned ? 'pinned' : ''} ${
                   selectedId === place.id ? 'selected' : ''
-                }`}
+                } ${themeMatches.length ? 'theme-matched' : ''}`}
                 onClick={() => onSelectResult?.(place)}
               >
                   <PlaceThumb
@@ -613,6 +632,12 @@ export function SearchPanel({
                       </span>
                     )}
                   </div>
+                  {themeMatches.length > 0 && (
+                    <span className="theme-match-badge">
+                      <Icon name={themeMatches[0].icon} size={11} />
+                      {t(themeMatches[0].labelKey)}
+                    </span>
+                  )}
                   {badge && (
                     <span className={`insight-badge ${badge.kind}`}>{badge.label}</span>
                   )}

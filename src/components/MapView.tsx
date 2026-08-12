@@ -10,6 +10,8 @@ import {
 } from '../lib/mapMarkers';
 import { GoogleMapView } from './GoogleMapView';
 import type { MapProvider } from '../lib/mapProvider';
+import { useLongPress } from '../hooks/useLongPress';
+import { mapCentersNear, shouldAnimateMapCenter, type MapLatLng } from '../lib/mapCenterMotion';
 
 interface Props {
   provider?: MapProvider;
@@ -29,6 +31,8 @@ interface Props {
   pickingPinFromMap?: boolean;
   onOriginPicked?: (lat: number, lng: number, address: string) => void;
   onPinLocationPicked?: (lat: number, lng: number, address: string) => void;
+  /** 모바일 지도 롱프레스 — 좌표 없이 "핀 찍기 모드 진입" 신호만 전달 */
+  onMapLongPress?: () => void;
   draftPinLocation?: { lat: number; lng: number } | null;
   onSelectPlace?: (place: Place) => void;
   onPinnedMarkerClick?: (place: Place) => void;
@@ -81,6 +85,7 @@ export function MapView({
         pickingPinFromMap={rest.pickingPinFromMap}
         onOriginPicked={rest.onOriginPicked}
         onPinLocationPicked={rest.onPinLocationPicked}
+        onMapLongPress={rest.onMapLongPress}
         draftPinLocation={rest.draftPinLocation}
         onSelectPlace={rest.onSelectPlace}
         onPinnedMarkerClick={rest.onPinnedMarkerClick}
@@ -121,6 +126,7 @@ function KakaoMapView({
   pickingPinFromMap = false,
   onOriginPicked,
   onPinLocationPicked,
+  onMapLongPress,
   draftPinLocation = null,
   onSelectPlace,
   onPinnedMarkerClick,
@@ -146,6 +152,7 @@ function KakaoMapView({
 }: Omit<Props, 'provider' | 'googleMapsReady'>) {
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
+  const centerReadyRef = useRef(false);
   const overlaysRef = useRef<any[]>([]);
   const placeMarkerContentsRef = useRef<HTMLElement[]>([]);
   const polylineRef = useRef<any>(null);
@@ -240,10 +247,27 @@ function KakaoMapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapsReady]);
 
-  // 센터 변경
+  // 센터 변경 — 칩·검색 선택 시 panTo 애니메이션
   useEffect(() => {
     if (!mapRef.current) return;
-    mapRef.current.setCenter(new window.kakao.maps.LatLng(center.lat, center.lng));
+    const target: MapLatLng = { lat: center.lat, lng: center.lng };
+    const latlng = new window.kakao.maps.LatLng(target.lat, target.lng);
+    const isInitial = !centerReadyRef.current;
+
+    if (isInitial) {
+      mapRef.current.setCenter(latlng);
+      centerReadyRef.current = true;
+      return;
+    }
+
+    const c = mapRef.current.getCenter();
+    const current: MapLatLng = { lat: c.getLat(), lng: c.getLng() };
+
+    if (shouldAnimateMapCenter(current, target)) {
+      mapRef.current.panTo(latlng);
+    } else if (!mapCentersNear(current, target)) {
+      mapRef.current.setCenter(latlng);
+    }
   }, [center.lat, center.lng]);
 
   useEffect(() => {
@@ -737,6 +761,8 @@ function KakaoMapView({
     }
   }, [generatedRoute, fitRouteBounds]);
 
+  const longPress = useLongPress(() => onMapLongPress?.());
+
   return (
     <div
       ref={mapEl}
@@ -744,6 +770,7 @@ function KakaoMapView({
       role="application"
       aria-label="지도"
       onContextMenu={(e) => e.preventDefault()}
+      {...longPress}
     />
   );
 }

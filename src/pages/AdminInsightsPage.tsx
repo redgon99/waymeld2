@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { AuthBar } from '../components/AuthBar';
+import { AdminHeader } from '../components/AdminHeader';
 import {
   addInsightKeyword,
   deleteInsightKeyword,
@@ -90,6 +90,7 @@ export default function AdminInsightsPage() {
   const [filterSource, setFilterSource] = useState<InsightSource | ''>('');
   const [filterCategory, setFilterCategory] = useState<InsightCategory | ''>('');
   const [expandedCategory, setExpandedCategory] = useState<InsightCategory | null>(null);
+  const [activeTab, setActiveTab] = useState<'collect' | 'keywords' | 'dashboard'>('dashboard');
   const [collectPeriod, setCollectPeriod] = useState<InsightCollectPeriod>(() =>
     loadInsightCollectPeriod()
   );
@@ -424,27 +425,38 @@ export default function AdminInsightsPage() {
   return (
     <main className="admin-page">
       <div className="admin-shell">
-        <header className="admin-header">
-          <div>
-            <h1>시장 인사이트</h1>
-            <p>한국여행 계획자·경험자의 니즈/불편함을 외부 플랫폼에서 수집·분석 (관리자 전용)</p>
-          </div>
-          <div className="admin-header-actions">
-            <AuthBar />
-            <button type="button" className="admin-refresh-btn" onClick={() => void loadAll()}>
-              {refreshing ? '새로고침 중...' : '새로고침'}
-            </button>
-            <Link to="/admin" className="admin-link-btn">
-              관리자 페이지로
-            </Link>
-            <Link to="/admin/guides" className="admin-link-btn">
-              가이드 카드
-            </Link>
-          </div>
-        </header>
+        <AdminHeader
+          title="시장 인사이트"
+          subtitle="한국여행 계획자·경험자의 니즈/불편함을 외부 플랫폼에서 수집·분석 (관리자 전용)"
+          current="insights"
+          refreshing={refreshing}
+          onRefresh={() => void loadAll()}
+        />
 
         {error && <div className="admin-error">{error}</div>}
 
+        <div className="admin-tab-bar" role="tablist" aria-label="인사이트 설정 영역">
+          {(
+            [
+              { id: 'dashboard' as const, label: '인사이트 대시보드' },
+              { id: 'collect' as const, label: '수집 실행 현황' },
+              { id: 'keywords' as const, label: '키워드 관리' },
+            ] as const
+          ).map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              className={`admin-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === 'collect' && (
         <section className="admin-section">
           <h2>수집 실행 현황</h2>
           <div className="admin-collect-period">
@@ -552,7 +564,9 @@ export default function AdminInsightsPage() {
             </table>
           </div>
         </section>
+        )}
 
+        {activeTab === 'keywords' && (
         <section className="admin-section">
           <h2>키워드 관리</h2>
           <div className="admin-notice-form-row" style={{ marginBottom: 12 }}>
@@ -607,7 +621,9 @@ export default function AdminInsightsPage() {
             </div>
           ))}
         </section>
+        )}
 
+        {activeTab === 'dashboard' && (
         <section className="admin-section">
           <h2>인사이트 대시보드</h2>
           <p className="admin-cell-sub" style={{ marginBottom: 10 }}>
@@ -848,6 +864,7 @@ export default function AdminInsightsPage() {
             </table>
           </div>
         </section>
+        )}
       </div>
     </main>
   );

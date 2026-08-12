@@ -1,5 +1,6 @@
 import { Icon } from './Icon';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type {
   PinnedPlace,
   RouteOptions,
@@ -7,8 +8,10 @@ import type {
   OptimizeBy,
   OriginType,
   Origin,
+  SimpleCategory,
 } from '../types';
-import { TRAVEL_MODE_META, suggestStayMinutes, getCategoryMeta } from '../lib/categories';
+import { suggestStayMinutes, getCategoryMeta } from '../lib/categories';
+import { useTravelModeMeta } from '../lib/i18nCategories';
 import { generateRoute } from '../lib/planner';
 
 interface Props {
@@ -29,16 +32,12 @@ interface Props {
   embedded?: boolean;
 }
 
-const OPTIMIZE_LABELS: Record<OptimizeBy, string> = {
-  distance: '최단거리',
-  time: '최소시간',
-  'no-toll': '무료도로',
-};
+const OPTIMIZE_KEYS: OptimizeBy[] = ['distance', 'time', 'no-toll'];
 
-const OPTIMIZE_LABELS_EN: Record<OptimizeBy, string> = {
-  distance: 'Shortest',
-  time: 'Fastest',
-  'no-toll': 'Free roads',
+const OPTIMIZE_I18N: Record<OptimizeBy, string> = {
+  distance: 'route.options.optimizeDistance',
+  time: 'route.options.optimizeTime',
+  'no-toll': 'route.options.optimizeNoToll',
 };
 
 export function RouteOptionsPanel({
@@ -57,6 +56,8 @@ export function RouteOptionsPanel({
   onUpdateStayMinutes,
   embedded = false,
 }: Props) {
+  const { t, i18n } = useTranslation('planner');
+  const travelModeMeta = useTravelModeMeta();
   const [originMenuOpen, setOriginMenuOpen] = useState(false);
 
   const preview = useMemo(() => {
@@ -78,18 +79,32 @@ export function RouteOptionsPanel({
 
   function setOriginType(type: OriginType) {
     if (type === 'current') {
-      patchOrigin({ type, label: '현재 위치' });
+      patchOrigin({ type, label: t('route.options.originCurrent') });
       setOriginMenuOpen(false);
     } else if (type === 'map-click') {
-      patchOrigin({ type, label: '지도에서 선택', lat: undefined, lng: undefined });
+      patchOrigin({
+        type,
+        label: t('route.options.originMapPick'),
+        lat: undefined,
+        lng: undefined,
+      });
       onPickOriginFromMap();
       setOriginMenuOpen(false);
     } else {
-      patchOrigin({ type, label: options.origin.address || '', address: options.origin.address || '' });
+      patchOrigin({
+        type,
+        label: options.origin.address || '',
+        address: options.origin.address || '',
+      });
     }
   }
 
-  const originLabel = originDisplayLabel(options.origin, pickingOriginFromMap, pinned);
+  const originLabel = originDisplayLabel(
+    options.origin,
+    pickingOriginFromMap,
+    pinned,
+    t
+  );
 
   if (!open && !embedded) return null;
 
@@ -98,33 +113,42 @@ export function RouteOptionsPanel({
       className={`route-panel route-panel-v2 ${open || embedded ? 'open' : ''} ${
         embedded ? 'route-panel-embedded' : ''
       }`}
-      aria-label="경로 설정"
+      aria-label={t('route.options.panelAria')}
+      lang={i18n.language}
     >
       {!embedded && (
         <header className="route-panel-header">
           <div>
             <div className="panel-title">
               <Icon name="route" />
-              <span>경로 설정</span>
+              <span>{t('route.options.title')}</span>
             </div>
             <div className="panel-subtitle">
-              {currentDay}일차 · {pinned.length}개 장소
+              {t('route.options.subtitle', {
+                day: currentDay,
+                count: pinned.length,
+              })}
             </div>
           </div>
-          <button className="icon-btn" onClick={onClose} aria-label="패널 닫기">
+          <button
+            className="icon-btn"
+            onClick={onClose}
+            aria-label={t('route.options.close')}
+          >
             <Icon name="close" />
           </button>
         </header>
       )}
 
       <div className="route-panel-body">
-        {/* DEPART 출발 */}
         <section className="route-section">
           <div className="section-header">
-            <span className="section-label route-v2-label">DEPART 출발</span>
+            <span className="section-label route-v2-label">
+              {t('route.options.sectionDepart')}
+            </span>
             {currentDay > 1 && onCopyFromPreviousDay && (
               <button type="button" className="copy-day-btn" onClick={onCopyFromPreviousDay}>
-                {currentDay - 1}일차와 동일
+                {t('route.options.copySameAsDay', { day: currentDay - 1 })}
               </button>
             )}
           </div>
@@ -133,9 +157,10 @@ export function RouteOptionsPanel({
               <Icon name="clock" size={16} />
               <input
                 type="time"
+                lang={i18n.language === 'zh' ? 'zh-CN' : i18n.language}
                 value={options.departTime}
                 onChange={(e) => patch('departTime', e.target.value)}
-                aria-label="출발 시각"
+                aria-label={t('route.options.departTime')}
               />
             </label>
             <button
@@ -146,8 +171,13 @@ export function RouteOptionsPanel({
               onClick={() => setOriginMenuOpen((v) => !v)}
               aria-expanded={originMenuOpen}
               aria-haspopup="listbox"
+              aria-label={t('route.options.originAria', { label: originLabel })}
+              title={t('route.options.originAria', { label: originLabel })}
             >
-              <Icon name="mapPin" size={16} />
+              <span className="route-depart-origin-badge">
+                {t('route.options.originBadge')}
+              </span>
+              <Icon name="mapPin" size={15} />
               <span className="route-depart-origin-text">{originLabel}</span>
             </button>
           </div>
@@ -159,14 +189,14 @@ export function RouteOptionsPanel({
                 className={options.origin.type === 'current' ? 'active' : ''}
                 onClick={() => setOriginType('current')}
               >
-                <Icon name="location" size={14} /> 현재 위치
+                <Icon name="location" size={14} /> {t('route.options.originCurrent')}
               </button>
               <button
                 type="button"
                 className={options.origin.type === 'map-click' ? 'active' : ''}
                 onClick={() => setOriginType('map-click')}
               >
-                <Icon name="pinSelect" size={14} /> 지도에서 선택
+                <Icon name="pinSelect" size={14} /> {t('route.options.originMapPick')}
               </button>
               <div
                 className={`route-origin-address ${
@@ -176,7 +206,7 @@ export function RouteOptionsPanel({
                 <Icon name="search" size={14} />
                 <input
                   type="text"
-                  placeholder="주소·장소명"
+                  placeholder={t('route.options.originAddressPlaceholder')}
                   value={
                     options.origin.type === 'address' ? options.origin.address ?? '' : ''
                   }
@@ -199,16 +229,17 @@ export function RouteOptionsPanel({
               checked={options.reflectMealTime}
               onChange={(e) => patch('reflectMealTime', e.target.checked)}
             />
-            <span>식사 시간 반영</span>
+            <span>{t('route.options.reflectMeal')}</span>
           </label>
         </section>
 
-        {/* TRANSPORT 이동수단 */}
         <section className="route-section">
-          <div className="section-label route-v2-label">TRANSPORT 이동수단</div>
+          <div className="section-label route-v2-label">
+            {t('route.options.sectionTransport')}
+          </div>
           <div className="route-mode-row">
-            {(Object.keys(TRAVEL_MODE_META) as TravelMode[]).map((mode) => {
-              const meta = TRAVEL_MODE_META[mode];
+            {(Object.keys(travelModeMeta) as TravelMode[]).map((mode) => {
+              const meta = travelModeMeta[mode];
               return (
                 <button
                   key={mode}
@@ -226,11 +257,12 @@ export function RouteOptionsPanel({
           </div>
         </section>
 
-        {/* OPTIMIZE 최적화 */}
         <section className="route-section">
-          <div className="section-label route-v2-label">OPTIMIZE 최적화</div>
+          <div className="section-label route-v2-label">
+            {t('route.options.sectionOptimize')}
+          </div>
           <div className="route-optimize-row">
-            {(['distance', 'time', 'no-toll'] as OptimizeBy[]).map((key) => (
+            {OPTIMIZE_KEYS.map((key) => (
               <button
                 key={key}
                 type="button"
@@ -238,9 +270,8 @@ export function RouteOptionsPanel({
                   options.optimizeBy === key ? 'selected' : ''
                 }`}
                 onClick={() => patch('optimizeBy', key)}
-                title={OPTIMIZE_LABELS_EN[key]}
               >
-                {OPTIMIZE_LABELS[key]}
+                {t(OPTIMIZE_I18N[key])}
               </button>
             ))}
           </div>
@@ -250,29 +281,30 @@ export function RouteOptionsPanel({
               className={`route-order-chip ${options.autoOrder ? 'selected' : ''}`}
               onClick={() => patch('autoOrder', true)}
             >
-              <Icon name="wand" size={12} /> 자동
+              <Icon name="wand" size={12} /> {t('route.options.orderAuto')}
             </button>
             <button
               type="button"
               className={`route-order-chip ${!options.autoOrder ? 'selected' : ''}`}
               onClick={() => patch('autoOrder', false)}
             >
-              <Icon name="grip" size={12} /> 핀 순서
+              <Icon name="grip" size={12} /> {t('route.options.orderPins')}
             </button>
           </div>
         </section>
 
-        {/* STAY TIME 체류 시간 */}
         <section className="route-section">
           <div className="section-header">
-            <span className="section-label route-v2-label">STAY TIME 체류 시간</span>
+            <span className="section-label route-v2-label">
+              {t('route.options.sectionStay')}
+            </span>
             <button
               type="button"
               className={`route-ai-suggest ${options.autoStayTime ? 'active' : ''}`}
               onClick={() => patch('autoStayTime', !options.autoStayTime)}
               aria-pressed={options.autoStayTime}
             >
-              <Icon name="sparkles" size={12} /> AI suggest 자동 추천
+              <Icon name="sparkles" size={12} /> {t('route.options.aiSuggest')}
             </button>
           </div>
           <div className="route-stay-list">
@@ -280,6 +312,7 @@ export function RouteOptionsPanel({
               const meta = getCategoryMeta(p.categoryCode);
               const sug = suggestStayMinutes(p.category);
               const minutes = p.stayMinutes ?? sug.minutes;
+              const reason = stayReasonLabel(p.category, t);
               return (
                 <div key={p.id} className="route-stay-card">
                   <span
@@ -291,7 +324,7 @@ export function RouteOptionsPanel({
                   <div className="route-stay-body">
                     <div className="route-stay-name">{p.name}</div>
                     <div className="route-stay-hint">
-                      {options.autoStayTime ? sug.reason : p.categoryLabel}
+                      {options.autoStayTime ? reason : p.categoryLabel}
                     </div>
                   </div>
                   {options.autoStayTime || !onUpdateStayMinutes ? (
@@ -309,7 +342,7 @@ export function RouteOptionsPanel({
                           if (!Number.isFinite(n) || !onUpdateStayMinutes) return;
                           onUpdateStayMinutes(p.id, n);
                         }}
-                        aria-label={`${p.name} 체류시간(분)`}
+                        aria-label={t('route.options.stayMinutesAria', { name: p.name })}
                       />
                       <span>min</span>
                     </label>
@@ -324,10 +357,13 @@ export function RouteOptionsPanel({
       <footer className="route-panel-footer">
         {preview && (
           <div className="preview-stats route-preview-line">
-            <span className="stat-label">Preview 예상</span>
+            <span className="stat-label">{t('route.options.preview')}</span>
             <span className="stat-value">
-              {preview.totalDistanceKm} km · {preview.totalTravelMinutes}분 · ends{' '}
-              {preview.finishAt}
+              {t('route.options.previewStats', {
+                km: preview.totalDistanceKm,
+                minutes: preview.totalTravelMinutes,
+                time: preview.finishAt,
+              })}
             </span>
           </div>
         )}
@@ -337,27 +373,47 @@ export function RouteOptionsPanel({
           disabled={pinned.length < 2}
         >
           <Icon name="sparkles" />
-          {hasExistingRoute ? 'Rebuild route · 동선 다시 만들기' : 'Build route · 동선 만들기'}
+          {hasExistingRoute ? t('route.options.rebuild') : t('route.options.build')}
         </button>
       </footer>
     </aside>
   );
 }
 
+function stayReasonLabel(
+  category: SimpleCategory,
+  t: (key: string) => string
+): string {
+  return t(`route.options.stayReason.${category}`);
+}
+
 function originDisplayLabel(
   origin: Origin,
   picking: boolean,
-  pinned: PinnedPlace[]
+  pinned: PinnedPlace[],
+  t: (key: string, opts?: Record<string, unknown>) => string
 ): string {
-  if (picking) return '지도를 클릭하세요';
-  if (origin.type === 'current') return '현재 위치';
+  if (picking) return t('route.options.originClickMap');
+  if (origin.type === 'current') return t('route.options.originCurrent');
   if (origin.type === 'map-click') {
-    if (origin.address || origin.label) return origin.address || origin.label;
-    return '지도에서 선택';
+    if (origin.address || origin.label) {
+      const raw = (origin.address || origin.label || '').trim();
+      // 언어 전환 후에도 타입 기준 기본 문구는 재번역
+      if (
+        raw === '지도에서 선택' ||
+        raw === 'Pick on map' ||
+        raw === '地図で選択' ||
+        raw === '在地图上选择'
+      ) {
+        return t('route.options.originMapPick');
+      }
+      return raw;
+    }
+    return t('route.options.originMapPick');
   }
   if (origin.type === 'address') {
-    return origin.address?.trim() || '주소·장소명 입력';
+    return origin.address?.trim() || t('route.options.originEnterAddress');
   }
-  if (pinned[0]) return `${pinned[0].name} (stop 1)`;
-  return '출발지 선택';
+  if (pinned[0]) return t('route.options.originStop1', { name: pinned[0].name });
+  return t('route.options.originSelect');
 }

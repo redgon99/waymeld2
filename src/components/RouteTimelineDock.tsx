@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from './Icon';
-import type { GeneratedRoute } from '../types';
-import { getCategoryMeta, TRAVEL_MODE_META } from '../lib/categories';
+import type { GeneratedRoute, PinnedPlace } from '../types';
+import { getCategoryMeta } from '../lib/categories';
+import { useTravelModeMeta } from '../lib/i18nCategories';
 import { buildKakaoMapDirectionsUrl } from '../lib/mapLinks';
 
 interface Props {
@@ -10,10 +11,14 @@ interface Props {
   currentDay: number;
   panelOpen: boolean;
   collapsed: boolean;
+  /** 'mobile'이면 데스크톱 사이드패널 오버레이 배치 대신 모바일 바텀시트 위 고정 카드로 렌더링 */
+  variant?: 'desktop' | 'mobile';
   onToggleCollapsed: () => void;
   onReoptimize: () => void;
+  onClearRoute?: () => void;
   selectedStopId?: string | null;
   onSelectStop?: (placeId: string) => void;
+  onShowTaxiCard?: (place: PinnedPlace) => void;
   refining?: boolean;
 }
 
@@ -34,16 +39,22 @@ export function RouteTimelineDock({
   currentDay,
   panelOpen,
   collapsed,
+  variant = 'desktop',
   onToggleCollapsed,
   onReoptimize,
+  onClearRoute,
   selectedStopId,
   onSelectStop,
+  onShowTaxiCard,
   refining,
 }: Props) {
   const { t } = useTranslation('planner');
-  const modeMeta = TRAVEL_MODE_META[route.options.travelMode];
+  const travelModeMeta = useTravelModeMeta();
+  const modeMeta = travelModeMeta[route.options.travelMode];
   const directionsUrl = buildKakaoMapDirectionsUrl(route);
   const leftClass = panelOpen ? 'dock-beside-panel' : 'dock-beside-rail';
+  const placementClass =
+    variant === 'mobile' ? 'route-dock-mobile' : `${leftClass} desktop-only-overlay`;
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
@@ -95,7 +106,7 @@ export function RouteTimelineDock({
   if (collapsed) {
     const nextName = route.stops[0]?.name ?? '';
     return (
-      <div className={`route-timeline-dock collapsed ${leftClass} desktop-only-overlay`}>
+      <div className={`route-timeline-dock collapsed ${placementClass}`}>
         <button type="button" className="route-dock-pill" onClick={onToggleCollapsed}>
           <span className="route-dock-pill-title">
             {t('dock.pillTitle', { day: currentDay, count: route.stops.length })}
@@ -112,7 +123,7 @@ export function RouteTimelineDock({
   }
 
   return (
-    <div className={`route-timeline-dock route-dock-nextup ${leftClass} desktop-only-overlay`}>
+    <div className={`route-timeline-dock route-dock-nextup ${placementClass}`}>
       {refining && (
         <div className="route-dock-refining">
           <Icon name="loader" spin size={14} /> {t('route.refining')}
@@ -166,6 +177,22 @@ export function RouteTimelineDock({
                   {t('route.mapDrive')}
                 </a>
               )}
+              {onClearRoute && (
+                <>
+                  <div className="route-dock-more-sep" aria-hidden />
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="route-dock-more-item danger"
+                    onClick={() => {
+                      setMoreOpen(false);
+                      onClearRoute();
+                    }}
+                  >
+                    {t('dock.clearRoute')}
+                  </button>
+                </>
+              )}
               <div className="route-dock-more-meta" role="note">
                 {modeMeta.label} · {t('dock.departAt', { time: route.options.departTime })}
               </div>
@@ -213,6 +240,18 @@ export function RouteTimelineDock({
                 {focusIndex + 1}
               </span>
               <span className="route-dock-focus-badge">{t('dock.focusBadge')}</span>
+              {onShowTaxiCard && (
+                <button
+                  type="button"
+                  className="route-dock-focus-taxi"
+                  onClick={() => onShowTaxiCard(focusStop)}
+                  title={t('taxi.showCard')}
+                  aria-label={t('taxi.showCard')}
+                >
+                  <Icon name="transportCar" size={14} />
+                  <span>{t('taxi.showCard')}</span>
+                </button>
+              )}
             </div>
             <div className="route-dock-focus-name">{focusStop.name}</div>
             <div className="route-dock-focus-meta">
