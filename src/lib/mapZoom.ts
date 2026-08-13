@@ -37,3 +37,21 @@ export function googleZoomToKakaoLevel(zoom: number): number {
   if (z <= 6) return 14;
   return Math.max(1, Math.min(14, 20 - z));
 }
+
+/** 플래너에서 구글 지도가 대륙/세계 축척으로 풀리지 않도록 하한 */
+export const MIN_PLANNER_GOOGLE_ZOOM = 12;
+
+/** 저장된 카카오 레벨이 구글에서 너무 멀면 기본 줌으로 복구 */
+export function googleZoomForPlannerLevel(level: number): {
+  zoom: number;
+  recoveredLevel: number | null;
+} {
+  const zoom = kakaoLevelToGoogleZoom(level);
+  if (zoom >= MIN_PLANNER_GOOGLE_ZOOM) {
+    return { zoom, recoveredLevel: null };
+  }
+  return {
+    zoom: kakaoLevelToGoogleZoom(KAKAO_LEVEL_DEFAULT),
+    recoveredLevel: KAKAO_LEVEL_DEFAULT,
+  };
+}

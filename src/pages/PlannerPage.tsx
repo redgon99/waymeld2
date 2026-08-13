@@ -16,7 +16,7 @@ import type {
   TripTheme,
   FoodRestriction,
 } from '../types';
-import { loadKakaoSdk, searchPlacesUnified } from '../lib/kakao';
+import { coordsToAddress, loadKakaoSdk, searchPlacesUnified } from '../lib/kakao';
 import { loadGoogleMapsSdk, searchPlacesUnifiedWithGoogle } from '../lib/googleMaps';
 import {
   inferMapProviderFromLocation,
@@ -96,7 +96,9 @@ import { shouldShowOnboarding, isPlazaNavUnlocked, unlockPlazaNav } from '../lib
 import { TRIP_THEMES } from '../lib/themes';
 import { splitSearchQueries } from '../lib/searchQueries';
 import { filterPlacesBySubFilters, type SearchSubFilterId } from '../lib/searchSubFilters';
-import { isTourApiConfigured, searchTourPlaces } from '../lib/tourApi';
+import { isTourApiConfigured, searchTourPlaces, searchTourPlacesNearby } from '../lib/tourApi';
+import { isTourFestivalConfigured, searchTourFestivals } from '../lib/tourFestival';
+import { regionPrefixOf } from '../lib/koreaAreaCodes';
 import '../styles/app.css';
 
 type MobileSheetKind = 'search' | 'pins' | null;
@@ -179,6 +181,7 @@ export default function PlannerPage() {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Place[]>([]);
   const [searching, setSearching] = useState(false);
+  const [searchingFestivals, setSearchingFestivals] = useState(false);
   const [searchEmpty, setSearchEmpty] = useState(false);
   const [searchScope, setSearchScope] = useState<SearchScope>('nationwide');
   const [categoryFilter, setCategoryFilter] = useState<SearchCategoryFilter>(null);
@@ -640,8 +643,19 @@ export default function PlannerPage() {
             }
           }
           if (mapProvider === 'google') recordGoogleSearch(plan, isAdmin);
+          if (isTourApiConfigured()) {
+            const tourNearby = await searchTourPlacesNearby(searchCenter, radius);
+            for (const place of tourNearby) {
+              if (seen.has(place.id)) continue;
+              seen.add(place.id);
+              merged.push({
+                ...place,
+                distance: Math.round(haversineMeters(searchCenter, place)),
+              });
+            }
+          }
           merged.sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
-          const clipped = merged.slice(0, 20);
+          const clipped = merged.slice(0, 24);
           setResults(clipped);
           setSearchPage(1);
           setSearchHasMore(false);
@@ -1014,6 +1028,39 @@ export default function PlannerPage() {
       });
     });
   }, [runSearch, openSearchPanel]);
+
+  const handleSearchFestivals = useCallback(() => {
+    if (!isTourFestivalConfigured()) return;
+    setSearchingFestivals(true);
+    const regionLookup = kakaoReady
+      ? coordsToAddress(mapCenter.lat, mapCenter.lng).catch(() => '')
+      : Promise.resolve('');
+    void regionLookup
+      .then((address) => {
+        const regionPrefix = regionPrefixOf(address);
+        return searchTourFestivals({ regionPrefix });
+      })
+      .then((festivals) => {
+        if (festivals.length === 0) {
+          showToast(tp('search.festivalsEmpty'));
+          return;
+        }
+        setResults((prev) => {
+          const seen = new Set(prev.map((p) => p.id));
+          const extra = festivals
+            .filter((p) => !seen.has(p.id))
+            .map((p) => ({
+              ...p,
+              distance: Math.round(haversineMeters(mapCenter, p)),
+            }))
+            .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
+          return extra.length ? [...prev, ...extra] : prev;
+        });
+        openSearchPanel();
+        showToast(tp('search.festivalsFound', { count: festivals.length }));
+      })
+      .finally(() => setSearchingFestivals(false));
+  }, [mapCenter, kakaoReady, openSearchPanel, tp]);
 
   // ============== 핀업 ==============
   const addPinFromPlace = useCallback(
@@ -1781,6 +1828,8 @@ export default function PlannerPage() {
                 searchRadius={searchRadius}
                 onSearchRadiusChange={handleSearchRadiusChange}
                 onUseMyLocation={handleUseMyLocationForSearch}
+                onSearchFestivals={isTourFestivalConfigured() ? handleSearchFestivals : undefined}
+                searchingFestivals={searchingFestivals}
                 query={query}
                 onQueryChange={setQuery}
                 onSearch={handleSearch}
@@ -2129,6 +2178,8 @@ export default function PlannerPage() {
                 searchRadius={searchRadius}
                 onSearchRadiusChange={handleSearchRadiusChange}
                 onUseMyLocation={handleUseMyLocationForSearch}
+                onSearchFestivals={isTourFestivalConfigured() ? handleSearchFestivals : undefined}
+                searchingFestivals={searchingFestivals}
                 query={query}
                 onQueryChange={setQuery}
                 onSearch={handleSearch}

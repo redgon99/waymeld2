@@ -11,7 +11,12 @@ import {
   createMapPlaceBubbleHtml,
   isMapPlaceBubbleDetailClick,
 } from '../lib/mapPlaceBubble';
-import { kakaoLevelToGoogleZoom, googleZoomToKakaoLevel } from '../lib/mapZoom';
+import {
+  googleZoomForPlannerLevel,
+  googleZoomToKakaoLevel,
+  kakaoLevelToGoogleZoom,
+  MIN_PLANNER_GOOGLE_ZOOM,
+} from '../lib/mapZoom';
 import { useLongPress } from '../hooks/useLongPress';
 import { mapCentersNear, shouldAnimateMapCenter, type MapLatLng } from '../lib/mapCenterMotion';
 
@@ -52,12 +57,6 @@ interface Props {
   onPlazaMarkerClick?: (id: string) => void;
 }
 
-function levelToZoom(level: number) {
-  // 상세(≤3, ~50m)는 축척 맞춤, 그 외는 기존 개요 매핑 유지
-  if (level <= 3) return kakaoLevelToGoogleZoom(level);
-  return Math.max(3, Math.min(18, 15 - level));
-}
-
 export function GoogleMapView({
   mapsReady = false,
   center,
@@ -96,6 +95,10 @@ export function GoogleMapView({
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const centerReadyRef = useRef(false);
+  const suppressZoomSyncRef = useRef(false);
+  const skipStaleZoomApplyRef = useRef(false);
+  const onMapLevelChangeRef = useRef(onMapLevelChange);
+  onMapLevelChangeRef.current = onMapLevelChange;
   const markersRef = useRef<any[]>([]);
   const placeMarkersRef = useRef<GoogleHtmlMarker[]>([]);
   const routeLineRef = useRef<any>(null);
@@ -124,13 +127,18 @@ export function GoogleMapView({
   useEffect(() => {
     if (!mapsReady || !mapEl.current || !window.google?.maps) return;
     if (mapRef.current) return;
+    const { zoom: initialZoom, recoveredLevel } = googleZoomForPlannerLevel(level);
     mapRef.current = new window.google.maps.Map(mapEl.current, {
       center,
-      zoom: levelToZoom(level),
+      zoom: initialZoom,
       streetViewControl: false,
       mapTypeControl: false,
       fullscreenControl: false,
     });
+    if (recoveredLevel != null) {
+      skipStaleZoomApplyRef.current = true;
+      onMapLevelChangeRef.current?.(recoveredLevel);
+    }
     return () => {
       markersRef.current.forEach((m) => {
         try {
@@ -188,7 +196,17 @@ export function GoogleMapView({
 
   useEffect(() => {
     if (!mapRef.current) return;
-    mapRef.current.setZoom(levelToZoom(level));
+    const nextZoom = kakaoLevelToGoogleZoom(level);
+    if (skipStaleZoomApplyRef.current) {
+      skipStaleZoomApplyRef.current = false;
+      if (nextZoom < MIN_PLANNER_GOOGLE_ZOOM) return;
+    }
+    const currentZoom = mapRef.current.getZoom();
+    if (typeof currentZoom === 'number' && Math.round(currentZoom) === nextZoom) {
+      return;
+    }
+    suppressZoomSyncRef.current = true;
+    mapRef.current.setZoom(nextZoom);
   }, [level, levelTick]);
 
   useEffect(() => {
@@ -205,6 +223,10 @@ export function GoogleMapView({
     }
     listenersRef.current.push(
       mapRef.current.addListener('zoom_changed', () => {
+        if (suppressZoomSyncRef.current) {
+          suppressZoomSyncRef.current = false;
+          return;
+        }
         const z = mapRef.current.getZoom();
         if (typeof z === 'number') onMapLevelChange?.(googleZoomToKakaoLevel(z));
         if (onMapCenterChange) {

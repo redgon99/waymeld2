@@ -12,6 +12,7 @@ import {
 } from '../lib/placePanelTabs';
 import { googlePlaceDetailModalPayload } from '../lib/googlePlaceDetail';
 import { fetchGooglePlaceDetail } from '../lib/googleMaps';
+import { fetchTourPlaceDetail } from '../lib/tourPlaceDetail';
 import { PlaceDetailTabPanel } from './PlaceDetailTabPanels';
 import { PlaceActionBar } from './PlaceActionBar';
 
@@ -38,6 +39,7 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
   const [photoError, setPhotoError] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const isGooglePlace = Boolean(place?.id?.startsWith('g:'));
+  const isTourPlace = Boolean(place?.id?.startsWith('tour:'));
 
   useEffect(() => {
     if (!open || !place) {
@@ -68,10 +70,15 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
       ? fetchGooglePlaceDetail(place).then((detail) =>
           googlePlaceDetailModalPayload(detail, place.placeUrl)
         )
-      : fetchPlacePanelDetail(place.id).then((detail) => ({
-          ...detail,
-          placeUrl: place.placeUrl,
-        }));
+      : isTourPlace
+        ? fetchTourPlaceDetail(place.id).then((detail) => ({
+            ...detail,
+            placeUrl: place.placeUrl,
+          }))
+        : fetchPlacePanelDetail(place.id).then((detail) => ({
+            ...detail,
+            placeUrl: place.placeUrl,
+          }));
 
     load
       .then(({ panel: p, tabs: nextTabs, photos: urls, placeUrl }) => {
@@ -95,7 +102,7 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
     return () => {
       cancelled = true;
     };
-  }, [open, place?.id, place?.thumbnailUrl, isGooglePlace]);
+  }, [open, place?.id, place?.thumbnailUrl, isGooglePlace, isTourPlace]);
 
   useEffect(() => {
     if (!open) return;
@@ -130,7 +137,9 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
     ? (panel?.place_url as string | undefined) ??
       place.placeUrl ??
       `https://www.google.com/maps/place/?q=place_id:${place.id.replace(/^g:/, '')}`
-    : place.photosUrl ?? buildKakaoPhotosUrl(place.id, place.placeUrl);
+    : isTourPlace
+      ? (place.placeUrl ?? 'https://korean.visitkorea.or.kr/')
+      : (place.photosUrl ?? buildKakaoPhotosUrl(place.id, place.placeUrl));
   const active = photos[activeIndex];
   const isPhotoTab = activeTab === 'PHOTO';
 
@@ -186,7 +195,9 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
                   <a href={placeExternalUrl} target="_blank" rel="noopener noreferrer">
                     {isGooglePlace
                       ? t('place.detail.openOnGoogle')
-                      : t('place.detail.openOnKakao')}
+                      : isTourPlace
+                        ? t('place.detail.openOnTour')
+                        : t('place.detail.openOnKakao')}
                   </a>
                 </div>
               )}

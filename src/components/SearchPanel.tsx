@@ -55,6 +55,8 @@ interface Props {
   searchRadius: SearchRadiusMeters;
   onSearchRadiusChange: (radius: SearchRadiusMeters) => void;
   onUseMyLocation?: () => void;
+  onSearchFestivals?: () => void;
+  searchingFestivals?: boolean;
   query: string;
   onQueryChange: (q: string) => void;
   onSearch: () => void;
@@ -119,6 +121,8 @@ export function SearchPanel({
   searchRadius,
   onSearchRadiusChange,
   onUseMyLocation,
+  onSearchFestivals,
+  searchingFestivals = false,
   query,
   onQueryChange,
   onSearch,
@@ -443,6 +447,21 @@ export function SearchPanel({
         {onUseMyLocation && (
           <button type="button" className="search-tool-chip" onClick={onUseMyLocation}>
             <Icon name="location" size={14} /> {t('search.myLocation')}
+          </button>
+        )}
+        {onSearchFestivals && (
+          <button
+            type="button"
+            className="search-tool-chip"
+            onClick={onSearchFestivals}
+            disabled={searchingFestivals}
+          >
+            {searchingFestivals ? (
+              <Icon name="loader" spin size={14} />
+            ) : (
+              <Icon name="sparkles" size={14} />
+            )}
+            {t('search.festivals', { defaultValue: '축제/행사' })}
           </button>
         )}
         <button

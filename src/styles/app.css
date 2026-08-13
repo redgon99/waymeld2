@@ -2467,6 +2467,20 @@ button {
   color: var(--color-text-tertiary);
 }
 
+.place-detail-tour-overview {
+  margin: 0 0 4px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  white-space: pre-line;
+}
+
+.place-detail-tour-attribution {
+  margin: 12px 0 0;
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+
 .place-detail-google-reviews {
   display: flex;
   flex-direction: column;

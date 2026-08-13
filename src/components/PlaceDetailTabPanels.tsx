@@ -31,6 +31,7 @@ export function PlaceDetailTabPanel({
   const { t } = useTranslation('planner');
   switch (tabId) {
     case 'SUMMARY':
+      if (panel?.provider === 'tour') return <TourSummaryTab panel={panel} place={place} />;
       return <SummaryTab panel={panel} place={place} />;
     case 'PRODUCT':
       return <MenuTab panel={panel} />;
@@ -286,6 +287,69 @@ function GoogleSummaryTab({ panel, place }: TabProps) {
           {String(panel.api_source) === 'new' ? 'Places API (New)' : 'Places API'} 데이터
         </p>
       )}
+    </div>
+  );
+}
+
+function TourSummaryTab({ panel, place }: TabProps) {
+  const { t } = useTranslation('planner');
+  const overview = pickStr(panel ?? undefined, 'overview');
+  const homepage = pickStr(panel ?? undefined, 'homepage');
+  const tel = pickStr(panel ?? undefined, 'tel') ?? place?.phone;
+  const address = pickStr(panel ?? undefined, 'address') ?? place?.roadAddress ?? place?.address;
+  const intro = (panel?.intro as Record<string, string> | undefined) ?? {};
+
+  if (!overview && !homepage && !tel && !address && Object.keys(intro).length === 0) {
+    return <EmptyTab message={t('place.detail.empty.summary')} />;
+  }
+
+  return (
+    <div className="place-detail-summary">
+      {overview && <p className="place-detail-summary-text place-detail-tour-overview">{overview}</p>}
+
+      {intro.hours && (
+        <SummaryRow icon="clock">
+          <p className="place-detail-summary-text">{intro.hours}</p>
+          {intro.restDate && <p className="place-detail-summary-sub">{t('place.detail.restDate')}: {intro.restDate}</p>}
+        </SummaryRow>
+      )}
+      {!intro.hours && intro.restDate && (
+        <SummaryRow icon="clock">
+          <p className="place-detail-summary-text">{t('place.detail.restDate')}: {intro.restDate}</p>
+        </SummaryRow>
+      )}
+
+      {address && (
+        <SummaryRow icon="mapPin" copyText={address} copyLabel={t('place.detail.address')}>
+          <p className="place-detail-summary-text">{address}</p>
+        </SummaryRow>
+      )}
+
+      {tel && (
+        <SummaryRow icon="phone" copyText={tel} copyLabel={t('place.detail.phone')}>
+          <a href={`tel:${tel.replace(/\s/g, '')}`} className="place-detail-summary-text">
+            {tel}
+          </a>
+        </SummaryRow>
+      )}
+
+      {homepage && (
+        <SummaryRow icon="globe">
+          <a href={homepage} target="_blank" rel="noopener noreferrer">
+            {homepage}
+          </a>
+        </SummaryRow>
+      )}
+
+      {(intro.parking || intro.infoCenter || intro.fee) && (
+        <ul className="place-detail-facility-details">
+          {intro.fee && <li className="place-detail-facility-detail">{t('place.detail.fee')}: {intro.fee}</li>}
+          {intro.parking && <li className="place-detail-facility-detail">{t('place.detail.parking')}: {intro.parking}</li>}
+          {intro.infoCenter && <li className="place-detail-facility-detail">{t('place.detail.infoCenter')}: {intro.infoCenter}</li>}
+        </ul>
+      )}
+
+      <p className="place-detail-tour-attribution">{t('place.detail.tourAttribution')}</p>
     </div>
   );
 }
