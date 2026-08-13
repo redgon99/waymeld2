@@ -5,9 +5,10 @@ import { useTranslation } from 'react-i18next';
 interface Props {
   onShare: () => void;
   plazaNavVisible?: boolean;
+  onOpenScenario?: () => void;
 }
 
-export function MobileMoreMenu({ onShare, plazaNavVisible }: Props) {
+export function MobileMoreMenu({ onShare, plazaNavVisible, onOpenScenario }: Props) {
   const { t } = useTranslation('planner');
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -63,6 +64,7 @@ export function MobileMoreMenu({ onShare, plazaNavVisible }: Props) {
       {open && (
         <div className="planner-more-menu" role="menu">
           {item(t('trip.share'), onShare)}
+          {onOpenScenario && item(t('scenario.menuLabel'), onOpenScenario)}
           {plazaNavVisible && item(t('plazaNav'), () => navigate('/plaza'))}
           {item(t('nav.setup'), () => navigate('/setup'))}
           {item(t('nav.help'), () => navigate('/help'))}

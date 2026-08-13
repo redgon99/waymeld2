@@ -347,5 +347,45 @@
       "note": "备注",
       "map": "地图链接"
     }
+  },
+  "scenario": {
+    "menuLabel": "创建主题旅行",
+    "title": "主题旅行方案",
+    "subtitle": "选择旅行主题后，AI 会根据真实场所数据为您生成逐日旅行方案。",
+    "themeLabel": "旅行主题",
+    "theme": {
+      "meditation": "冥想寺庙游",
+      "wellbeing": "身心疗愈游",
+      "shopping": "购物游",
+      "family": "大家庭游",
+      "honeymoon": "蜜月游",
+      "night": "夜间观光",
+      "hallyu": "韩流观光",
+      "camping": "露营观光",
+      "walking": "徒步旅行",
+      "marine": "海洋观光"
+    },
+    "themeDesc": {
+      "meditation": "寺庙寄宿、韩屋民宿等静谧内省之旅",
+      "wellbeing": "温泉、汗蒸幕等身心疗愈之旅",
+      "shopping": "奥特莱斯、百货商店、传统市场、免税店",
+      "family": "儿童咖啡馆、动物园、科学馆、主题公园",
+      "honeymoon": "度假村、海景、观景台等浪漫情侣之旅",
+      "night": "夜市、夜景景点、夜间开放等夜间体验之旅",
+      "hallyu": "影视剧拍摄地、K-POP相关景点",
+      "camping": "露营地、豪华露营、汽车露营",
+      "walking": "环城步道、徒步路线、偶来小路等步行之旅",
+      "marine": "海水浴场、码头、游艇等海上之旅"
+    },
+    "daysLabel": "旅行天数",
+    "generate": "生成方案",
+    "generating": "AI 正在生成方案…",
+    "error": "生成方案失败，请稍后重试。",
+    "regionBadge": "推荐地区：{{region}}",
+    "dayTitle": "第{{day}}天",
+    "apply": "添加到行程",
+    "applied": "已将{{count}}个地点添加到行程。",
+    "newSearch": "换个主题重新生成",
+    "unavailable": "该功能暂不可用。"
   }
 }

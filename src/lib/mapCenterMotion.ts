@@ -30,3 +30,32 @@ export function shouldAnimateMapCenter(
   if (current && mapCentersNear(current, target)) return false;
   return true;
 }
+
+export interface MapFitPadding {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
+/** 검색 결과 전체가 패널·크롬에 가리지 않도록 여백 */
+export function searchResultFitPadding(): MapFitPadding {
+  const mobile =
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches;
+  if (mobile) {
+    return { top: 72, right: 20, bottom: 180, left: 20 };
+  }
+  return { top: 72, right: 48, bottom: 88, left: 340 };
+}
+
+export function validMapPoints(
+  places: Array<{ lat?: number; lng?: number }>
+): MapLatLng[] {
+  return places.filter(
+    (p): p is MapLatLng =>
+      typeof p.lat === 'number' &&
+      typeof p.lng === 'number' &&
+      Number.isFinite(p.lat) &&
+      Number.isFinite(p.lng)
+  );
+}

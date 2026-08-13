@@ -534,5 +534,45 @@
       "note": "Note",
       "map": "Map link"
     }
+  },
+  "scenario": {
+    "menuLabel": "Create Theme Trip",
+    "title": "Theme Trip Scenario",
+    "subtitle": "Pick a travel theme and AI will build a day-by-day trip scenario from real place data.",
+    "themeLabel": "Travel theme",
+    "theme": {
+      "meditation": "Temples",
+      "wellbeing": "Wellness",
+      "shopping": "Shopping",
+      "family": "Family",
+      "honeymoon": "Honeymoon",
+      "night": "Night",
+      "hallyu": "Hallyu",
+      "camping": "Camping",
+      "walking": "Walking",
+      "marine": "Coast"
+    },
+    "themeDesc": {
+      "meditation": "Temple stays, hanok stays — a quiet, reflective trip",
+      "wellbeing": "Hot springs, jjimjilbang, healing — recover body and mind",
+      "shopping": "Outlets, department stores, markets, duty-free",
+      "family": "Kids cafes, zoos, science museums, theme parks",
+      "honeymoon": "Resorts, ocean views, viewpoints — a romantic couple's trip",
+      "night": "Night markets, night views, late-night openings",
+      "hallyu": "K-drama & movie filming locations, K-pop spots",
+      "camping": "Campgrounds, glamping, car camping",
+      "walking": "Dulle-gil trails, trekking courses, olle-gil paths",
+      "marine": "Beaches, marinas, yachting"
+    },
+    "daysLabel": "Trip length",
+    "generate": "Generate scenario",
+    "generating": "AI is building your scenario…",
+    "error": "Couldn't generate a scenario. Please try again.",
+    "regionBadge": "Recommended region: {{region}}",
+    "dayTitle": "Day {{day}}",
+    "apply": "Add to pins",
+    "applied": "Added {{count}} places to your trip.",
+    "newSearch": "Try another theme",
+    "unavailable": "This feature is unavailable."
   }
 }

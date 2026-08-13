@@ -18,7 +18,7 @@ import {
   MIN_PLANNER_GOOGLE_ZOOM,
 } from '../lib/mapZoom';
 import { useLongPress } from '../hooks/useLongPress';
-import { mapCentersNear, shouldAnimateMapCenter, type MapLatLng } from '../lib/mapCenterMotion';
+import { mapCentersNear, searchResultFitPadding, shouldAnimateMapCenter, validMapPoints, type MapLatLng } from '../lib/mapCenterMotion';
 
 interface Props {
   mapsReady?: boolean;
@@ -174,7 +174,7 @@ export function GoogleMapView({
   }, [mapsReady]);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || fitSearchBounds) return;
     const target: MapLatLng = { lat: center.lat, lng: center.lng };
     const isInitial = !centerReadyRef.current;
 
@@ -192,10 +192,10 @@ export function GoogleMapView({
     } else if (!mapCentersNear(current, target)) {
       mapRef.current.setCenter(target);
     }
-  }, [center.lat, center.lng]);
+  }, [center.lat, center.lng, fitSearchBounds]);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || fitSearchBounds) return;
     const nextZoom = kakaoLevelToGoogleZoom(level);
     if (skipStaleZoomApplyRef.current) {
       skipStaleZoomApplyRef.current = false;
@@ -207,7 +207,7 @@ export function GoogleMapView({
     }
     suppressZoomSyncRef.current = true;
     mapRef.current.setZoom(nextZoom);
-  }, [level, levelTick]);
+  }, [level, levelTick, fitSearchBounds]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -470,10 +470,20 @@ export function GoogleMapView({
   }, [generatedRoute, fitRouteBounds]);
 
   useEffect(() => {
-    if (!mapRef.current || !fitSearchBounds || searchResults.length < 2) return;
+    if (!mapRef.current || !fitSearchBounds) return;
+    const points = validMapPoints(searchResults);
+    if (points.length === 0) return;
+
+    if (points.length === 1) {
+      mapRef.current.panTo(points[0]);
+      return;
+    }
+
     const bounds = new window.google.maps.LatLngBounds();
-    searchResults.forEach((p) => bounds.extend({ lat: p.lat, lng: p.lng }));
-    mapRef.current.fitBounds(bounds);
+    points.forEach((p) => bounds.extend(p));
+    const pad = searchResultFitPadding();
+    suppressZoomSyncRef.current = true;
+    mapRef.current.fitBounds(bounds, pad);
   }, [searchResults, fitSearchBounds]);
 
   useEffect(() => {

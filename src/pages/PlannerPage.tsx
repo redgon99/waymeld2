@@ -92,6 +92,9 @@ import type { SaveStatus } from '../components/SaveStatusBadge';
 import { OnboardingCoach } from '../components/OnboardingCoach';
 import { ThemePreferenceChips } from '../components/ThemePreferenceChips';
 import { TaxiDriverCardModal } from '../components/TaxiDriverCardModal';
+import { ThemeScenarioPanel } from '../components/ThemeScenarioPanel';
+import { AppSheetModal } from '../components/AppSheetModal';
+import { isTourScenarioConfigured } from '../lib/tourScenario';
 import { shouldShowOnboarding, isPlazaNavUnlocked, unlockPlazaNav } from '../lib/onboarding';
 import { TRIP_THEMES } from '../lib/themes';
 import { splitSearchQueries } from '../lib/searchQueries';
@@ -166,6 +169,7 @@ export default function PlannerPage() {
   const { t: tp } = useTranslation('planner');
   const { t: tb } = useTranslation('billing');
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [scenarioOpen, setScenarioOpen] = useState(false);
   const [kakaoReady, setKakaoReady] = useState(false);
   const [googleReady, setGoogleReady] = useState(false);
   const [trip, setTrip] = useState<Trip>(() => makeEmptyTrip());
@@ -796,6 +800,7 @@ export default function PlannerPage() {
                 }));
               return extra.length ? [...prev, ...extra] : prev;
             });
+            if (!keepMapCenter) setFitSearchBounds(true);
           }
         }
       } catch (e) {
@@ -1056,6 +1061,11 @@ export default function PlannerPage() {
             .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0));
           return extra.length ? [...prev, ...extra] : prev;
         });
+        if (festivals.length === 1) {
+          setMapCenter({ lat: festivals[0].lat, lng: festivals[0].lng });
+        } else if (festivals.length > 1) {
+          setFitSearchBounds(true);
+        }
         openSearchPanel();
         showToast(tp('search.festivalsFound', { count: festivals.length }));
       })
@@ -1912,6 +1922,19 @@ export default function PlannerPage() {
                 pickingOriginFromMap={pickingOriginFromMap}
               />
             }
+            scenarioSlot={
+              isTourScenarioConfigured() ? (
+                <ThemeScenarioPanel
+                  currentDay={currentDay}
+                  totalDays={trip.totalDays}
+                  pinnedByDay={trip.pinnedByDay}
+                  onApply={(result) => {
+                    handleImportPins(result);
+                    showToast(tp('scenario.applied', { count: result.importedCount }));
+                  }}
+                />
+              ) : undefined
+            }
           />
 
           <PanelIconRail
@@ -2025,7 +2048,11 @@ export default function PlannerPage() {
               >
                 <Icon name="folder" size={18} />
               </button>
-              <MobileMoreMenu onShare={openShareModal} plazaNavVisible={plazaNavVisible} />
+              <MobileMoreMenu
+                onShare={openShareModal}
+                plazaNavVisible={plazaNavVisible}
+                onOpenScenario={isTourScenarioConfigured() ? () => setScenarioOpen(true) : undefined}
+              />
             </div>
             <div className="mobile-planner-days">
               {Array.from({ length: trip.totalDays }, (_, i) => i + 1).map((d) => (
@@ -2274,6 +2301,23 @@ export default function PlannerPage() {
         place={taxiCardPlace}
         onClose={() => setTaxiCardPlace(null)}
       />
+
+      <AppSheetModal
+        open={scenarioOpen}
+        title={tp('scenario.title')}
+        onClose={() => setScenarioOpen(false)}
+        wide
+      >
+        <ThemeScenarioPanel
+          currentDay={currentDay}
+          totalDays={trip.totalDays}
+          pinnedByDay={trip.pinnedByDay}
+          onApply={(result) => {
+            handleImportPins(result);
+            showToast(tp('scenario.applied', { count: result.importedCount }));
+          }}
+        />
+      </AppSheetModal>
 
       {showOnboarding && (
         <OnboardingCoach

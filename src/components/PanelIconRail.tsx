@@ -41,6 +41,15 @@ export function PanelIconRail({ visible, pinCount, activeTab, onOpen }: Props) {
       >
         <Icon name="route" size={18} />
       </button>
+      <button
+        type="button"
+        className={`planner-rail-btn ${activeTab === 'scenario' ? 'active' : ''}`}
+        onClick={() => onOpen('scenario')}
+        title="AI 시나리오"
+        aria-label="테마 여행 시나리오 열기"
+      >
+        <Icon name="sparkles" size={18} />
+      </button>
     </nav>
   );
 }

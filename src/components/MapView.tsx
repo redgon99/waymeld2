@@ -11,7 +11,7 @@ import {
 import { GoogleMapView } from './GoogleMapView';
 import type { MapProvider } from '../lib/mapProvider';
 import { useLongPress } from '../hooks/useLongPress';
-import { mapCentersNear, shouldAnimateMapCenter, type MapLatLng } from '../lib/mapCenterMotion';
+import { mapCentersNear, searchResultFitPadding, shouldAnimateMapCenter, validMapPoints, type MapLatLng } from '../lib/mapCenterMotion';
 
 interface Props {
   provider?: MapProvider;
@@ -153,6 +153,7 @@ function KakaoMapView({
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const centerReadyRef = useRef(false);
+  const suppressLevelSyncRef = useRef(false);
   const overlaysRef = useRef<any[]>([]);
   const placeMarkerContentsRef = useRef<HTMLElement[]>([]);
   const polylineRef = useRef<any>(null);
@@ -247,9 +248,9 @@ function KakaoMapView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mapsReady]);
 
-  // 센터 변경 — 칩·검색 선택 시 panTo 애니메이션
+  // 센터 변경 — 칩·검색 선택 시 panTo 애니메이션 (결과 전체 맞춤 중에는 생략)
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || fitSearchBounds) return;
     const target: MapLatLng = { lat: center.lat, lng: center.lng };
     const latlng = new window.kakao.maps.LatLng(target.lat, target.lng);
     const isInitial = !centerReadyRef.current;
@@ -268,12 +269,16 @@ function KakaoMapView({
     } else if (!mapCentersNear(current, target)) {
       mapRef.current.setCenter(latlng);
     }
-  }, [center.lat, center.lng]);
+  }, [center.lat, center.lng, fitSearchBounds]);
 
   useEffect(() => {
-    if (!mapRef.current) return;
+    if (!mapRef.current || fitSearchBounds) return;
+    if (suppressLevelSyncRef.current) {
+      suppressLevelSyncRef.current = false;
+      return;
+    }
     mapRef.current.setLevel(level);
-  }, [level, levelTick]);
+  }, [level, levelTick, fitSearchBounds]);
 
   // 사용자가 지도를 움직이면 중심 좌표 동기화 (카테고리·지도 주변 검색용)
   useEffect(() => {
@@ -614,14 +619,26 @@ function KakaoMapView({
     infoOverlayRef.current = overlay;
   }, [infoWindowPlace]);
 
-  // 검색 결과가 여러 개일 때 지도 범위 맞춤
+  // 검색 결과가 나오면 모든 포인트가 보이도록 축척 맞춤
   useEffect(() => {
-    if (!mapRef.current || !fitSearchBounds || searchResults.length < 2) return;
+    if (!mapRef.current || !fitSearchBounds) return;
+    const points = validMapPoints(searchResults);
+    if (points.length === 0) return;
+
+    if (points.length === 1) {
+      mapRef.current.panTo(new window.kakao.maps.LatLng(points[0].lat, points[0].lng));
+      return;
+    }
+
     const bounds = new window.kakao.maps.LatLngBounds();
-    searchResults.forEach((p) =>
-      bounds.extend(new window.kakao.maps.LatLng(p.lat, p.lng))
-    );
-    mapRef.current.setBounds(bounds);
+    points.forEach((p) => bounds.extend(new window.kakao.maps.LatLng(p.lat, p.lng)));
+    const pad = searchResultFitPadding();
+    suppressLevelSyncRef.current = true;
+    try {
+      mapRef.current.setBounds(bounds, pad.top, pad.right, pad.bottom, pad.left);
+    } catch {
+      mapRef.current.setBounds(bounds);
+    }
   }, [searchResults, fitSearchBounds]);
 
   // 조감 모드 — 보이는 핀(+출발지) 전체가 들어오도록 축척 맞춤

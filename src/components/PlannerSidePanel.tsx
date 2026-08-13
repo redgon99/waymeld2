@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Icon } from './Icon';
 
-export type PlannerPanelTab = 'search' | 'pins' | 'route';
+export type PlannerPanelTab = 'search' | 'pins' | 'route' | 'scenario';
 
 interface Props {
   open: boolean;
@@ -12,12 +12,14 @@ interface Props {
   searchSlot: ReactNode;
   pinsSlot: ReactNode;
   routeSlot: ReactNode;
+  scenarioSlot?: ReactNode;
 }
 
 const TAB_LABELS: Record<PlannerPanelTab, string> = {
   search: 'Search 검색',
   pins: 'Pins',
   route: 'Route 동선',
+  scenario: 'AI 시나리오',
 };
 
 export function PlannerSidePanel({
@@ -29,14 +31,19 @@ export function PlannerSidePanel({
   searchSlot,
   pinsSlot,
   routeSlot,
+  scenarioSlot,
 }: Props) {
   if (!open) return null;
+
+  const tabs = scenarioSlot
+    ? (['search', 'pins', 'route', 'scenario'] as const)
+    : (['search', 'pins', 'route'] as const);
 
   return (
     <aside className="planner-side-panel desktop-only-overlay" aria-label="플래너 패널">
       <div className="planner-side-tabs">
         <div className="planner-side-tabs-track" role="tablist">
-          {(['search', 'pins', 'route'] as const).map((id) => (
+          {tabs.map((id) => (
             <button
               key={id}
               type="button"
@@ -55,6 +62,7 @@ export function PlannerSidePanel({
         {tab === 'search' && searchSlot}
         {tab === 'pins' && pinsSlot}
         {tab === 'route' && routeSlot}
+        {tab === 'scenario' && scenarioSlot}
       </div>
 
       <button

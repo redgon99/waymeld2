@@ -534,5 +534,45 @@
       "note": "메모",
       "map": "지도링크"
     }
+  },
+  "scenario": {
+    "menuLabel": "테마 여행 만들기",
+    "title": "테마 여행 시나리오",
+    "subtitle": "여행 테마를 고르면 AI가 실제 장소 데이터를 기반으로 일자별 여행 시나리오를 만들어드립니다.",
+    "themeLabel": "여행 테마",
+    "theme": {
+      "meditation": "명상관광",
+      "wellbeing": "웰빙관광",
+      "shopping": "쇼핑관광",
+      "family": "대가족관광",
+      "honeymoon": "허니문관광",
+      "night": "야간관광",
+      "hallyu": "한류관광",
+      "camping": "캠핑관광",
+      "walking": "걷기여행",
+      "marine": "해양관광"
+    },
+    "themeDesc": {
+      "meditation": "사찰, 한옥스테이 등 정적이고 내면에 집중하는 여행",
+      "wellbeing": "온천, 찜질방, 힐링 등 몸과 마음의 회복",
+      "shopping": "아울렛, 백화점, 전통시장, 면세점",
+      "family": "키즈카페, 동물원, 과학관, 테마파크",
+      "honeymoon": "리조트, 오션뷰, 전망대 등 로맨틱한 커플 여행",
+      "night": "야시장, 야경 명소, 야간개장 등 밤에 즐기는 여행",
+      "hallyu": "드라마·영화 촬영지, 케이팝 관련 명소",
+      "camping": "캠핑장, 글램핑, 오토캠핑 등 야외 숙영 여행",
+      "walking": "둘레길, 트레킹 코스, 올레길 등 도보 여행",
+      "marine": "해수욕장, 마리나, 요트 등 바다를 즐기는 여행"
+    },
+    "daysLabel": "여행 일수",
+    "generate": "시나리오 생성",
+    "generating": "AI가 시나리오를 만들고 있어요…",
+    "error": "시나리오를 만들지 못했습니다. 잠시 후 다시 시도해주세요.",
+    "regionBadge": "추천 지역: {{region}}",
+    "dayTitle": "{{day}}일차",
+    "apply": "핀에 반영",
+    "applied": "{{count}}곳을 일정에 반영했습니다.",
+    "newSearch": "다른 테마로 다시 만들기",
+    "unavailable": "이 기능을 사용할 수 없습니다."
   }
 }

@@ -18,7 +18,7 @@ export interface PinImportResult {
   importedCount: number;
 }
 
-interface RawPinRow {
+export interface RawPinRow {
   day: number;
   order: number;
   name: string;
@@ -233,7 +233,7 @@ function rawFromRecord(
   };
 }
 
-function applyImportRows(
+export function applyImportRows(
   rows: RawPinRow[],
   options: PinImportOptions
 ): PinImportResult {
