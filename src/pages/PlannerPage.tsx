@@ -1932,6 +1932,7 @@ export default function PlannerPage() {
                     handleImportPins(result);
                     showToast(tp('scenario.applied', { count: result.importedCount }));
                   }}
+                  onSelectPlace={handleSelectPlace}
                 />
               ) : undefined
             }
@@ -2315,6 +2316,10 @@ export default function PlannerPage() {
           onApply={(result) => {
             handleImportPins(result);
             showToast(tp('scenario.applied', { count: result.importedCount }));
+          }}
+          onSelectPlace={(place) => {
+            handleSelectPlace(place);
+            setScenarioOpen(false);
           }}
         />
       </AppSheetModal>

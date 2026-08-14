@@ -13,6 +13,8 @@ import type {
 import { suggestStayMinutes, getCategoryMeta } from '../lib/categories';
 import { useTravelModeMeta } from '../lib/i18nCategories';
 import { generateRoute } from '../lib/planner';
+import { normalizeLocale } from '../lib/locale';
+import { fetchAiStaySuggestions } from '../lib/routeStaySuggest';
 
 interface Props {
   open: boolean;
@@ -59,6 +61,8 @@ export function RouteOptionsPanel({
   const { t, i18n } = useTranslation('planner');
   const travelModeMeta = useTravelModeMeta();
   const [originMenuOpen, setOriginMenuOpen] = useState(false);
+  const [aiStayLoading, setAiStayLoading] = useState(false);
+  const [aiStayReasons, setAiStayReasons] = useState<Record<string, string>>({});
 
   const preview = useMemo(() => {
     if (pinned.length === 0) return null;
@@ -75,6 +79,44 @@ export function RouteOptionsPanel({
 
   function patchOrigin(next: Partial<Origin>) {
     onChange({ ...options, origin: { ...options.origin, ...next } });
+  }
+
+  async function handleToggleAutoStay() {
+    if (options.autoStayTime) {
+      patch('autoStayTime', false);
+      return;
+    }
+    if (!onUpdateStayMinutes || pinned.length === 0) {
+      patch('autoStayTime', true);
+      return;
+    }
+
+    setAiStayLoading(true);
+    const targets = pinned.map((p) => ({
+      id: p.id,
+      name: p.name,
+      category: p.category,
+      categoryLabel: p.categoryLabel,
+      address: p.address,
+    }));
+    const suggestions = await fetchAiStaySuggestions(targets, normalizeLocale(i18n.language));
+
+    if (suggestions && suggestions.length > 0) {
+      const reasons: Record<string, string> = {};
+      for (const s of suggestions) {
+        onUpdateStayMinutes(s.id, s.minutes);
+        if (s.reason) reasons[s.id] = s.reason;
+      }
+      setAiStayReasons(reasons);
+    } else {
+      // AI 호출 실패 시 기존 카테고리 고정값으로 조용히 대체
+      for (const p of pinned) {
+        onUpdateStayMinutes(p.id, suggestStayMinutes(p.category).minutes);
+      }
+      setAiStayReasons({});
+    }
+    setAiStayLoading(false);
+    patch('autoStayTime', true);
   }
 
   function setOriginType(type: OriginType) {
@@ -301,10 +343,12 @@ export function RouteOptionsPanel({
             <button
               type="button"
               className={`route-ai-suggest ${options.autoStayTime ? 'active' : ''}`}
-              onClick={() => patch('autoStayTime', !options.autoStayTime)}
+              onClick={() => void handleToggleAutoStay()}
+              disabled={aiStayLoading}
               aria-pressed={options.autoStayTime}
             >
-              <Icon name="sparkles" size={12} /> {t('route.options.aiSuggest')}
+              <Icon name="sparkles" size={12} spin={aiStayLoading} />{' '}
+              {aiStayLoading ? t('route.options.aiSuggesting') : t('route.options.aiSuggest')}
             </button>
           </div>
           <div className="route-stay-list">
@@ -312,7 +356,7 @@ export function RouteOptionsPanel({
               const meta = getCategoryMeta(p.categoryCode);
               const sug = suggestStayMinutes(p.category);
               const minutes = p.stayMinutes ?? sug.minutes;
-              const reason = stayReasonLabel(p.category, t);
+              const reason = aiStayReasons[p.id] ?? stayReasonLabel(p.category, t);
               return (
                 <div key={p.id} className="route-stay-card">
                   <span

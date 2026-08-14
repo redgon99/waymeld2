@@ -163,6 +163,7 @@
       "orderAuto": "自動",
       "orderPins": "ピン順",
       "aiSuggest": "AI suggest 自動推薦",
+      "aiSuggesting": "AI推薦中…",
       "stayMinutesAria": "{{name}} 滞在時間(分)",
       "preview": "Preview 予想",
       "previewStats": "{{km}} km · {{minutes}}分 · ends {{time}}",
@@ -377,15 +378,14 @@
       "walking": "トゥレギル、トレッキングコース、オルレギルなど徒歩旅行",
       "marine": "海水浴場、マリーナ、ヨットなど海を楽しむ旅"
     },
-    "daysLabel": "旅行日数",
-    "generate": "シナリオ生成",
-    "generating": "AIがシナリオを作成中です…",
-    "error": "シナリオを作成できませんでした。もう一度お試しください。",
+    "pickPrompt": "用意されたシナリオから選んでください",
+    "catalogLoading": "シナリオを読み込み中…",
+    "catalogEmpty": "このテーマにはまだ用意されたシナリオがありません。近日追加予定です。",
+    "dayCount": "{{count}}日間",
     "regionBadge": "おすすめ地域: {{region}}",
     "dayTitle": "{{day}}日目",
     "apply": "ピンに反映",
     "applied": "{{count}}か所を旅程に反映しました。",
-    "newSearch": "別のテーマで作り直す",
-    "unavailable": "この機能は利用できません。"
+    "newSearch": "別のテーマで作り直す"
   }
 }

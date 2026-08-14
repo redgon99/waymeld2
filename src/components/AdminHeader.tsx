@@ -2,10 +2,11 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthBar } from './AuthBar';
 
-export type AdminPageKey = 'admin' | 'insights' | 'guides' | 'distribution';
+export type AdminPageKey = 'admin' | 'insights' | 'guides' | 'distribution' | 'scenarios';
 
 interface Props {
-  title: string;
+  /** 페이지별 설명. 화면 제목은 항상 「관리자 페이지」로 고정. */
+  title?: string;
   subtitle: string;
   current: AdminPageKey;
   refreshing?: boolean;
@@ -15,14 +16,14 @@ interface Props {
 }
 
 const NAV_ITEMS: Array<{ key: AdminPageKey; label: string; to: string }> = [
-  { key: 'admin', label: '관리자 페이지', to: '/admin' },
+  { key: 'admin', label: '현황 관리', to: '/admin' },
   { key: 'insights', label: '시장 인사이트', to: '/admin/insights' },
   { key: 'guides', label: '가이드 카드', to: '/admin/guides' },
   { key: 'distribution', label: '배포관리', to: '/admin/distribution' },
+  { key: 'scenarios', label: '시나리오 카탈로그', to: '/admin/scenarios' },
 ];
 
 export function AdminHeader({
-  title,
   subtitle,
   current,
   refreshing = false,
@@ -31,19 +32,26 @@ export function AdminHeader({
 }: Props) {
   return (
     <header className="admin-header">
-      <div>
-        <h1>{title}</h1>
-        <p>{subtitle}</p>
-      </div>
-      <div className="admin-header-actions">
+      <div className="admin-header-top">
+        <div className="admin-header-brand">
+          <h1>관리자 페이지</h1>
+          <p>{subtitle}</p>
+        </div>
         <AuthBar />
+      </div>
+      <nav className="admin-header-nav" aria-label="관리자 메뉴">
         {onRefresh && (
           <button type="button" className="admin-refresh-btn" onClick={onRefresh}>
             {refreshing ? '새로고침 중...' : '새로고침'}
           </button>
         )}
-        {NAV_ITEMS.filter((item) => item.key !== current).map((item) => (
-          <Link key={item.key} to={item.to} className="admin-link-btn">
+        {NAV_ITEMS.map((item) => (
+          <Link
+            key={item.key}
+            to={item.to}
+            className={`admin-link-btn${item.key === current ? ' active' : ''}`}
+            aria-current={item.key === current ? 'page' : undefined}
+          >
             {item.label}
           </Link>
         ))}
@@ -51,7 +59,7 @@ export function AdminHeader({
         <Link to="/plan" className="admin-link-btn">
           플래너로 이동
         </Link>
-      </div>
+      </nav>
     </header>
   );
 }

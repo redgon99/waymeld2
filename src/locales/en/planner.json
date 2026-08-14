@@ -177,6 +177,7 @@
       "orderAuto": "Auto",
       "orderPins": "Pin order",
       "aiSuggest": "AI suggest",
+      "aiSuggesting": "AI thinking…",
       "stayMinutesAria": "{{name}} stay (min)",
       "preview": "Preview",
       "previewStats": "{{km}} km · {{minutes}} min · ends {{time}}",
@@ -405,7 +406,10 @@
         "tip2": "eSIMs install via QR code ahead of time — just activate on arrival",
         "tip3": "Pocket Wi-Fi routers can be reserved online and picked up/returned at the airport",
         "links": [
-          { "label": "Incheon Airport – Roaming Center Info", "url": "https://www.airport.kr/ap/ko/svc/getFacilityMain.do?CTGRY_ID=12&UPPER_ID=127" }
+          {
+            "label": "Incheon Airport – Roaming Center Info",
+            "url": "https://www.airport.kr/ap/ko/svc/getFacilityMain.do?CTGRY_ID=12&UPPER_ID=127"
+          }
         ]
       },
       "tmoney": {
@@ -414,7 +418,10 @@
         "tip2": "Top up with cash at the same convenience stores",
         "tip3": "Tap on boarding, and tap again when transferring",
         "links": [
-          { "label": "Tmoney Official Site", "url": "https://www.tmoney.co.kr/" }
+          {
+            "label": "Tmoney Official Site",
+            "url": "https://www.tmoney.co.kr/"
+          }
         ]
       },
       "maps": {
@@ -423,9 +430,18 @@
         "tip2": "Naver Map — a similar alternative to Kakao Map",
         "tip3": "Use Google Maps as a backup for place search and sharing abroad",
         "links": [
-          { "label": "Kakao Map", "url": "https://map.kakao.com/" },
-          { "label": "Naver Map", "url": "https://map.naver.com/" },
-          { "label": "Google Maps", "url": "https://maps.google.com/" }
+          {
+            "label": "Kakao Map",
+            "url": "https://map.kakao.com/"
+          },
+          {
+            "label": "Naver Map",
+            "url": "https://map.naver.com/"
+          },
+          {
+            "label": "Google Maps",
+            "url": "https://maps.google.com/"
+          }
         ]
       },
       "airport": {
@@ -434,8 +450,14 @@
         "tip2": "Limousine buses are easier with a lot of luggage, dropping closer to your lodging",
         "tip3": "Save your lodging's address ahead of time to show a taxi driver",
         "links": [
-          { "label": "Incheon International Airport Corporation", "url": "https://www.airport.kr/" },
-          { "label": "AREX Airport Railroad", "url": "https://www.arex.or.kr/" }
+          {
+            "label": "Incheon International Airport Corporation",
+            "url": "https://www.airport.kr/"
+          },
+          {
+            "label": "AREX Airport Railroad",
+            "url": "https://www.arex.or.kr/"
+          }
         ]
       },
       "exchange": {
@@ -444,7 +466,10 @@
         "tip2": "Foreign cards can withdraw cash at convenience-store ATMs marked \"Global\"",
         "tip3": "Keep cash on hand for traditional market purchases and temple admission fees",
         "links": [
-          { "label": "Korea Customs Service – Currency Declaration", "url": "https://www.customs.go.kr/kcs/cm/cntnts/cntntsView.do?mi=8458&cntntsId=2808" }
+          {
+            "label": "Korea Customs Service – Currency Declaration",
+            "url": "https://www.customs.go.kr/kcs/cm/cntnts/cntntsView.do?mi=8458&cntntsId=2808"
+          }
         ]
       },
       "emergency": {
@@ -453,9 +478,18 @@
         "tip2": "112 — police",
         "tip3": "119 — fire and ambulance",
         "links": [
-          { "label": "Gov24 – 1330 Tourist Info Line", "url": "https://www.gov.kr/portal/service/serviceInfo/B55101100019" },
-          { "label": "112 Police Report Portal", "url": "https://www.112.go.kr/" },
-          { "label": "119 Safety Call (Fire Agency)", "url": "https://u119.nfa.go.kr/" }
+          {
+            "label": "Gov24 – 1330 Tourist Info Line",
+            "url": "https://www.gov.kr/portal/service/serviceInfo/B55101100019"
+          },
+          {
+            "label": "112 Police Report Portal",
+            "url": "https://www.112.go.kr/"
+          },
+          {
+            "label": "119 Safety Call (Fire Agency)",
+            "url": "https://u119.nfa.go.kr/"
+          }
         ]
       }
     }
@@ -564,15 +598,14 @@
       "walking": "Dulle-gil trails, trekking courses, olle-gil paths",
       "marine": "Beaches, marinas, yachting"
     },
-    "daysLabel": "Trip length",
-    "generate": "Generate scenario",
-    "generating": "AI is building your scenario…",
-    "error": "Couldn't generate a scenario. Please try again.",
+    "pickPrompt": "Pick one of the ready-made scenarios",
+    "catalogLoading": "Loading scenarios…",
+    "catalogEmpty": "No scenarios are ready for this theme yet. Check back soon.",
+    "dayCount": "{{count}} days",
     "regionBadge": "Recommended region: {{region}}",
     "dayTitle": "Day {{day}}",
     "apply": "Add to pins",
     "applied": "Added {{count}} places to your trip.",
-    "newSearch": "Try another theme",
-    "unavailable": "This feature is unavailable."
+    "newSearch": "Try another theme"
   }
 }

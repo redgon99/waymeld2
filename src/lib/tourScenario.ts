@@ -1,6 +1,7 @@
 import { getSupabase, isSupabaseConfigured } from './supabase';
 import { applyImportRows, type PinImportResult, type RawPinRow } from './importPins';
-import type { PinnedPlace } from '../types';
+import { CATEGORY_MAP, DEFAULT_CODE_BY_SIMPLE_CATEGORY } from './categories';
+import type { Place, PinnedPlace, SimpleCategory } from '../types';
 
 export type ScenarioTheme =
   | 'meditation'
@@ -69,27 +70,76 @@ const CONTENT_TYPE_TO_CATEGORY_LABEL: Record<string, string> = {
   '39': '맛집',
 };
 
+/** contentTypeId(TourAPI) → 앱 내부 SimpleCategory (지도 마커·아이콘용) */
+const CONTENT_TYPE_TO_SIMPLE_CATEGORY: Record<string, SimpleCategory> = {
+  '12': 'tour',
+  '14': 'culture',
+  '15': 'culture',
+  '25': 'tour',
+  '28': 'tour',
+  '32': 'stay',
+  '38': 'shop',
+  '39': 'food',
+};
+
+/** 시나리오 스팟 카드를 클릭했을 때 지도 이동·정보창 표시에 쓸 Place로 변환 */
+export function scenarioStopToPlace(stop: ScenarioStop): Place {
+  const category = CONTENT_TYPE_TO_SIMPLE_CATEGORY[stop.contentTypeId] ?? 'tour';
+  const categoryCode = DEFAULT_CODE_BY_SIMPLE_CATEGORY[category];
+  return {
+    id: stop.placeId,
+    name: stop.title,
+    nameKo: stop.titleKo,
+    category,
+    categoryCode,
+    categoryLabel: CATEGORY_MAP[categoryCode].label,
+    address: stop.address,
+    lat: stop.lat,
+    lng: stop.lng,
+    thumbnailUrl: stop.thumbnailUrl,
+    placeUrl: `https://www.visitkorea.or.kr/detail/ms_detail.do?contentId=${stop.contentId}`,
+  };
+}
+
 export function isTourScenarioConfigured(): boolean {
   return isSupabaseConfigured;
 }
 
-export async function generateTourScenario(
-  theme: ScenarioTheme,
-  days: number,
-  locale: string
-): Promise<TourScenario | null> {
-  const supabase = getSupabase();
-  if (!supabase) return null;
+/** 하루 일정에 배치하는 평균 스팟 수 — 서버 프롬프트의 "하루 2~4곳" 지침과 일치 */
+const STOPS_PER_DAY_ESTIMATE = 3;
+/** 데이터가 아무리 풍부해도 하루 단위 AI 시나리오는 이 이상 늘리지 않음(비용·현실성) */
+export const MAX_DAYS_CEILING = 7;
+/** 후보 밀집도를 확인 못했을 때(오류 등) 쓰는 보수적 기본값 */
+const FALLBACK_MAX_DAYS = 5;
 
-  const { data, error } = await supabase.functions.invoke<TourScenario>('tour-scenario', {
-    body: { theme, days, locale },
-  });
-  if (error) {
-    console.warn('tour-scenario function error', error.message);
-    return null;
-  }
-  if (!data || !Array.isArray(data.days)) return null;
-  return data;
+export interface ScenarioAvailability {
+  maxDays: number;
+  topRegion?: string;
+  topRegionCount: number;
+}
+
+/**
+ * 테마 선택 시 실제 후보 밀집도를 미리 조회해 "며칠까지 만들 수 있는지"를 계산한다.
+ * 정적으로 일수 상한을 걸어두면(예: 무조건 5일) 데이터가 부족한 테마는 뒷날짜가
+ * 조용히 비어버리고, 데이터가 풍부한 테마는 불필요하게 제한된다 — 실제 밀집도
+ * 기반으로 상한을 매겨야 두 문제를 동시에 해결한다.
+ */
+export async function fetchScenarioAvailability(theme: ScenarioTheme): Promise<ScenarioAvailability> {
+  const supabase = getSupabase();
+  if (!supabase) return { maxDays: FALLBACK_MAX_DAYS, topRegionCount: 0 };
+
+  const { data, error } = await supabase.functions.invoke<{
+    regionClusters?: Array<{ region: string; count: number }>;
+  }>('tour-scenario-candidates', { body: { theme } });
+
+  const top = data?.regionClusters?.[0];
+  if (error || !top) return { maxDays: FALLBACK_MAX_DAYS, topRegionCount: 0 };
+
+  const maxDays = Math.min(
+    MAX_DAYS_CEILING,
+    Math.max(1, Math.floor(top.count / STOPS_PER_DAY_ESTIMATE))
+  );
+  return { maxDays, topRegion: top.region, topRegionCount: top.count };
 }
 
 /**

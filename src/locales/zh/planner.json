@@ -163,6 +163,7 @@
       "orderAuto": "自动",
       "orderPins": "标记顺序",
       "aiSuggest": "AI suggest 自动推荐",
+      "aiSuggesting": "AI推荐中…",
       "stayMinutesAria": "{{name}} 停留时间(分钟)",
       "preview": "Preview 预估",
       "previewStats": "{{km}} km · {{minutes}} 分钟 · ends {{time}}",
@@ -377,15 +378,14 @@
       "walking": "环城步道、徒步路线、偶来小路等步行之旅",
       "marine": "海水浴场、码头、游艇等海上之旅"
     },
-    "daysLabel": "旅行天数",
-    "generate": "生成方案",
-    "generating": "AI 正在生成方案…",
-    "error": "生成方案失败，请稍后重试。",
+    "pickPrompt": "请从已生成的方案中选择一个",
+    "catalogLoading": "正在加载方案…",
+    "catalogEmpty": "该主题暂无已生成的方案，敬请期待。",
+    "dayCount": "{{count}}天",
     "regionBadge": "推荐地区：{{region}}",
     "dayTitle": "第{{day}}天",
     "apply": "添加到行程",
     "applied": "已将{{count}}个地点添加到行程。",
-    "newSearch": "换个主题重新生成",
-    "unavailable": "该功能暂不可用。"
+    "newSearch": "换个主题重新生成"
   }
 }

@@ -10,6 +10,7 @@ import AdminPage from './pages/AdminPage';
 import AdminInsightsPage from './pages/AdminInsightsPage';
 import AdminGuidesPage from './pages/AdminGuidesPage';
 import AdminDistributionPage from './pages/AdminDistributionPage';
+import AdminScenariosPage from './pages/AdminScenariosPage';
 import GuidesPage from './pages/GuidesPage';
 import GuideDetailPage from './pages/GuideDetailPage';
 import KoreaSetupPage from './pages/KoreaSetupPage';
@@ -30,6 +31,7 @@ const PAGE_ROUTES = (
     <Route path="admin/insights" element={<AdminInsightsPage />} />
     <Route path="admin/guides" element={<AdminGuidesPage />} />
     <Route path="admin/distribution" element={<AdminDistributionPage />} />
+    <Route path="admin/scenarios" element={<AdminScenariosPage />} />
     <Route path="setup" element={<KoreaSetupPage />} />
     <Route path="help" element={<HelpPage />} />
     <Route path="themes" element={<ThemesPage />} />

@@ -1,16 +1,12 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon, type IconName } from './Icon';
 import { normalizeLocale } from '../lib/locale';
-import type { PinnedPlace } from '../types';
+import { CATEGORY_MAP } from '../lib/categories';
+import type { Place, PinnedPlace } from '../types';
 import type { PinImportResult } from '../lib/importPins';
-import {
-  SCENARIO_THEMES,
-  generateTourScenario,
-  applyScenarioToTrip,
-  type ScenarioTheme,
-  type TourScenario,
-} from '../lib/tourScenario';
+import { listPublishedScenarios } from '../lib/scenarioCatalog';
+import { SCENARIO_THEMES, applyScenarioToTrip, scenarioStopToPlace, type ScenarioTheme, type TourScenario } from '../lib/tourScenario';
 
 const THEME_ICON: Record<ScenarioTheme, IconName> = {
   meditation: 'catCulture',
@@ -25,35 +21,51 @@ const THEME_ICON: Record<ScenarioTheme, IconName> = {
   marine: 'navigate',
 };
 
+interface ScenarioOption {
+  id: string;
+  days: number;
+  scenario: TourScenario;
+}
+
 interface Props {
   currentDay: number;
   totalDays: number;
   pinnedByDay: Record<number, PinnedPlace[]>;
   onApply: (result: PinImportResult) => void;
+  onSelectPlace?: (place: Place) => void;
 }
 
-export function ThemeScenarioPanel({ currentDay, totalDays, pinnedByDay, onApply }: Props) {
+export function ThemeScenarioPanel({
+  currentDay,
+  totalDays,
+  pinnedByDay,
+  onApply,
+  onSelectPlace,
+}: Props) {
   const { t, i18n } = useTranslation('planner');
   const [theme, setTheme] = useState<ScenarioTheme | null>(null);
-  const [days, setDays] = useState(2);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
+  const [options, setOptions] = useState<ScenarioOption[]>([]);
+  const [loadingOptions, setLoadingOptions] = useState(false);
   const [scenario, setScenario] = useState<TourScenario | null>(null);
   const [appliedCount, setAppliedCount] = useState<number | null>(null);
+  const optionsRequestRef = useRef<ScenarioTheme | null>(null);
 
-  const handleGenerate = async () => {
-    if (!theme) return;
-    setLoading(true);
-    setError(false);
-    setScenario(null);
+  const handleSelectTheme = (id: ScenarioTheme) => {
+    setTheme(id);
+    setOptions([]);
+    setLoadingOptions(true);
+    optionsRequestRef.current = id;
+    void listPublishedScenarios(id, normalizeLocale(i18n.language)).then((rows) => {
+      // 사용자가 이후 다른 테마를 눌렀다면 이 응답은 무시(경쟁 상태 방지)
+      if (optionsRequestRef.current !== id) return;
+      setOptions(rows);
+      setLoadingOptions(false);
+    });
+  };
+
+  const handlePickOption = (option: ScenarioOption) => {
+    setScenario(option.scenario);
     setAppliedCount(null);
-    const result = await generateTourScenario(theme, days, normalizeLocale(i18n.language));
-    setLoading(false);
-    if (!result) {
-      setError(true);
-      return;
-    }
-    setScenario(result);
   };
 
   const handleApply = () => {
@@ -66,7 +78,6 @@ export function ThemeScenarioPanel({ currentDay, totalDays, pinnedByDay, onApply
   const handleReset = () => {
     setScenario(null);
     setAppliedCount(null);
-    setError(false);
   };
 
   return (
@@ -85,7 +96,7 @@ export function ThemeScenarioPanel({ currentDay, totalDays, pinnedByDay, onApply
                   className={`theme-scenario-theme-card theme-scenario-theme-card--${id} ${theme === id ? 'active' : ''}`}
                   aria-pressed={theme === id}
                   title={t(`scenario.themeDesc.${id}`)}
-                  onClick={() => setTheme(id)}
+                  onClick={() => handleSelectTheme(id)}
                 >
                   <span className="theme-scenario-theme-icon">
                     <Icon name={THEME_ICON[id]} size={18} />
@@ -102,42 +113,40 @@ export function ThemeScenarioPanel({ currentDay, totalDays, pinnedByDay, onApply
             )}
           </div>
 
-          <div className="theme-scenario-field">
-            <span className="theme-scenario-field-label">{t('scenario.daysLabel')}</span>
-            <div className="theme-scenario-days-stepper" role="group">
-              <button
-                type="button"
-                className="theme-scenario-step-btn"
-                onClick={() => setDays((d) => Math.max(1, d - 1))}
-                disabled={days <= 1}
-                aria-label="-"
-              >
-                −
-              </button>
-              <span className="theme-scenario-days-value">{days}</span>
-              <button
-                type="button"
-                className="theme-scenario-step-btn"
-                onClick={() => setDays((d) => Math.min(5, d + 1))}
-                disabled={days >= 5}
-                aria-label="+"
-              >
-                +
-              </button>
+          {theme && (
+            <div className="theme-scenario-field">
+              <span className="theme-scenario-field-label">{t('scenario.pickPrompt')}</span>
+              {loadingOptions && (
+                <p className="theme-scenario-days-hint">{t('scenario.catalogLoading')}</p>
+              )}
+              {!loadingOptions && options.length === 0 && (
+                <p className="theme-scenario-error">{t('scenario.catalogEmpty')}</p>
+              )}
+              {!loadingOptions && options.length > 0 && (
+                <div className="theme-scenario-option-list">
+                  {options.map((option) => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      className="theme-scenario-option-card"
+                      onClick={() => handlePickOption(option)}
+                    >
+                      <span className="theme-scenario-option-days">
+                        {t('scenario.dayCount', { count: option.days })}
+                      </span>
+                      <span className="theme-scenario-option-info">
+                        <span className="theme-scenario-option-title">{option.scenario.title}</span>
+                        <span className="theme-scenario-option-region">
+                          {option.scenario.regionLabel || option.scenario.region}
+                        </span>
+                      </span>
+                      <Icon name="chevronRight" size={16} />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          </div>
-
-          {error && <p className="theme-scenario-error">{t('scenario.error')}</p>}
-
-          <button
-            type="button"
-            className="theme-scenario-generate-btn"
-            disabled={!theme || loading}
-            onClick={() => void handleGenerate()}
-          >
-            <Icon name="sparkles" size={16} spin={loading} />
-            {loading ? t('scenario.generating') : t('scenario.generate')}
-          </button>
+          )}
         </>
       )}
 
@@ -156,25 +165,37 @@ export function ThemeScenarioPanel({ currentDay, totalDays, pinnedByDay, onApply
                 {day.dayTitle ? ` · ${day.dayTitle}` : ''}
               </h4>
               <div className="theme-scenario-stop-list">
-                {day.stops.map((stop) => (
-                  <div key={stop.placeId} className="theme-scenario-stop-card">
-                    {stop.thumbnailUrl && (
-                      <img
-                        src={stop.thumbnailUrl}
-                        alt=""
-                        className="theme-scenario-stop-thumb"
-                        loading="lazy"
-                      />
-                    )}
-                    <div className="theme-scenario-stop-info">
-                      <div className="theme-scenario-stop-name">{stop.title}</div>
-                      {stop.titleKo && stop.titleKo !== stop.title && (
-                        <div className="theme-scenario-stop-name-ko">{stop.titleKo}</div>
+                {day.stops.map((stop) => {
+                  const place = scenarioStopToPlace(stop);
+                  return (
+                    <button
+                      key={stop.placeId}
+                      type="button"
+                      className="theme-scenario-stop-card"
+                      onClick={() => onSelectPlace?.(place)}
+                    >
+                      {stop.thumbnailUrl ? (
+                        <img
+                          src={stop.thumbnailUrl}
+                          alt=""
+                          className="theme-scenario-stop-thumb"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <span className="theme-scenario-stop-thumb-placeholder" aria-hidden>
+                          <Icon name={CATEGORY_MAP[place.categoryCode].icon} size={20} />
+                        </span>
                       )}
-                      <div className="theme-scenario-stop-note">{stop.note}</div>
-                    </div>
-                  </div>
-                ))}
+                      <span className="theme-scenario-stop-info">
+                        <span className="theme-scenario-stop-name">{stop.title}</span>
+                        {stop.titleKo && stop.titleKo !== stop.title && (
+                          <span className="theme-scenario-stop-name-ko">{stop.titleKo}</span>
+                        )}
+                        <span className="theme-scenario-stop-note">{stop.note}</span>
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ))}
