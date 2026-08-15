@@ -44,8 +44,9 @@ function thumbInnerHtml(place: Place): string {
   `;
 }
 
-function bubbleInnerHtml(place: Place): string {
+function bubbleInnerHtml(place: Place, isPinned = false): string {
   const addr = place.roadAddress || place.address || '';
+  const pinLabel = isPinned ? '핀업됨' : '핀업';
   return `
     <div class="map-place-bubble-card">
       ${thumbInnerHtml(place)}
@@ -59,11 +60,11 @@ function bubbleInnerHtml(place: Place): string {
       </div>
       <button
         type="button"
-        class="map-place-bubble-link"
-        title="상세 정보 보기"
-        aria-label="상세 정보 보기"
+        class="map-place-bubble-pin${isPinned ? ' pinned' : ''}"
+        title="${pinLabel}"
+        aria-label="${pinLabel}"
       >
-        ${iconSvgMarkup('externalLink', { size: 16, color: '#fff' })}
+        ${iconSvgMarkup(isPinned ? 'check' : 'pinPlus', { size: 22, color: '#fff' })}
       </button>
     </div>
     <div class="map-place-bubble-tail" aria-hidden="true"></div>
@@ -73,20 +74,30 @@ function bubbleInnerHtml(place: Place): string {
 /** 구글맵 스타일 대상물 상세 말풍선 (카카오 CustomOverlay용 DOM) */
 export function createMapPlaceBubbleElement(
   place: Place,
-  opts?: { onClose?: () => void; onOpenDetail?: (place: Place) => void }
+  opts?: {
+    onClose?: () => void;
+    onOpenDetail?: (place: Place) => void;
+    onTogglePin?: (place: Place) => void;
+    isPinned?: boolean;
+  }
 ): HTMLElement {
   const root = document.createElement('div');
   root.className = 'map-place-bubble';
-  root.innerHTML = bubbleInnerHtml(place);
+  root.innerHTML = bubbleInnerHtml(place, opts?.isPinned);
 
   const openDetail = (e: Event) => {
     e.preventDefault();
     e.stopPropagation();
     opts?.onOpenDetail?.(place);
   };
+  const togglePin = (e: Event) => {
+    e.preventDefault();
+    e.stopPropagation();
+    opts?.onTogglePin?.(place);
+  };
 
   root.querySelector('.map-place-bubble-thumb')?.addEventListener('click', openDetail);
-  root.querySelector('.map-place-bubble-link')?.addEventListener('click', openDetail);
+  root.querySelector('.map-place-bubble-pin')?.addEventListener('click', togglePin);
 
   root.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -98,14 +109,20 @@ export function createMapPlaceBubbleElement(
 }
 
 /** GoogleHtmlMarker용 HTML 문자열 */
-export function createMapPlaceBubbleHtml(place: Place): string {
-  return `<div class="map-place-bubble">${bubbleInnerHtml(place)}</div>`;
+export function createMapPlaceBubbleHtml(place: Place, isPinned = false): string {
+  return `<div class="map-place-bubble">${bubbleInnerHtml(place, isPinned)}</div>`;
 }
 
-/** 말풍선에서 미리보기/상세 버튼 클릭인지 판별 */
+/** 말풍선에서 미리보기(좌측) 클릭인지 판별 */
 export function isMapPlaceBubbleDetailClick(target: EventTarget | null): boolean {
   return Boolean(
-    target instanceof Element &&
-      target.closest('.map-place-bubble-thumb, .map-place-bubble-link')
+    target instanceof Element && target.closest('.map-place-bubble-thumb')
+  );
+}
+
+/** 말풍선에서 핀업(우측) 클릭인지 판별 */
+export function isMapPlaceBubblePinClick(target: EventTarget | null): boolean {
+  return Boolean(
+    target instanceof Element && target.closest('.map-place-bubble-pin')
   );
 }

@@ -15,6 +15,7 @@ import koAuth from '../locales/ko/auth.json';
 import koBilling from '../locales/ko/billing.json';
 import koLanding from '../locales/ko/landing.json';
 import koGuides from '../locales/ko/guides.json';
+import koKorInfo from '../locales/ko/korInfo.json';
 
 import enCommon from '../locales/en/common.json';
 import enPlanner from '../locales/en/planner.json';
@@ -23,6 +24,7 @@ import enAuth from '../locales/en/auth.json';
 import enBilling from '../locales/en/billing.json';
 import enLanding from '../locales/en/landing.json';
 import enGuides from '../locales/en/guides.json';
+import enKorInfo from '../locales/en/korInfo.json';
 
 import jaCommon from '../locales/ja/common.json';
 import jaPlanner from '../locales/ja/planner.json';
@@ -31,6 +33,7 @@ import jaAuth from '../locales/ja/auth.json';
 import jaBilling from '../locales/ja/billing.json';
 import jaLanding from '../locales/ja/landing.json';
 import jaGuides from '../locales/ja/guides.json';
+import jaKorInfo from '../locales/ja/korInfo.json';
 
 import zhCommon from '../locales/zh/common.json';
 import zhPlanner from '../locales/zh/planner.json';
@@ -39,6 +42,7 @@ import zhAuth from '../locales/zh/auth.json';
 import zhBilling from '../locales/zh/billing.json';
 import zhLanding from '../locales/zh/landing.json';
 import zhGuides from '../locales/zh/guides.json';
+import zhKorInfo from '../locales/zh/korInfo.json';
 
 const resources = {
   ko: {
@@ -49,6 +53,7 @@ const resources = {
     billing: koBilling,
     landing: koLanding,
     guides: koGuides,
+    korInfo: koKorInfo,
   },
   en: {
     common: enCommon,
@@ -58,6 +63,7 @@ const resources = {
     billing: enBilling,
     landing: enLanding,
     guides: enGuides,
+    korInfo: enKorInfo,
   },
   ja: {
     common: jaCommon,
@@ -67,6 +73,7 @@ const resources = {
     billing: jaBilling,
     landing: jaLanding,
     guides: jaGuides,
+    korInfo: jaKorInfo,
   },
   zh: {
     common: zhCommon,
@@ -76,6 +83,7 @@ const resources = {
     billing: zhBilling,
     landing: zhLanding,
     guides: zhGuides,
+    korInfo: zhKorInfo,
   },
 } as const;
 
@@ -85,7 +93,7 @@ void i18n.use(initReactI18next).init({
   fallbackLng: DEFAULT_LOCALE,
   supportedLngs: ['ko', 'en', 'ja', 'zh'],
   defaultNS: 'common',
-  ns: ['common', 'planner', 'share', 'auth', 'billing', 'landing', 'guides'],
+  ns: ['common', 'planner', 'share', 'auth', 'billing', 'landing', 'guides', 'korInfo'],
   interpolation: { escapeValue: false },
   returnEmptyString: false,
 });

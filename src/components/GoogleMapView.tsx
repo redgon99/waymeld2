@@ -10,6 +10,7 @@ import {
 import {
   createMapPlaceBubbleHtml,
   isMapPlaceBubbleDetailClick,
+  isMapPlaceBubblePinClick,
 } from '../lib/mapPlaceBubble';
 import {
   googleZoomForPlannerLevel,
@@ -44,6 +45,7 @@ interface Props {
   onMapLevelChange?: (level: number) => void;
   infoWindowPlace?: Place | null;
   onCloseInfoWindow?: () => void;
+  onTogglePinFromInfo?: (place: Place) => void;
   onOpenPlacePhotosFromInfo?: (place: Place) => void;
   fitRouteBounds?: boolean;
   fitSearchBounds?: boolean;
@@ -81,6 +83,7 @@ export function GoogleMapView({
   onMapLevelChange,
   infoWindowPlace = null,
   onCloseInfoWindow,
+  onTogglePinFromInfo,
   onOpenPlacePhotosFromInfo,
   fitRouteBounds = false,
   fitSearchBounds = false,
@@ -114,7 +117,9 @@ export function GoogleMapView({
   hoverSearchRef.current = onHoverSearchPlace;
   const infoBubbleRef = useRef<GoogleHtmlMarker | null>(null);
   const openPlacePhotosRef = useRef(onOpenPlacePhotosFromInfo);
+  const togglePinFromInfoRef = useRef(onTogglePinFromInfo);
   openPlacePhotosRef.current = onOpenPlacePhotosFromInfo;
+  togglePinFromInfoRef.current = onTogglePinFromInfo;
 
   const pinSelectionActive = pinSelectionFilter != null && pinSelectionFilter.size > 0;
   let visiblePinned = pinCategoryFilter
@@ -287,14 +292,20 @@ export function GoogleMapView({
     infoBubbleRef.current = null;
     if (!infoWindowPlace) return;
     const place = infoWindowPlace;
+    const isPinned = pinned.some((p) => p.id === place.id);
     infoBubbleRef.current = new GoogleHtmlMarker(
       mapRef.current,
       { lat: place.lat, lng: place.lng },
-      createMapPlaceBubbleHtml(place),
+      createMapPlaceBubbleHtml(place, isPinned),
       1.28,
       {
         zIndex: 2000,
         onClick: (e) => {
+          if (isMapPlaceBubblePinClick(e.target)) {
+            e.preventDefault();
+            togglePinFromInfoRef.current?.(place);
+            return;
+          }
           if (isMapPlaceBubbleDetailClick(e.target)) {
             e.preventDefault();
             openPlacePhotosRef.current?.(place);
@@ -302,7 +313,7 @@ export function GoogleMapView({
         },
       }
     );
-  }, [infoWindowPlace]);
+  }, [infoWindowPlace, pinned]);
 
   useEffect(() => {
     if (!mapRef.current) return;

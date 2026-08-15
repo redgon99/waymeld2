@@ -34,6 +34,7 @@ export default function LandingPage() {
   const planPath = plannerPath(locale);
   const plazaPath = pathWithLocale('/plaza', locale);
   const guidesPath = pathWithLocale('/guides', locale);
+  const infoPath = pathWithLocale('/info', locale);
   const loginPath = pathWithLocale('/login', locale);
   const year = new Date().getFullYear();
   const [tipGuides, setTipGuides] = useState<GuideArticle[]>([]);
@@ -69,6 +70,10 @@ export default function LandingPage() {
 
   return (
     <div className="landing-page">
+      <div className="landing-top">
+        <p className="landing-notice" role="status">
+          {t('notice.trial')}
+        </p>
       <header className="landing-nav">
         <Link to={pathWithLocale('/', locale)} className="landing-brand">
           <span className="landing-brand-mark" aria-hidden>
@@ -81,6 +86,7 @@ export default function LandingPage() {
           <a href="#how">{t('nav.howItWorks')}</a>
           <Link to={plazaPath}>{t('nav.plaza')}</Link>
           <Link to={guidesPath}>{t('nav.tips')}</Link>
+          <Link to={infoPath}>{t('nav.info')}</Link>
         </nav>
         <div className="landing-nav-actions">
           <LocaleSwitcher compact />
@@ -92,6 +98,7 @@ export default function LandingPage() {
           </Link>
         </div>
       </header>
+      </div>
 
       <section className="landing-section landing-hero">
         <div className="landing-hero-copy">
@@ -280,6 +287,7 @@ export default function LandingPage() {
             <Link to={planPath}>{t('footer.plan')}</Link>
             <Link to={plazaPath}>{t('footer.plaza')}</Link>
             <Link to={guidesPath}>{t('footer.tips')}</Link>
+            <Link to={infoPath}>{t('footer.info')}</Link>
             <Link to={loginPath}>{t('footer.login')}</Link>
           </nav>
           <p className="landing-footer-copy">{t('footer.rights', { year })}</p>

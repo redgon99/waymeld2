@@ -1,0 +1,43 @@
+{
+  "brand": "WayMeld",
+  "metaTitle": "Korea Travel Info · WayMeld",
+  "title": "Korea Travel Info",
+  "subtitle": "Not pinnable, but useful for your trip — curated tourism photos and walking/cycling trail courses.",
+  "cta": {
+    "planner": "Build my route"
+  },
+  "tabs": {
+    "label": "Content type",
+    "photos": "Photo gallery",
+    "trails": "Walking & cycling trails"
+  },
+  "kinds": {
+    "all": "All"
+  },
+  "list": {
+    "loading": "Loading…",
+    "empty": "No results."
+  },
+  "photos": {
+    "searchPlaceholder": "Search by place or keyword (e.g. Gyeongbokgung, night view)"
+  },
+  "trails": {
+    "searchPlaceholder": "Search by course name (e.g. Olle-gil)",
+    "filterLabel": "Course filters",
+    "walking": "Walking",
+    "cycling": "Cycling",
+    "levelLow": "Easy",
+    "levelMid": "Moderate",
+    "levelHigh": "Hard",
+    "viewRoute": "View route on map",
+    "start": "Start",
+    "finish": "Finish",
+    "close": "Close",
+    "mapNotConfigured": "Google Maps must be configured to show this route.",
+    "routeUnavailable": "Couldn't load the route data."
+  },
+  "errors": {
+    "notConfigured": "Supabase must be configured to show this content.",
+    "loadFailed": "Failed to load this content."
+  }
+}

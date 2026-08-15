@@ -1,0 +1,43 @@
+{
+  "brand": "WayMeld",
+  "metaTitle": "韓国旅行情報 · WayMeld",
+  "title": "韓国旅行情報",
+  "subtitle": "ピン留めはできませんが旅の参考になる情報です — 観光写真とウォーキング・サイクリングコースをまとめました。",
+  "cta": {
+    "planner": "旅程を作る"
+  },
+  "tabs": {
+    "label": "情報の種類",
+    "photos": "観光写真",
+    "trails": "ウォーキング・サイクリングコース"
+  },
+  "kinds": {
+    "all": "すべて"
+  },
+  "list": {
+    "loading": "読み込み中…",
+    "empty": "結果がありません。"
+  },
+  "photos": {
+    "searchPlaceholder": "場所・キーワードで検索 (例: 景福宮, 夜景)"
+  },
+  "trails": {
+    "searchPlaceholder": "コース名で検索 (例: オルレ길)",
+    "filterLabel": "コースフィルター",
+    "walking": "ウォーキング",
+    "cycling": "サイクリング",
+    "levelLow": "難易度: 易",
+    "levelMid": "難易度: 中",
+    "levelHigh": "難易度: 難",
+    "viewRoute": "地図でルートを見る",
+    "start": "出発",
+    "finish": "到着",
+    "close": "閉じる",
+    "mapNotConfigured": "このルートを表示するにはGoogle Mapsの設定が必要です。",
+    "routeUnavailable": "ルートデータを読み込めませんでした。"
+  },
+  "errors": {
+    "notConfigured": "このコンテンツを表示するにはSupabaseの設定が必要です。",
+    "loadFailed": "情報の読み込みに失敗しました。"
+  }
+}

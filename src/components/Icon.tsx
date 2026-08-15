@@ -35,7 +35,13 @@ export function Icon({ name, size = 20, className, style, spin, title }: IconPro
       {title ? <title>{title}</title> : null}
       {paths.map((p, i) =>
         p.fill ? (
-          <path key={i} fill="currentColor" stroke="none" d={p.d} />
+          <path
+            key={i}
+            fill="currentColor"
+            fillRule={p.evenodd ? 'evenodd' : undefined}
+            stroke="none"
+            d={p.d}
+          />
         ) : (
           <path key={i} d={p.d} />
         )

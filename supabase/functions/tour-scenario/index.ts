@@ -113,6 +113,7 @@ Deno.serve(async (req) => {
         lat: number;
         lng: number;
         thumbnailUrl?: string;
+        sourceApi?: 'gocamping';
         note: string;
       }>;
     }> = [];
@@ -137,6 +138,7 @@ Deno.serve(async (req) => {
           lat: candidate.lat,
           lng: candidate.lng,
           thumbnailUrl: candidate.thumbnailUrl,
+          sourceApi: candidate.sourceApi,
           note: String(s.note ?? '').trim(),
         });
       }

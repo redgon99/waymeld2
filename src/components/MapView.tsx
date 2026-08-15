@@ -94,6 +94,7 @@ export function MapView({
         onMapLevelChange={rest.onMapLevelChange}
         infoWindowPlace={rest.infoWindowPlace}
         onCloseInfoWindow={rest.onCloseInfoWindow}
+        onTogglePinFromInfo={rest.onTogglePinFromInfo}
         onOpenPlacePhotosFromInfo={rest.onOpenPlacePhotosFromInfo}
         fitRouteBounds={rest.fitRouteBounds}
         fitSearchBounds={rest.fitSearchBounds}
@@ -606,6 +607,8 @@ function KakaoMapView({
     const content = createMapPlaceBubbleElement(place, {
       onClose: () => infoHandlersRef.current.onCloseInfoWindow?.(),
       onOpenDetail: (p) => infoHandlersRef.current.onOpenPlacePhotosFromInfo?.(p),
+      onTogglePin: (p) => infoHandlersRef.current.onTogglePinFromInfo?.(p),
+      isPinned: pinnedIds.has(place.id),
     });
 
     const overlay = new window.kakao.maps.CustomOverlay({
@@ -617,7 +620,7 @@ function KakaoMapView({
     });
     overlay.setMap(mapRef.current);
     infoOverlayRef.current = overlay;
-  }, [infoWindowPlace]);
+  }, [infoWindowPlace, pinnedIds]);
 
   // 검색 결과가 나오면 모든 포인트가 보이도록 축척 맞춤
   useEffect(() => {

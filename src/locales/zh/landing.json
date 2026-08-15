@@ -7,11 +7,15 @@
     "primary": "WayMeld",
     "secondary": "여로담"
   },
+  "notice": {
+    "trial": "8月试运营，9月起正式运营。"
+  },
   "nav": {
     "features": "功能",
     "howItWorks": "开始",
     "plaza": "分享广场",
     "tips": "旅行贴士",
+    "info": "韩国旅行信息",
     "start": "创建路线",
     "login": "登录"
   },
@@ -68,6 +72,7 @@
     "tagline": "收藏 → 编织 → 路线 → 分享",
     "plaza": "分享广场",
     "tips": "旅行贴士",
+    "info": "韩国旅行信息",
     "login": "登录",
     "plan": "规划器",
     "rights": "© {{year}} WayMeld"

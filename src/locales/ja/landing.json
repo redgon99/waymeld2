@@ -7,11 +7,15 @@
     "primary": "WayMeld",
     "secondary": "여로담"
   },
+  "notice": {
+    "trial": "8月は試験運用、9月から正式運用を開始します。"
+  },
   "nav": {
     "features": "機能",
     "howItWorks": "始め方",
     "plaza": "共有広場",
     "tips": "旅行Tips",
+    "info": "韓国旅行情報",
     "start": "ルート作成",
     "login": "ログイン"
   },
@@ -68,6 +72,7 @@
     "tagline": "集める → 紡ぐ → ルート → 共有",
     "plaza": "共有広場",
     "tips": "旅行Tips",
+    "info": "韓国旅行情報",
     "login": "ログイン",
     "plan": "プランナー",
     "rights": "© {{year}} WayMeld"

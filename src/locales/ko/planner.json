@@ -230,6 +230,7 @@
     "close": "닫기",
     "koreanName": "한국어 이름",
     "romanized": "로마자 표기",
+    "localeMeaning": "이 이름의 뜻",
     "address": "주소",
     "sayThis": "이렇게 말하세요",
     "copyName": "이름 복사",

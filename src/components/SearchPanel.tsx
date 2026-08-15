@@ -671,7 +671,7 @@ export function SearchPanel({
                     onTogglePin(place);
                   }}
                 >
-                  <Icon name={isPinned ? 'pin' : 'pinPlus'} size={18} />
+                  <Icon name={isPinned ? 'check' : 'pinPlus'} size={28} />
                 </button>
               </li>
             );

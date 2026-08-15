@@ -7,11 +7,15 @@
     "primary": "WayMeld",
     "secondary": ""
   },
+  "notice": {
+    "trial": "Trial operation through August. Official launch in September."
+  },
   "nav": {
     "features": "Features",
     "howItWorks": "Get started",
     "plaza": "Share plaza",
     "tips": "Travel tips",
+    "info": "Korea travel info",
     "start": "Plan a route",
     "login": "Sign in"
   },
@@ -91,6 +95,7 @@
     "tagline": "Collect → Meld → Route → Share",
     "plaza": "Share plaza",
     "tips": "Travel tips",
+    "info": "Korea travel info",
     "login": "Sign in",
     "plan": "Planner",
     "rights": "© {{year}} WayMeld"

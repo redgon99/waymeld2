@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Icon } from './Icon';
 import type { Place } from '../types';
 import { formatTaxiPhrase } from '../lib/itineraryExport';
+import { normalizeLocale } from '../lib/locale';
 
 interface Props {
   open: boolean;
@@ -11,7 +12,8 @@ interface Props {
 }
 
 export function TaxiDriverCardModal({ open, place, onClose }: Props) {
-  const { t } = useTranslation('planner');
+  const { t, i18n } = useTranslation('planner');
+  const locale = normalizeLocale(i18n.language);
 
   useEffect(() => {
     if (!open) return;
@@ -25,6 +27,10 @@ export function TaxiDriverCardModal({ open, place, onClose }: Props) {
   if (!open || !place) return null;
 
   const koName = place.nameKo ?? place.name;
+  const localeName =
+    locale !== 'ko'
+      ? [place.name, place.romanizedName].find((n) => n && n.trim() && n !== koName) ?? ''
+      : '';
   const addr = place.roadAddress || place.address;
   const taxiPhrase = formatTaxiPhrase({
     ...place,
@@ -59,16 +65,15 @@ export function TaxiDriverCardModal({ open, place, onClose }: Props) {
         <div className="taxi-card-body">
           <p className="taxi-card-label">{t('taxi.koreanName')}</p>
           <p className="taxi-card-value">{koName}</p>
+          {localeName ? (
+            <p className="taxi-card-locale">
+              <span className="taxi-card-locale-label">{t('taxi.localeMeaning')}</span>
+              {localeName}
+            </p>
+          ) : null}
           <button type="button" className="taxi-card-copy" onClick={() => void copy(koName)}>
             <Icon name="note" /> {t('taxi.copyName')}
           </button>
-
-          {place.romanizedName && (
-            <>
-              <p className="taxi-card-label">{t('taxi.romanized')}</p>
-              <p className="taxi-card-value taxi-card-value-sub">{place.romanizedName}</p>
-            </>
-          )}
 
           {addr && (
             <>

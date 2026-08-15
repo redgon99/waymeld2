@@ -1,0 +1,43 @@
+{
+  "brand": "여로담",
+  "metaTitle": "한국여행정보 · 여로담",
+  "title": "한국여행정보",
+  "subtitle": "핀으로 찍을 순 없지만 여행에 도움이 되는 정보들 — 관광사진과 걷기·자전거 코스를 모았습니다.",
+  "cta": {
+    "planner": "동선 만들기"
+  },
+  "tabs": {
+    "label": "정보 종류",
+    "photos": "관광사진",
+    "trails": "걷기·자전거길"
+  },
+  "kinds": {
+    "all": "전체"
+  },
+  "list": {
+    "loading": "불러오는 중…",
+    "empty": "결과가 없습니다."
+  },
+  "photos": {
+    "searchPlaceholder": "장소·키워드로 검색 (예: 경복궁, 야경)"
+  },
+  "trails": {
+    "searchPlaceholder": "코스명으로 검색 (예: 올레길)",
+    "filterLabel": "코스 필터",
+    "walking": "걷기길",
+    "cycling": "자전거길",
+    "levelLow": "난이도 하",
+    "levelMid": "난이도 중",
+    "levelHigh": "난이도 상",
+    "viewRoute": "경로 지도로 보기",
+    "start": "출발",
+    "finish": "도착",
+    "close": "닫기",
+    "mapNotConfigured": "지도를 표시하려면 Google Maps 설정이 필요합니다.",
+    "routeUnavailable": "경로 데이터를 불러오지 못했습니다."
+  },
+  "errors": {
+    "notConfigured": "이 콘텐츠를 표시하려면 Supabase 설정이 필요합니다.",
+    "loadFailed": "정보를 불러오지 못했습니다."
+  }
+}

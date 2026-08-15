@@ -230,6 +230,7 @@
     "close": "Close",
     "koreanName": "Korean name",
     "romanized": "Romanized",
+    "localeMeaning": "What this means",
     "address": "Address",
     "sayThis": "Say this",
     "copyName": "Copy name",

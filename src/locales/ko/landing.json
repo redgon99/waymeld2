@@ -7,11 +7,15 @@
     "primary": "여로담",
     "secondary": "WayMeld"
   },
+  "notice": {
+    "trial": "8월 한 달간 시범 운영하며, 9월부터 정식 운영합니다."
+  },
   "nav": {
     "features": "기능",
     "howItWorks": "시작하기",
     "plaza": "공유마당",
     "tips": "여행 팁",
+    "info": "한국여행정보",
     "start": "동선 만들기",
     "login": "로그인"
   },
@@ -91,6 +95,7 @@
     "tagline": "담기 → 엮기 → 동선 → 공유",
     "plaza": "공유마당",
     "tips": "여행 팁",
+    "info": "한국여행정보",
     "login": "로그인",
     "plan": "플래너",
     "rights": "© {{year}} 여로담 · WayMeld"

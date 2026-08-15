@@ -129,7 +129,7 @@ export function createMapInfoCardElement(
           ${
             opts.isPinned
               ? `${iconSvgMarkup('check', { size: 16 })} 핀업됨`
-              : `${iconSvgMarkup('pin', { size: 16 })} 핀업`
+              : `${iconSvgMarkup('pinPlus', { size: 18 })} 핀업`
           }
         </button>
       </div>

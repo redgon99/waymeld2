@@ -13,6 +13,7 @@ import AdminDistributionPage from './pages/AdminDistributionPage';
 import AdminScenariosPage from './pages/AdminScenariosPage';
 import GuidesPage from './pages/GuidesPage';
 import GuideDetailPage from './pages/GuideDetailPage';
+import KoreaInfoPage from './pages/KoreaInfoPage';
 import KoreaSetupPage from './pages/KoreaSetupPage';
 import HelpPage from './pages/HelpPage';
 import ThemesPage from './pages/ThemesPage';
@@ -27,6 +28,7 @@ const PAGE_ROUTES = (
     <Route path="plaza" element={<SharePlazaPage />} />
     <Route path="guides" element={<GuidesPage />} />
     <Route path="guides/:slug" element={<GuideDetailPage />} />
+    <Route path="info" element={<KoreaInfoPage />} />
     <Route path="admin" element={<AdminPage />} />
     <Route path="admin/insights" element={<AdminInsightsPage />} />
     <Route path="admin/guides" element={<AdminGuidesPage />} />

@@ -39,6 +39,8 @@ export interface ScenarioStop {
   lng: number;
   thumbnailUrl?: string;
   note: string;
+  /** 'gocamping'이면 contentId가 GoCamping 자체 ID 공간이라 visitkorea가 아닌 gocamping.or.kr로 링크해야 함 */
+  sourceApi?: 'gocamping';
 }
 
 export interface ScenarioDay {
@@ -82,6 +84,15 @@ const CONTENT_TYPE_TO_SIMPLE_CATEGORY: Record<string, SimpleCategory> = {
   '39': 'food',
 };
 
+/** GoCamping은 contentId가 "gocamping:<원본ID>" 형태 — visitkorea가 아닌 자체 상세페이지로 연결한다 */
+function scenarioStopDetailUrl(stop: Pick<ScenarioStop, 'contentId' | 'sourceApi'>): string {
+  if (stop.sourceApi === 'gocamping') {
+    const rawId = stop.contentId.replace(/^gocamping:/, '');
+    return `https://www.gocamping.or.kr/bsite/camp/info/read.do?c_no=${rawId}`;
+  }
+  return `https://www.visitkorea.or.kr/detail/ms_detail.do?contentId=${stop.contentId}`;
+}
+
 /** 시나리오 스팟 카드를 클릭했을 때 지도 이동·정보창 표시에 쓸 Place로 변환 */
 export function scenarioStopToPlace(stop: ScenarioStop): Place {
   const category = CONTENT_TYPE_TO_SIMPLE_CATEGORY[stop.contentTypeId] ?? 'tour';
@@ -97,7 +108,7 @@ export function scenarioStopToPlace(stop: ScenarioStop): Place {
     lat: stop.lat,
     lng: stop.lng,
     thumbnailUrl: stop.thumbnailUrl,
-    placeUrl: `https://www.visitkorea.or.kr/detail/ms_detail.do?contentId=${stop.contentId}`,
+    placeUrl: scenarioStopDetailUrl(stop),
   };
 }
 
@@ -161,7 +172,7 @@ export function applyScenarioToTrip(
       lat: stop.lat,
       lng: stop.lng,
       note: stop.note,
-      placeUrl: `https://www.visitkorea.or.kr/detail/ms_detail.do?contentId=${stop.contentId}`,
+      placeUrl: scenarioStopDetailUrl(stop),
     }))
   );
 

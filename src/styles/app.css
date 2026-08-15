@@ -4858,10 +4858,10 @@ button {
   word-break: keep-all;
 }
 
-.map-place-bubble-link {
+.map-place-bubble-pin {
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -4874,8 +4874,16 @@ button {
   padding: 0;
 }
 
-.map-place-bubble-link:hover {
+.map-place-bubble-pin:hover {
   background: #0f766e;
+}
+
+.map-place-bubble-pin.pinned {
+  background: #1f2937;
+}
+
+.map-place-bubble-pin.pinned:hover {
+  background: #111827;
 }
 
 .map-place-bubble-tail {
@@ -8031,6 +8039,21 @@ button {
   font-size: 18px;
   font-weight: 500;
 }
+.taxi-card-locale {
+  margin: 6px 0 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #4b5563;
+  word-break: keep-all;
+}
+.taxi-card-locale-label {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+}
 .taxi-card-phrase {
   font-size: 22px;
   font-weight: 600;
@@ -8811,6 +8834,166 @@ button {
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 28px;
+}
+
+.info-search-input {
+  width: 100%;
+  max-width: 22rem;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  font-size: 0.875rem;
+  margin-bottom: 16px;
+}
+
+.info-photo-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 640px) {
+  .info-photo-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 960px) {
+  .info-photo-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.info-photo-card {
+  margin: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.info-photo-card img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: #f1f5f9;
+}
+
+.info-photo-card figcaption {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px 12px;
+}
+
+.info-photo-card figcaption strong {
+  font-size: 0.8125rem;
+  letter-spacing: -0.01em;
+}
+
+.info-photo-card figcaption span {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.info-trail-list {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 720px) {
+  .info-trail-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.info-trail-card {
+  padding: 18px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.info-trail-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.info-trail-card-head h2 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.info-trail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  font-size: 0.8125rem;
+  color: #475569;
+  margin-bottom: 10px;
+}
+
+.info-trail-summary {
+  margin: 0 0 14px;
+  font-size: 0.875rem;
+  color: #64748b;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.trail-route-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.trail-route-panel {
+  width: min(100%, 640px);
+  max-height: 90dvh;
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.trail-route-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.trail-route-close {
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  padding: 4px;
+}
+
+.trail-route-map {
+  width: 100%;
+  height: min(60vh, 420px);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f1f5f9;
 }
 
 .admin-insight-rollup-actions {
@@ -11881,18 +12064,24 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   padding: 0;
-  border: 1.5px solid rgba(15, 23, 42, 0.14);
+  overflow: hidden;
+  border: 1.5px solid #99f6e4;
   border-radius: 99px;
-  background: #fff;
-  color: #0f172a;
+  background: #f0fdfa;
+  color: #0d9488;
+}
+
+.search-pin-btn .wm-icon {
+  display: block;
 }
 
 .search-pin-btn:hover {
-  background: #f8fafc;
-  border-color: rgba(15, 23, 42, 0.28);
+  background: #ccfbf1;
+  border-color: #5eead4;
+  color: #0f766e;
 }
 
 .search-pin-btn.pinned {

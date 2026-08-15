@@ -32,6 +32,7 @@ interface GroundedStop {
   lat: number;
   lng: number;
   thumbnailUrl?: string;
+  sourceApi?: 'gocamping';
 }
 interface GroundedDay {
   day: number;
@@ -56,6 +57,7 @@ interface LocaleContent {
       lat: number;
       lng: number;
       thumbnailUrl?: string;
+      sourceApi?: 'gocamping';
       note: string;
     }>;
   }>;
@@ -154,6 +156,7 @@ Deno.serve(async (req) => {
           lat: candidate.lat,
           lng: candidate.lng,
           thumbnailUrl: candidate.thumbnailUrl,
+          sourceApi: candidate.sourceApi,
         });
       }
       if (stops.length > 0) {
@@ -194,6 +197,7 @@ Deno.serve(async (req) => {
               lat: s.lat,
               lng: s.lng,
               thumbnailUrl: s.thumbnailUrl,
+              sourceApi: s.sourceApi,
               note: narrated?.note || '',
             };
           }),

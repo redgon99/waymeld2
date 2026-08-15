@@ -15,6 +15,7 @@ export type IconName =
   | 'roadview'
   | 'check'
   | 'pin'
+  | 'pushpin'
   | 'mapPin'
   | 'pinPlus'
   | 'pinSelect'
@@ -88,6 +89,8 @@ export interface IconPath {
   d: string;
   /** true면 면 채움 (별점 등) */
   fill?: boolean;
+  /** fill과 함께 쓰면 안쪽 서브패스를 구멍으로 뚫음 */
+  evenodd?: boolean;
 }
 
 export const WAYMELD_ICONS: Record<IconName, IconPath[]> = {
@@ -131,10 +134,20 @@ export const WAYMELD_ICONS: Record<IconName, IconPath[]> = {
     { d: 'M12 21s-6-5.2-6-10a6 6 0 1 1 12 0c0 4.8-6 10-6 10z' },
     { d: 'M12 11.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z' },
   ],
+  /** 핀업 액션 — 압정(thumbtack). 위치 마커(pin)와 구분 */
+  pushpin: [
+    { d: 'M14.6 3.8a3.05 3.05 0 1 1 0 6.1 3.05 3.05 0 0 1 0-6.1z' },
+    { d: 'M14.6 5.55a1.3 1.3 0 1 1 0 2.6 1.3 1.3 0 0 1 0-2.6z', fill: true },
+    { d: 'M13.15 9.55l2.9 1.65' },
+    { d: 'M14.6 10.35L8.15 20.35' },
+  ],
   mapPin: [{ d: 'M12 21V11M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z' }],
   pinPlus: [
-    { d: 'M12 21s-5.5-4.6-5.5-9.2a5.5 5.5 0 1 1 11 0C17.5 16.4 12 21 12 21z' },
-    { d: 'M12 8.5v5M9.5 11h5' },
+    {
+      d: 'M12 22s-6.4-5.4-6.4-10.8A6.4 6.4 0 1 1 18.4 11.2c0 5.4-6.4 10.8-6.4 10.8zM11.1 7.55h1.8v2.75h2.75v1.8H12.9v2.75h-1.8v-2.75H8.35v-1.8H11.1z',
+      fill: true,
+      evenodd: true,
+    },
   ],
   pinSelect: [
     { d: 'M12 21V12.5' },
@@ -406,6 +419,7 @@ export const TABLER_TO_WAYMELD: Record<string, IconName> = {
   'ti-view-360': 'roadview',
   'ti-check': 'check',
   'ti-pin': 'pin',
+  'ti-pinned': 'pushpin',
   'ti-map-pin': 'mapPin',
   'ti-map-pin-plus': 'pinPlus',
   'ti-map-pin-pin': 'pinSelect',
@@ -453,7 +467,7 @@ export function iconSvgMarkup(
   const paths = WAYMELD_ICONS[name]
     .map((p) =>
       p.fill
-        ? `<path fill="currentColor" stroke="none" d="${p.d}"/>`
+        ? `<path fill="currentColor" stroke="none"${p.evenodd ? ' fill-rule="evenodd"' : ''} d="${p.d}"/>`
         : `<path d="${p.d}"/>`
     )
     .join('');
