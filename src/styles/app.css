@@ -8872,7 +8872,8 @@ button {
   border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
-.info-photo-card img {
+.info-photo-card img,
+.info-photo-card-noimg {
   display: block;
   width: 100%;
   aspect-ratio: 4 / 3;

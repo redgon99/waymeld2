@@ -2,14 +2,16 @@
   "brand": "WayMeld",
   "metaTitle": "Korea Travel Info · WayMeld",
   "title": "Korea Travel Info",
-  "subtitle": "Not pinnable, but useful for your trip — curated tourism photos and Durunubi walking trail courses.",
+  "subtitle": "Not pinnable, but useful for your trip — curated tourism photos, Durunubi walking trails, pet-friendly spots, and accessible-travel spots.",
   "cta": {
     "planner": "Build my route"
   },
   "tabs": {
     "label": "Content type",
     "photos": "Photo gallery",
-    "trails": "Walking trails"
+    "trails": "Walking trails",
+    "pet": "Pet-friendly travel",
+    "with": "Accessible travel"
   },
   "kinds": {
     "all": "All"
@@ -39,6 +41,12 @@
     "close": "Close",
     "mapNotConfigured": "Google Maps must be configured to show this route.",
     "routeUnavailable": "Couldn't load the route data."
+  },
+  "pet": {
+    "searchPlaceholder": "Search by place or keyword (e.g. cafe, pension)"
+  },
+  "with": {
+    "searchPlaceholder": "Search by place or keyword (e.g. Gyeongbokgung, museum)"
   },
   "errors": {
     "notConfigured": "Supabase must be configured to show this content.",

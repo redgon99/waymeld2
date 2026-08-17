@@ -2,14 +2,16 @@
   "brand": "WayMeld",
   "metaTitle": "韩国旅行信息 · WayMeld",
   "title": "韩国旅行信息",
-  "subtitle": "无法标记为行程地点，但对旅行有帮助的信息 — 精选旅游照片与杜鲁努比徒步路线。",
+  "subtitle": "无法标记为行程地点，但对旅行有帮助的信息 — 精选旅游照片、杜鲁努比徒步路线、可携带宠物的景点、无障碍旅行景点。",
   "cta": {
     "planner": "制定行程"
   },
   "tabs": {
     "label": "内容类型",
     "photos": "旅游照片",
-    "trails": "徒步路线"
+    "trails": "徒步路线",
+    "pet": "宠物同行旅行",
+    "with": "无障碍旅行"
   },
   "kinds": {
     "all": "全部"
@@ -39,6 +41,12 @@
     "close": "关闭",
     "mapNotConfigured": "查看该路线需要配置 Google Maps。",
     "routeUnavailable": "无法加载路线数据。"
+  },
+  "pet": {
+    "searchPlaceholder": "按地点或关键词搜索 (如: 咖啡馆, 民宿)"
+  },
+  "with": {
+    "searchPlaceholder": "按地点或关键词搜索 (如: 景福宫, 博物馆)"
   },
   "errors": {
     "notConfigured": "显示此内容需要配置 Supabase。",

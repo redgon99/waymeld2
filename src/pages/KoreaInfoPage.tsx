@@ -8,15 +8,18 @@ import { normalizeLocale, pathWithLocale } from '../lib/locale';
 import { plannerPath } from '../lib/routes';
 import i18n from '../lib/i18n';
 import {
+  fetchFilteredPlaces,
   fetchTourPhotos,
   fetchTourTrails,
   isTourInfoConfigured,
+  type PlaceListKind,
+  type TourFilteredPlace,
   type TourPhoto,
   type TourTrailCourse,
 } from '../lib/tourInfo';
 import '../styles/app.css';
 
-type InfoTab = 'photos' | 'trails';
+type InfoTab = 'photos' | 'trails' | 'pet' | 'with';
 
 const LEVEL_LABEL_KEY: Record<'1' | '2' | '3', string> = {
   '1': 'trails.levelLow',
@@ -45,6 +48,72 @@ function formatHours(totalMinutes: number): string {
   const m = totalMinutes % 60;
   if (h <= 0) return `${m}${m ? 'm' : ''}`;
   return m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
+/** 반려동물 동반여행(KorPetTourService2)/무장애여행(KorWithService2) — 검색 가능한 목록 브라우징 */
+function FilteredPlaceSection({ kind }: { kind: PlaceListKind }) {
+  const { t } = useTranslation('korInfo');
+  const [keyword, setKeyword] = useState('');
+  const [places, setPlaces] = useState<TourFilteredPlace[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isTourInfoConfigured()) {
+      setLoading(false);
+      setError(t('errors.notConfigured'));
+      return;
+    }
+    let alive = true;
+    setLoading(true);
+    setError(null);
+    const timer = setTimeout(() => {
+      fetchFilteredPlaces(kind, { keyword, numOfRows: 24 })
+        .then(({ items }) => {
+          if (alive) setPlaces(items);
+        })
+        .catch((e) => {
+          if (alive) setError(e instanceof Error ? e.message : t('errors.loadFailed'));
+        })
+        .finally(() => {
+          if (alive) setLoading(false);
+        });
+    }, 300);
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, [kind, keyword, t]);
+
+  return (
+    <section>
+      <input
+        type="search"
+        className="info-search-input"
+        placeholder={t(`${kind}.searchPlaceholder`)}
+        value={keyword}
+        onChange={(e) => setKeyword(e.currentTarget.value)}
+      />
+      {loading && <p className="guides-muted">{t('list.loading')}</p>}
+      {error && <p className="guides-error">{error}</p>}
+      {!loading && !error && places.length === 0 && <p className="guides-muted">{t('list.empty')}</p>}
+      <div className="info-photo-grid">
+        {places.map((p) => (
+          <figure key={p.contentId} className="info-photo-card">
+            {p.thumbnailUrl ? (
+              <img src={p.thumbnailUrl} alt={p.title} loading="lazy" />
+            ) : (
+              <div className="info-photo-card-noimg" aria-hidden />
+            )}
+            <figcaption>
+              <strong>{p.title}</strong>
+              <span>{p.address}</span>
+            </figcaption>
+          </figure>
+        ))}
+      </div>
+    </section>
+  );
 }
 
 export default function KoreaInfoPage() {
@@ -173,6 +242,24 @@ export default function KoreaInfoPage() {
           >
             {t('tabs.trails')}
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'pet'}
+            className={`guides-kind-chip${tab === 'pet' ? ' is-active' : ''}`}
+            onClick={() => setTab('pet')}
+          >
+            {t('tabs.pet')}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'with'}
+            className={`guides-kind-chip${tab === 'with' ? ' is-active' : ''}`}
+            onClick={() => setTab('with')}
+          >
+            {t('tabs.with')}
+          </button>
         </div>
 
         {tab === 'photos' && (
@@ -277,6 +364,8 @@ export default function KoreaInfoPage() {
             </div>
           </section>
         )}
+        {tab === 'pet' && <FilteredPlaceSection kind="pet" />}
+        {tab === 'with' && <FilteredPlaceSection kind="with" />}
       </div>
 
       <TrailRouteModal course={routeModalCourse} onClose={() => setRouteModalCourse(null)} />

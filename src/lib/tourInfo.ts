@@ -81,3 +81,29 @@ export async function fetchTourTrails(options: {
   if (error) throw error;
   return { items: data?.items ?? [], totalCount: data?.totalCount ?? 0 };
 }
+
+export type PlaceListKind = 'pet' | 'with';
+
+export interface TourFilteredPlace {
+  contentId: string;
+  contentTypeId: string;
+  title: string;
+  address: string;
+  lat: number;
+  lng: number;
+  thumbnailUrl?: string;
+}
+
+export async function fetchFilteredPlaces(
+  kind: PlaceListKind,
+  options: { keyword?: string; pageNo?: number; numOfRows?: number }
+): Promise<{ items: TourFilteredPlace[]; totalCount: number }> {
+  const supabase = getSupabase();
+  if (!supabase) return { items: [], totalCount: 0 };
+  const { data, error } = await supabase.functions.invoke<{
+    items?: TourFilteredPlace[];
+    totalCount?: number;
+  }>('tour-filtered-places', { body: { kind, ...options } });
+  if (error) throw error;
+  return { items: data?.items ?? [], totalCount: data?.totalCount ?? 0 };
+}

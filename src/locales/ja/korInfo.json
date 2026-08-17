@@ -2,14 +2,16 @@
   "brand": "WayMeld",
   "metaTitle": "韓国旅行情報 · WayMeld",
   "title": "韓国旅行情報",
-  "subtitle": "ピン留めはできませんが旅の参考になる情報です — 観光写真とドゥルヌビのウォーキングコースをまとめました。",
+  "subtitle": "ピン留めはできませんが旅の参考になる情報です — 観光写真、ドゥルヌビのウォーキングコース、ペット同伴可の旅行地、バリアフリー旅行地をまとめました。",
   "cta": {
     "planner": "旅程を作る"
   },
   "tabs": {
     "label": "情報の種類",
     "photos": "観光写真",
-    "trails": "ウォーキングコース"
+    "trails": "ウォーキングコース",
+    "pet": "ペット同伴旅行",
+    "with": "バリアフリー旅行"
   },
   "kinds": {
     "all": "すべて"
@@ -39,6 +41,12 @@
     "close": "閉じる",
     "mapNotConfigured": "このルートを表示するにはGoogle Mapsの設定が必要です。",
     "routeUnavailable": "ルートデータを読み込めませんでした。"
+  },
+  "pet": {
+    "searchPlaceholder": "場所・キーワードで検索 (例: カフェ, ペンション)"
+  },
+  "with": {
+    "searchPlaceholder": "場所・キーワードで検索 (例: 景福宮, 博物館)"
   },
   "errors": {
     "notConfigured": "このコンテンツを表示するにはSupabaseの設定が必要です。",
