@@ -2,14 +2,14 @@
   "brand": "WayMeld",
   "metaTitle": "Korea Travel Info · WayMeld",
   "title": "Korea Travel Info",
-  "subtitle": "Not pinnable, but useful for your trip — curated tourism photos and walking/cycling trail courses.",
+  "subtitle": "Not pinnable, but useful for your trip — curated tourism photos and Durunubi walking trail courses.",
   "cta": {
     "planner": "Build my route"
   },
   "tabs": {
     "label": "Content type",
     "photos": "Photo gallery",
-    "trails": "Walking & cycling trails"
+    "trails": "Walking trails"
   },
   "kinds": {
     "all": "All"
@@ -22,10 +22,14 @@
     "searchPlaceholder": "Search by place or keyword (e.g. Gyeongbokgung, night view)"
   },
   "trails": {
-    "searchPlaceholder": "Search by course name (e.g. Olle-gil)",
+    "searchPlaceholder": "Search by course name (e.g. Haeparang-gil)",
     "filterLabel": "Course filters",
-    "walking": "Walking",
-    "cycling": "Cycling",
+    "brand": {
+      "해파랑길": "Haeparang-gil (east coast)",
+      "남파랑길": "Namparang-gil (south coast)",
+      "서해랑길": "Seohaerang-gil (west coast)",
+      "DMZ 평화의 길": "DMZ Peace Trail"
+    },
     "levelLow": "Easy",
     "levelMid": "Moderate",
     "levelHigh": "Hard",

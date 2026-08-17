@@ -68,7 +68,6 @@ export async function fetchTrailGpxRoute(gpxUrl: string): Promise<{ points: GpxP
 
 export async function fetchTourTrails(options: {
   keyword?: string;
-  brdDiv?: TrailKind;
   level?: '1' | '2' | '3';
   pageNo?: number;
   numOfRows?: number;

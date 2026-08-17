@@ -13,7 +13,6 @@ import {
   isTourInfoConfigured,
   type TourPhoto,
   type TourTrailCourse,
-  type TrailKind,
 } from '../lib/tourInfo';
 import '../styles/app.css';
 
@@ -24,6 +23,17 @@ const LEVEL_LABEL_KEY: Record<'1' | '2' | '3', string> = {
   '2': 'trails.levelMid',
   '3': 'trails.levelHigh',
 };
+
+/**
+ * 두루누비 courseList는 brdDiv(걷기/자전거) 필터가 실효가 없고, 자체는 100% 걷기길인
+ * 코리아둘레길 4개 브랜드로만 구성되어 있다(서해랑길/해파랑길/남파랑길/DMZ 평화의 길).
+ * 이 4개는 서버 필터가 아니라 코스명 접두어로 클라이언트에서 구분한다.
+ */
+const TRAIL_BRANDS = ['해파랑길', '남파랑길', '서해랑길', 'DMZ 평화의 길'] as const;
+
+function trailBrandOf(name: string): string | null {
+  return TRAIL_BRANDS.find((b) => name.startsWith(b)) ?? null;
+}
 
 function formatMonth(month: string | undefined): string | null {
   if (!month || month.length !== 6) return null;
@@ -50,7 +60,7 @@ export default function KoreaInfoPage() {
   const [photosError, setPhotosError] = useState<string | null>(null);
 
   const [trailKeyword, setTrailKeyword] = useState('');
-  const [trailKind, setTrailKind] = useState<TrailKind | ''>('');
+  const [trailBrand, setTrailBrand] = useState<string>('');
   const [trailLevel, setTrailLevel] = useState<'1' | '2' | '3' | ''>('');
   const [trails, setTrails] = useState<TourTrailCourse[]>([]);
   const [trailsLoading, setTrailsLoading] = useState(true);
@@ -98,11 +108,11 @@ export default function KoreaInfoPage() {
     setTrailsLoading(true);
     setTrailsError(null);
     const timer = setTimeout(() => {
+      // 필터 없는 전체 코스 수 자체가 144건뿐이라 페이지네이션 없이 한 번에 받아온다.
       fetchTourTrails({
         keyword: trailKeyword,
-        brdDiv: trailKind || undefined,
         level: trailLevel || undefined,
-        numOfRows: 30,
+        numOfRows: 150,
       })
         .then(({ items }) => {
           if (alive) setTrails(items);
@@ -118,7 +128,9 @@ export default function KoreaInfoPage() {
       alive = false;
       clearTimeout(timer);
     };
-  }, [trailKeyword, trailKind, trailLevel, t]);
+  }, [trailKeyword, trailLevel, t]);
+
+  const visibleTrails = trailBrand ? trails.filter((c) => c.name.startsWith(trailBrand)) : trails;
 
   return (
     <main className="guides-page">
@@ -203,22 +215,18 @@ export default function KoreaInfoPage() {
               onChange={(e) => setTrailKeyword(e.currentTarget.value)}
             />
             <div className="guides-kind-filters" role="group" aria-label={t('trails.filterLabel')}>
-              {(
-                [
-                  { id: '', label: t('kinds.all') },
-                  { id: 'DNWW', label: t('trails.walking') },
-                  { id: 'DNBW', label: t('trails.cycling') },
-                ] as const
-              ).map((chip) => (
-                <button
-                  key={chip.id || 'all'}
-                  type="button"
-                  className={`guides-kind-chip${trailKind === chip.id ? ' is-active' : ''}`}
-                  onClick={() => setTrailKind(chip.id)}
-                >
-                  {chip.label}
-                </button>
-              ))}
+              {[{ id: '', label: t('kinds.all') }, ...TRAIL_BRANDS.map((b) => ({ id: b, label: t(`trails.brand.${b}`) }))].map(
+                (chip) => (
+                  <button
+                    key={chip.id || 'all'}
+                    type="button"
+                    className={`guides-kind-chip${trailBrand === chip.id ? ' is-active' : ''}`}
+                    onClick={() => setTrailBrand(chip.id)}
+                  >
+                    {chip.label}
+                  </button>
+                )
+              )}
               {(
                 [
                   { id: '', label: t('kinds.all') },
@@ -239,17 +247,17 @@ export default function KoreaInfoPage() {
             </div>
             {trailsLoading && <p className="guides-muted">{t('list.loading')}</p>}
             {trailsError && <p className="guides-error">{trailsError}</p>}
-            {!trailsLoading && !trailsError && trails.length === 0 && (
+            {!trailsLoading && !trailsError && visibleTrails.length === 0 && (
               <p className="guides-muted">{t('list.empty')}</p>
             )}
             <div className="info-trail-list">
-              {trails.map((c) => (
+              {visibleTrails.map((c) => (
                 <article key={c.courseId} className="info-trail-card">
                   <div className="info-trail-card-head">
                     <h2>{c.name}</h2>
-                    <span className="guides-tag guides-tag-kind">
-                      {c.kind === 'DNWW' ? t('trails.walking') : t('trails.cycling')}
-                    </span>
+                    {trailBrandOf(c.name) && (
+                      <span className="guides-tag guides-tag-kind">{t(`trails.brand.${trailBrandOf(c.name)}`)}</span>
+                    )}
                   </div>
                   <div className="info-trail-meta">
                     {c.region && <span>{c.region}</span>}

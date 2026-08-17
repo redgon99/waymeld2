@@ -2,14 +2,14 @@
   "brand": "여로담",
   "metaTitle": "한국여행정보 · 여로담",
   "title": "한국여행정보",
-  "subtitle": "핀으로 찍을 순 없지만 여행에 도움이 되는 정보들 — 관광사진과 걷기·자전거 코스를 모았습니다.",
+  "subtitle": "핀으로 찍을 순 없지만 여행에 도움이 되는 정보들 — 관광사진과 두루누비 걷기 코스를 모았습니다.",
   "cta": {
     "planner": "동선 만들기"
   },
   "tabs": {
     "label": "정보 종류",
     "photos": "관광사진",
-    "trails": "걷기·자전거길"
+    "trails": "걷기 코스"
   },
   "kinds": {
     "all": "전체"
@@ -22,10 +22,14 @@
     "searchPlaceholder": "장소·키워드로 검색 (예: 경복궁, 야경)"
   },
   "trails": {
-    "searchPlaceholder": "코스명으로 검색 (예: 올레길)",
+    "searchPlaceholder": "코스명으로 검색 (예: 해파랑길)",
     "filterLabel": "코스 필터",
-    "walking": "걷기길",
-    "cycling": "자전거길",
+    "brand": {
+      "해파랑길": "해파랑길",
+      "남파랑길": "남파랑길",
+      "서해랑길": "서해랑길",
+      "DMZ 평화의 길": "DMZ 평화의 길"
+    },
     "levelLow": "난이도 하",
     "levelMid": "난이도 중",
     "levelHigh": "난이도 상",

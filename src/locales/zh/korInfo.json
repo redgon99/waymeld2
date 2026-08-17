@@ -2,14 +2,14 @@
   "brand": "WayMeld",
   "metaTitle": "韩国旅行信息 · WayMeld",
   "title": "韩国旅行信息",
-  "subtitle": "无法标记为行程地点，但对旅行有帮助的信息 — 精选旅游照片与徒步·骑行路线。",
+  "subtitle": "无法标记为行程地点，但对旅行有帮助的信息 — 精选旅游照片与杜鲁努比徒步路线。",
   "cta": {
     "planner": "制定行程"
   },
   "tabs": {
     "label": "内容类型",
     "photos": "旅游照片",
-    "trails": "徒步·骑行路线"
+    "trails": "徒步路线"
   },
   "kinds": {
     "all": "全部"
@@ -22,10 +22,14 @@
     "searchPlaceholder": "按地点或关键词搜索 (如: 景福宫, 夜景)"
   },
   "trails": {
-    "searchPlaceholder": "按路线名称搜索 (如: 偶来小路)",
+    "searchPlaceholder": "按路线名称搜索 (如: 海波浪路)",
     "filterLabel": "路线筛选",
-    "walking": "徒步路线",
-    "cycling": "骑行路线",
+    "brand": {
+      "해파랑길": "海波浪路（东海岸）",
+      "남파랑길": "南波浪路（南海岸）",
+      "서해랑길": "西海浪路（西海岸）",
+      "DMZ 평화의 길": "DMZ和平之路"
+    },
     "levelLow": "难度：低",
     "levelMid": "难度：中",
     "levelHigh": "难度：高",
