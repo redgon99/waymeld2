@@ -22,17 +22,21 @@ Deno.serve(async (req) => {
 
   let kind: PlaceListKind | '' = '';
   let keyword = '';
+  let contentTypeId = '';
   let pageNo = 1;
   let numOfRows = 24;
   try {
     const body = (await req.json()) as {
       kind?: string;
       keyword?: string;
+      contentTypeId?: string;
       pageNo?: number;
       numOfRows?: number;
     };
     kind = body.kind === 'pet' || body.kind === 'with' ? body.kind : '';
     keyword = body.keyword?.trim() ?? '';
+    const rawType = body.contentTypeId?.trim() ?? '';
+    contentTypeId = ['12', '14', '15', '25', '28', '32', '38', '39'].includes(rawType) ? rawType : '';
     pageNo = Math.max(1, Math.round(Number(body.pageNo ?? 1)));
     numOfRows = Math.min(48, Math.max(1, Math.round(Number(body.numOfRows ?? 24))));
   } catch {
@@ -50,7 +54,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const url = buildPlaceListUrl(kind, serviceKey, { keyword: keyword || undefined, pageNo, numOfRows });
+    const url = buildPlaceListUrl(kind, serviceKey, {
+      keyword: keyword || undefined,
+      contentTypeId: contentTypeId || undefined,
+      pageNo,
+      numOfRows,
+    });
     const { items, totalCount } = await fetchFilteredPlaces(url);
     return new Response(JSON.stringify({ items, totalCount }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

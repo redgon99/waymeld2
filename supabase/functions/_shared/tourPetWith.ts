@@ -21,7 +21,7 @@ function keyParam(serviceKey: string): string {
 export function buildPlaceListUrl(
   kind: PlaceListKind,
   serviceKey: string,
-  options: { keyword?: string; pageNo?: number; numOfRows?: number }
+  options: { keyword?: string; contentTypeId?: string; pageNo?: number; numOfRows?: number }
 ): string {
   const base = `https://apis.data.go.kr/B551011/${BASE_BY_KIND[kind]}`;
   const params = new URLSearchParams({
@@ -32,6 +32,8 @@ export function buildPlaceListUrl(
     numOfRows: String(options.numOfRows ?? 30),
     pageNo: String(options.pageNo ?? 1),
   });
+  const contentTypeId = options.contentTypeId?.trim();
+  if (contentTypeId) params.set('contentTypeId', contentTypeId);
   const keyword = options.keyword?.trim();
   if (keyword) {
     params.set('keyword', keyword);

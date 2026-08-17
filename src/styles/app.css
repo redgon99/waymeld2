@@ -8656,6 +8656,21 @@ button {
   margin-bottom: 20px;
 }
 
+.info-tab-desc {
+  margin: -8px 0 12px;
+  color: #64748b;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  max-width: 42rem;
+}
+
+.info-subcats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 20px;
+}
+
 .guides-kind-chip {
   border: 1px solid rgba(15, 23, 42, 0.12);
   background: #fff;

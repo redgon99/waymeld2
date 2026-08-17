@@ -11,21 +11,49 @@
     "photos": "Photo gallery",
     "trails": "Walking trails",
     "pet": "Pet-friendly travel",
-    "with": "Accessible travel"
+    "with": "Accessible travel",
+    "desc": {
+      "photos": "Tourism photos from the Korea Tourism Organization — sights, festivals, and landscapes. Search by place or keyword.",
+      "trails": "Durunubi Korea Dulle-gil walking courses (Haeparang, Namparang, Seohaerang, and the DMZ). Filter by brand and difficulty.",
+      "pet": "Lodging, dining, and attractions you can visit with a pet. Check each venue’s pet policy before you go.",
+      "with": "Barrier-free spots that are easier with a wheelchair or stroller. Accessibility details can differ by venue."
+    }
   },
   "kinds": {
     "all": "All"
+  },
+  "subcats": {
+    "label": "Subcategories"
+  },
+  "contentTypes": {
+    "12": "Attractions",
+    "14": "Culture",
+    "15": "Festivals",
+    "25": "Courses",
+    "28": "Leports",
+    "32": "Stay",
+    "38": "Shopping",
+    "39": "Food"
   },
   "list": {
     "loading": "Loading…",
     "empty": "No results."
   },
   "photos": {
-    "searchPlaceholder": "Search by place or keyword (e.g. Gyeongbokgung, night view)"
+    "searchPlaceholder": "Search by place or keyword (e.g. Gyeongbokgung, night view)",
+    "themes": {
+      "night": "Night view",
+      "festival": "Festival",
+      "hanok": "Hanok",
+      "nature": "Nature",
+      "beach": "Beach",
+      "temple": "Temple"
+    }
   },
   "trails": {
     "searchPlaceholder": "Search by course name (e.g. Haeparang-gil)",
     "filterLabel": "Course filters",
+    "levelFilterLabel": "Difficulty",
     "brand": {
       "해파랑길": "Haeparang-gil (east coast)",
       "남파랑길": "Namparang-gil (south coast)",

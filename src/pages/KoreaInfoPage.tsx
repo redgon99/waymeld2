@@ -12,7 +12,10 @@ import {
   fetchTourPhotos,
   fetchTourTrails,
   isTourInfoConfigured,
+  PHOTO_GALLERY_THEMES,
+  TOUR_CONTENT_TYPE_IDS,
   type PlaceListKind,
+  type TourContentTypeId,
   type TourFilteredPlace,
   type TourPhoto,
   type TourTrailCourse,
@@ -51,7 +54,13 @@ function formatHours(totalMinutes: number): string {
 }
 
 /** 반려동물 동반여행(KorPetTourService2)/무장애여행(KorWithService2) — 검색 가능한 목록 브라우징 */
-function FilteredPlaceSection({ kind }: { kind: PlaceListKind }) {
+function FilteredPlaceSection({
+  kind,
+  contentTypeId,
+}: {
+  kind: PlaceListKind;
+  contentTypeId: TourContentTypeId | '';
+}) {
   const { t } = useTranslation('korInfo');
   const [keyword, setKeyword] = useState('');
   const [places, setPlaces] = useState<TourFilteredPlace[]>([]);
@@ -68,7 +77,11 @@ function FilteredPlaceSection({ kind }: { kind: PlaceListKind }) {
     setLoading(true);
     setError(null);
     const timer = setTimeout(() => {
-      fetchFilteredPlaces(kind, { keyword, numOfRows: 24 })
+      fetchFilteredPlaces(kind, {
+        keyword,
+        contentTypeId: contentTypeId || undefined,
+        numOfRows: 24,
+      })
         .then(({ items }) => {
           if (alive) setPlaces(items);
         })
@@ -83,7 +96,7 @@ function FilteredPlaceSection({ kind }: { kind: PlaceListKind }) {
       alive = false;
       clearTimeout(timer);
     };
-  }, [kind, keyword, t]);
+  }, [kind, keyword, contentTypeId, t]);
 
   return (
     <section>
@@ -122,6 +135,7 @@ export default function KoreaInfoPage() {
   const planPath = plannerPath(locale);
 
   const [tab, setTab] = useState<InfoTab>('photos');
+  const [placeTypeId, setPlaceTypeId] = useState<TourContentTypeId | ''>('');
 
   const [photoKeyword, setPhotoKeyword] = useState('');
   const [photos, setPhotos] = useState<TourPhoto[]>([]);
@@ -229,7 +243,10 @@ export default function KoreaInfoPage() {
             role="tab"
             aria-selected={tab === 'photos'}
             className={`guides-kind-chip${tab === 'photos' ? ' is-active' : ''}`}
-            onClick={() => setTab('photos')}
+            onClick={() => {
+              setTab('photos');
+              setPlaceTypeId('');
+            }}
           >
             {t('tabs.photos')}
           </button>
@@ -238,7 +255,10 @@ export default function KoreaInfoPage() {
             role="tab"
             aria-selected={tab === 'trails'}
             className={`guides-kind-chip${tab === 'trails' ? ' is-active' : ''}`}
-            onClick={() => setTab('trails')}
+            onClick={() => {
+              setTab('trails');
+              setPlaceTypeId('');
+            }}
           >
             {t('tabs.trails')}
           </button>
@@ -260,6 +280,66 @@ export default function KoreaInfoPage() {
           >
             {t('tabs.with')}
           </button>
+        </div>
+        <p className="info-tab-desc">{t(`tabs.desc.${tab}`)}</p>
+        <div className="info-subcats" role="group" aria-label={t('subcats.label')}>
+          {tab === 'photos' && (
+            <>
+              <button
+                type="button"
+                className={`guides-kind-chip${photoKeyword === '' ? ' is-active' : ''}`}
+                onClick={() => setPhotoKeyword('')}
+              >
+                {t('kinds.all')}
+              </button>
+              {PHOTO_GALLERY_THEMES.map((theme) => (
+                <button
+                  key={theme.id}
+                  type="button"
+                  className={`guides-kind-chip${photoKeyword === theme.keyword ? ' is-active' : ''}`}
+                  onClick={() =>
+                    setPhotoKeyword((cur) => (cur === theme.keyword ? '' : theme.keyword))
+                  }
+                >
+                  {t(`photos.themes.${theme.id}`)}
+                </button>
+              ))}
+            </>
+          )}
+          {tab === 'trails' &&
+            [{ id: '', label: t('kinds.all') }, ...TRAIL_BRANDS.map((b) => ({ id: b, label: t(`trails.brand.${b}`) }))].map(
+              (chip) => (
+                <button
+                  key={chip.id || 'all'}
+                  type="button"
+                  className={`guides-kind-chip${trailBrand === chip.id ? ' is-active' : ''}`}
+                  onClick={() => setTrailBrand(chip.id)}
+                >
+                  {chip.label}
+                </button>
+              )
+            )}
+          {(tab === 'pet' || tab === 'with') && (
+            <>
+              <button
+                type="button"
+                className={`guides-kind-chip${placeTypeId === '' ? ' is-active' : ''}`}
+                onClick={() => setPlaceTypeId('')}
+              >
+                {t('kinds.all')}
+              </button>
+              {TOUR_CONTENT_TYPE_IDS.map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={`guides-kind-chip${placeTypeId === id ? ' is-active' : ''}`}
+                  onClick={() => setPlaceTypeId((cur) => (cur === id ? '' : id))}
+                >
+                  {t(`contentTypes.${id}`)}
+                </button>
+              ))}
+            </>
+          )}
         </div>
 
         {tab === 'photos' && (
@@ -301,19 +381,7 @@ export default function KoreaInfoPage() {
               value={trailKeyword}
               onChange={(e) => setTrailKeyword(e.currentTarget.value)}
             />
-            <div className="guides-kind-filters" role="group" aria-label={t('trails.filterLabel')}>
-              {[{ id: '', label: t('kinds.all') }, ...TRAIL_BRANDS.map((b) => ({ id: b, label: t(`trails.brand.${b}`) }))].map(
-                (chip) => (
-                  <button
-                    key={chip.id || 'all'}
-                    type="button"
-                    className={`guides-kind-chip${trailBrand === chip.id ? ' is-active' : ''}`}
-                    onClick={() => setTrailBrand(chip.id)}
-                  >
-                    {chip.label}
-                  </button>
-                )
-              )}
+            <div className="guides-kind-filters" role="group" aria-label={t('trails.levelFilterLabel')}>
               {(
                 [
                   { id: '', label: t('kinds.all') },
@@ -364,8 +432,8 @@ export default function KoreaInfoPage() {
             </div>
           </section>
         )}
-        {tab === 'pet' && <FilteredPlaceSection kind="pet" />}
-        {tab === 'with' && <FilteredPlaceSection kind="with" />}
+        {tab === 'pet' && <FilteredPlaceSection kind="pet" contentTypeId={placeTypeId} />}
+        {tab === 'with' && <FilteredPlaceSection kind="with" contentTypeId={placeTypeId} />}
       </div>
 
       <TrailRouteModal course={routeModalCourse} onClose={() => setRouteModalCourse(null)} />

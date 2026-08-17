@@ -96,7 +96,7 @@ export interface TourFilteredPlace {
 
 export async function fetchFilteredPlaces(
   kind: PlaceListKind,
-  options: { keyword?: string; pageNo?: number; numOfRows?: number }
+  options: { keyword?: string; contentTypeId?: string; pageNo?: number; numOfRows?: number }
 ): Promise<{ items: TourFilteredPlace[]; totalCount: number }> {
   const supabase = getSupabase();
   if (!supabase) return { items: [], totalCount: 0 };
@@ -107,3 +107,17 @@ export async function fetchFilteredPlaces(
   if (error) throw error;
   return { items: data?.items ?? [], totalCount: data?.totalCount ?? 0 };
 }
+
+/** KorPetTourService2 / KorWithService2 areaBasedList2·searchKeyword2 의 contentTypeId */
+export const TOUR_CONTENT_TYPE_IDS = ['12', '14', '15', '25', '28', '32', '38', '39'] as const;
+export type TourContentTypeId = (typeof TOUR_CONTENT_TYPE_IDS)[number];
+
+/** PhotoGalleryService1 gallerySearchList1 키워드 — 사진 API에 분류코드가 없어 검색 키워드로 하위분류 */
+export const PHOTO_GALLERY_THEMES = [
+  { id: 'night', keyword: '야경' },
+  { id: 'festival', keyword: '축제' },
+  { id: 'hanok', keyword: '한옥' },
+  { id: 'nature', keyword: '자연' },
+  { id: 'beach', keyword: '해변' },
+  { id: 'temple', keyword: '사찰' },
+] as const;
