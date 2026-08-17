@@ -9012,6 +9012,57 @@ button {
   background: #f1f5f9;
 }
 
+.odii-site-card {
+  cursor: pointer;
+}
+
+.odii-story-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+.odii-story-card {
+  padding: 14px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.odii-story-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+.odii-story-time {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.odii-story-audio {
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.odii-story-script {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #64748b;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .admin-insight-rollup-actions {
   display: flex;
   flex-wrap: wrap;

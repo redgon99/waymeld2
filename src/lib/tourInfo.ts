@@ -108,6 +108,57 @@ export async function fetchFilteredPlaces(
   return { items: data?.items ?? [], totalCount: data?.totalCount ?? 0 };
 }
 
+export interface OdiiSite {
+  tid: string;
+  tlid: string;
+  title: string;
+  region: string;
+  themeCategory?: string;
+  lat: number;
+  lng: number;
+  imageUrl?: string;
+}
+
+export interface OdiiStory {
+  stid: string;
+  stlid: string;
+  title: string;
+  audioTitle?: string;
+  script?: string;
+  playTimeSec?: number;
+  audioUrl?: string;
+  imageUrl?: string;
+}
+
+export async function fetchOdiiSites(options: {
+  keyword?: string;
+  pageNo?: number;
+  numOfRows?: number;
+}): Promise<{ items: OdiiSite[]; totalCount: number }> {
+  const supabase = getSupabase();
+  if (!supabase) return { items: [], totalCount: 0 };
+  const { data, error } = await supabase.functions.invoke<{ items?: OdiiSite[]; totalCount?: number }>(
+    'tour-odii',
+    { body: { mode: 'sites', ...options } }
+  );
+  if (error) throw error;
+  return { items: data?.items ?? [], totalCount: data?.totalCount ?? 0 };
+}
+
+export async function fetchOdiiStories(
+  tid: string,
+  tlid: string
+): Promise<{ items: OdiiStory[]; totalCount: number }> {
+  const supabase = getSupabase();
+  if (!supabase) return { items: [], totalCount: 0 };
+  const { data, error } = await supabase.functions.invoke<{ items?: OdiiStory[]; totalCount?: number }>(
+    'tour-odii',
+    { body: { mode: 'stories', tid, tlid } }
+  );
+  if (error) throw error;
+  return { items: data?.items ?? [], totalCount: data?.totalCount ?? 0 };
+}
+
 /** KorPetTourService2 / KorWithService2 areaBasedList2·searchKeyword2 의 contentTypeId */
 export const TOUR_CONTENT_TYPE_IDS = ['12', '14', '15', '25', '28', '32', '38', '39'] as const;
 export type TourContentTypeId = (typeof TOUR_CONTENT_TYPE_IDS)[number];

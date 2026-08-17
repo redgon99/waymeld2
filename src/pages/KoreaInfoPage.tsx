@@ -4,16 +4,19 @@ import { useTranslation } from 'react-i18next';
 import { AuthBar } from '../components/AuthBar';
 import { LocaleSwitcher } from '../components/LocaleSwitcher';
 import { TrailRouteModal } from '../components/TrailRouteModal';
+import { OdiiStoriesModal } from '../components/OdiiStoriesModal';
 import { normalizeLocale, pathWithLocale } from '../lib/locale';
 import { plannerPath } from '../lib/routes';
 import i18n from '../lib/i18n';
 import {
   fetchFilteredPlaces,
+  fetchOdiiSites,
   fetchTourPhotos,
   fetchTourTrails,
   isTourInfoConfigured,
   PHOTO_GALLERY_THEMES,
   TOUR_CONTENT_TYPE_IDS,
+  type OdiiSite,
   type PlaceListKind,
   type TourContentTypeId,
   type TourFilteredPlace,
@@ -22,7 +25,7 @@ import {
 } from '../lib/tourInfo';
 import '../styles/app.css';
 
-type InfoTab = 'photos' | 'trails' | 'pet' | 'with';
+type InfoTab = 'photos' | 'trails' | 'audio' | 'pet' | 'with';
 
 const LEVEL_LABEL_KEY: Record<'1' | '2' | '3', string> = {
   '1': 'trails.levelLow',
@@ -150,6 +153,12 @@ export default function KoreaInfoPage() {
   const [trailsError, setTrailsError] = useState<string | null>(null);
   const [routeModalCourse, setRouteModalCourse] = useState<TourTrailCourse | null>(null);
 
+  const [audioKeyword, setAudioKeyword] = useState('');
+  const [audioSites, setAudioSites] = useState<OdiiSite[]>([]);
+  const [audioLoading, setAudioLoading] = useState(true);
+  const [audioError, setAudioError] = useState<string | null>(null);
+  const [storyModalSite, setStoryModalSite] = useState<OdiiSite | null>(null);
+
   useEffect(() => {
     document.title = t('metaTitle');
   }, [t]);
@@ -215,6 +224,33 @@ export default function KoreaInfoPage() {
 
   const visibleTrails = trailBrand ? trails.filter((c) => c.name.startsWith(trailBrand)) : trails;
 
+  useEffect(() => {
+    if (!isTourInfoConfigured()) {
+      setAudioLoading(false);
+      setAudioError(t('errors.notConfigured'));
+      return;
+    }
+    let alive = true;
+    setAudioLoading(true);
+    setAudioError(null);
+    const timer = setTimeout(() => {
+      fetchOdiiSites({ keyword: audioKeyword, numOfRows: 24 })
+        .then(({ items }) => {
+          if (alive) setAudioSites(items);
+        })
+        .catch((e) => {
+          if (alive) setAudioError(e instanceof Error ? e.message : t('errors.loadFailed'));
+        })
+        .finally(() => {
+          if (alive) setAudioLoading(false);
+        });
+    }, 300);
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
+  }, [audioKeyword, t]);
+
   return (
     <main className="guides-page">
       <header className="guides-header">
@@ -261,6 +297,18 @@ export default function KoreaInfoPage() {
             }}
           >
             {t('tabs.trails')}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={tab === 'audio'}
+            className={`guides-kind-chip${tab === 'audio' ? ' is-active' : ''}`}
+            onClick={() => {
+              setTab('audio');
+              setPlaceTypeId('');
+            }}
+          >
+            {t('tabs.audio')}
           </button>
           <button
             type="button"
@@ -432,11 +480,52 @@ export default function KoreaInfoPage() {
             </div>
           </section>
         )}
+        {tab === 'audio' && (
+          <section>
+            <input
+              type="search"
+              className="info-search-input"
+              placeholder={t('audio.searchPlaceholder')}
+              value={audioKeyword}
+              onChange={(e) => setAudioKeyword(e.currentTarget.value)}
+            />
+            {audioLoading && <p className="guides-muted">{t('list.loading')}</p>}
+            {audioError && <p className="guides-error">{audioError}</p>}
+            {!audioLoading && !audioError && audioSites.length === 0 && (
+              <p className="guides-muted">{t('list.empty')}</p>
+            )}
+            <div className="info-photo-grid">
+              {audioSites.map((s) => (
+                <figure
+                  key={`${s.tid}-${s.tlid}`}
+                  className="info-photo-card odii-site-card"
+                  onClick={() => setStoryModalSite(s)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') setStoryModalSite(s);
+                  }}
+                >
+                  {s.imageUrl ? (
+                    <img src={s.imageUrl} alt={s.title} loading="lazy" />
+                  ) : (
+                    <div className="info-photo-card-noimg" aria-hidden />
+                  )}
+                  <figcaption>
+                    <strong>{s.title}</strong>
+                    <span>{[s.region, s.themeCategory].filter(Boolean).join(' · ')}</span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </section>
+        )}
         {tab === 'pet' && <FilteredPlaceSection kind="pet" contentTypeId={placeTypeId} />}
         {tab === 'with' && <FilteredPlaceSection kind="with" contentTypeId={placeTypeId} />}
       </div>
 
       <TrailRouteModal course={routeModalCourse} onClose={() => setRouteModalCourse(null)} />
+      <OdiiStoriesModal site={storyModalSite} onClose={() => setStoryModalSite(null)} />
     </main>
   );
 }
