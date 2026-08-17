@@ -9,6 +9,7 @@ import { normalizeLocale, pathWithLocale } from '../lib/locale';
 import { plannerPath } from '../lib/routes';
 import i18n from '../lib/i18n';
 import {
+  fetchDataLabRegions,
   fetchFilteredPlaces,
   fetchOdiiSites,
   fetchTourPhotos,
@@ -16,6 +17,8 @@ import {
   isTourInfoConfigured,
   PHOTO_GALLERY_THEMES,
   TOUR_CONTENT_TYPE_IDS,
+  type DataLabLevel,
+  type DataLabRegion,
   type OdiiSite,
   type PlaceListKind,
   type TourContentTypeId,
@@ -25,7 +28,18 @@ import {
 } from '../lib/tourInfo';
 import '../styles/app.css';
 
-type InfoTab = 'photos' | 'trails' | 'audio' | 'pet' | 'with';
+type InfoTab = 'photos' | 'trails' | 'audio' | 'stats' | 'pet' | 'with';
+
+function ymdInputDefault(): string {
+  // DataLab 집계는 최신 데이터까지 약 한 달의 시차가 있어 35일 전을 기본값으로 둔다.
+  const d = new Date();
+  d.setDate(d.getDate() - 35);
+  return d.toISOString().slice(0, 10);
+}
+
+function formatNumber(n: number): string {
+  return Math.round(n).toLocaleString('ko-KR');
+}
 
 const LEVEL_LABEL_KEY: Record<'1' | '2' | '3', string> = {
   '1': 'trails.levelLow',
@@ -159,6 +173,14 @@ export default function KoreaInfoPage() {
   const [audioError, setAudioError] = useState<string | null>(null);
   const [storyModalSite, setStoryModalSite] = useState<OdiiSite | null>(null);
 
+  const [statsLevel, setStatsLevel] = useState<DataLabLevel>('metco');
+  const [statsDate, setStatsDate] = useState(ymdInputDefault);
+  const [statsKeyword, setStatsKeyword] = useState('');
+  const [statsRegions, setStatsRegions] = useState<DataLabRegion[]>([]);
+  const [statsBaseYmd, setStatsBaseYmd] = useState<string | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState<string | null>(null);
+
   useEffect(() => {
     document.title = t('metaTitle');
   }, [t]);
@@ -251,6 +273,39 @@ export default function KoreaInfoPage() {
     };
   }, [audioKeyword, t]);
 
+  useEffect(() => {
+    if (!isTourInfoConfigured()) {
+      setStatsLoading(false);
+      setStatsError(t('errors.notConfigured'));
+      return;
+    }
+    const ymd = statsDate.replace(/-/g, '');
+    if (!/^\d{8}$/.test(ymd)) return;
+    let alive = true;
+    setStatsLoading(true);
+    setStatsError(null);
+    fetchDataLabRegions(statsLevel, ymd)
+      .then(({ regions, baseYmd }) => {
+        if (alive) {
+          setStatsRegions(regions);
+          setStatsBaseYmd(baseYmd);
+        }
+      })
+      .catch((e) => {
+        if (alive) setStatsError(e instanceof Error ? e.message : t('errors.loadFailed'));
+      })
+      .finally(() => {
+        if (alive) setStatsLoading(false);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [statsLevel, statsDate, t]);
+
+  const visibleStatsRegions = statsKeyword
+    ? statsRegions.filter((r) => r.name.includes(statsKeyword))
+    : statsRegions;
+
   return (
     <main className="guides-page">
       <header className="guides-header">
@@ -313,6 +368,18 @@ export default function KoreaInfoPage() {
           <button
             type="button"
             role="tab"
+            aria-selected={tab === 'stats'}
+            className={`guides-kind-chip${tab === 'stats' ? ' is-active' : ''}`}
+            onClick={() => {
+              setTab('stats');
+              setPlaceTypeId('');
+            }}
+          >
+            {t('tabs.stats')}
+          </button>
+          <button
+            type="button"
+            role="tab"
             aria-selected={tab === 'pet'}
             className={`guides-kind-chip${tab === 'pet' ? ' is-active' : ''}`}
             onClick={() => setTab('pet')}
@@ -367,6 +434,22 @@ export default function KoreaInfoPage() {
                 </button>
               )
             )}
+          {tab === 'stats' &&
+            (
+              [
+                { id: 'metco' as const, label: t('stats.level.metco') },
+                { id: 'locgo' as const, label: t('stats.level.locgo') },
+              ]
+            ).map((chip) => (
+              <button
+                key={chip.id}
+                type="button"
+                className={`guides-kind-chip${statsLevel === chip.id ? ' is-active' : ''}`}
+                onClick={() => setStatsLevel(chip.id)}
+              >
+                {chip.label}
+              </button>
+            ))}
           {(tab === 'pet' || tab === 'with') && (
             <>
               <button
@@ -516,6 +599,58 @@ export default function KoreaInfoPage() {
                     <span>{[s.region, s.themeCategory].filter(Boolean).join(' · ')}</span>
                   </figcaption>
                 </figure>
+              ))}
+            </div>
+          </section>
+        )}
+        {tab === 'stats' && (
+          <section>
+            <div className="info-stats-controls">
+              <input
+                type="date"
+                className="info-search-input"
+                value={statsDate}
+                max={ymdInputDefault()}
+                onChange={(e) => setStatsDate(e.currentTarget.value)}
+              />
+              <input
+                type="search"
+                className="info-search-input"
+                placeholder={t('stats.searchPlaceholder')}
+                value={statsKeyword}
+                onChange={(e) => setStatsKeyword(e.currentTarget.value)}
+              />
+            </div>
+            {statsBaseYmd && (
+              <p className="guides-muted">
+                {t('stats.baseYmd', {
+                  date: `${statsBaseYmd.slice(0, 4)}.${statsBaseYmd.slice(4, 6)}.${statsBaseYmd.slice(6, 8)}`,
+                })}
+              </p>
+            )}
+            {statsLoading && <p className="guides-muted">{t('list.loading')}</p>}
+            {statsError && <p className="guides-error">{statsError}</p>}
+            {!statsLoading && !statsError && visibleStatsRegions.length === 0 && (
+              <p className="guides-muted">{t('list.empty')}</p>
+            )}
+            <div className="info-stats-list">
+              {visibleStatsRegions.map((r, i) => (
+                <article key={r.code} className="info-stats-row">
+                  <span className="info-stats-rank">{i + 1}</span>
+                  <span className="info-stats-name">{r.name}</span>
+                  <span className="info-stats-total">{formatNumber(r.total)}</span>
+                  <span className="info-stats-breakdown">
+                    <span className="info-stats-chip">
+                      {t('stats.local')} {formatNumber(r.local)}
+                    </span>
+                    <span className="info-stats-chip">
+                      {t('stats.domestic')} {formatNumber(r.domestic)}
+                    </span>
+                    <span className="info-stats-chip">
+                      {t('stats.foreign')} {formatNumber(r.foreign)}
+                    </span>
+                  </span>
+                </article>
               ))}
             </div>
           </section>

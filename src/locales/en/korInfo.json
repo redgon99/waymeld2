@@ -2,7 +2,7 @@
   "brand": "WayMeld",
   "metaTitle": "Korea Travel Info · WayMeld",
   "title": "Korea Travel Info",
-  "subtitle": "Not pinnable, but useful for your trip — curated tourism photos, Durunubi walking trails, audio guides, pet-friendly spots, and accessible-travel spots.",
+  "subtitle": "Not pinnable, but useful for your trip — curated tourism photos, Durunubi walking trails, audio guides, regional visitor stats, pet-friendly spots, and accessible-travel spots.",
   "cta": {
     "planner": "Build my route"
   },
@@ -11,12 +11,14 @@
     "photos": "Photo gallery",
     "trails": "Walking trails",
     "audio": "Audio guides",
+    "stats": "Regional visitor stats",
     "pet": "Pet-friendly travel",
     "with": "Accessible travel",
     "desc": {
       "photos": "Tourism photos from the Korea Tourism Organization — sights, festivals, and landscapes. Search by place or keyword.",
       "trails": "Durunubi Korea Dulle-gil walking courses (Haeparang, Namparang, Seohaerang, and the DMZ). Filter by brand and difficulty.",
       "audio": "'Odii' audio guides that narrate the history and stories behind Korea's attractions. Pick a place to open its stories.",
+      "stats": "Daily visitor counts by region (DataLab), estimated from telecom and card data. There's roughly a one-month lag before the latest data becomes available.",
       "pet": "Lodging, dining, and attractions you can visit with a pet. Check each venue’s pet policy before you go.",
       "with": "Barrier-free spots that are easier with a wheelchair or stroller. Accessibility details can differ by venue."
     }
@@ -75,6 +77,17 @@
   "audio": {
     "searchPlaceholder": "Search by place name (e.g. Gyeongbokgung, Daeheungsa)",
     "noStories": "No stories available yet."
+  },
+  "stats": {
+    "level": {
+      "metco": "Province/city",
+      "locgo": "District (si/gun/gu)"
+    },
+    "searchPlaceholder": "Filter by region name",
+    "baseYmd": "As of {{date}}",
+    "local": "Local",
+    "domestic": "Domestic",
+    "foreign": "Foreign"
   },
   "pet": {
     "searchPlaceholder": "Search by place or keyword (e.g. cafe, pension)"

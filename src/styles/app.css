@@ -9063,6 +9063,67 @@ button {
   overflow: hidden;
 }
 
+.info-stats-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.info-stats-controls .info-search-input {
+  flex: 1;
+  min-width: 180px;
+}
+
+.info-stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-stats-row {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 6px 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.info-stats-rank {
+  font-weight: 700;
+  color: #94a3b8;
+  font-size: 0.8125rem;
+}
+
+.info-stats-name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.info-stats-total {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.info-stats-breakdown {
+  grid-column: 2 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.info-stats-chip {
+  font-size: 0.75rem;
+  color: #64748b;
+  background: #f1f5f9;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-variant-numeric: tabular-nums;
+}
+
 .admin-insight-rollup-actions {
   display: flex;
   flex-wrap: wrap;

@@ -159,6 +159,31 @@ export async function fetchOdiiStories(
   return { items: data?.items ?? [], totalCount: data?.totalCount ?? 0 };
 }
 
+export type DataLabLevel = 'metco' | 'locgo';
+
+export interface DataLabRegion {
+  code: string;
+  name: string;
+  local: number;
+  domestic: number;
+  foreign: number;
+  total: number;
+}
+
+export async function fetchDataLabRegions(
+  level: DataLabLevel,
+  ymd: string
+): Promise<{ regions: DataLabRegion[]; baseYmd: string | null }> {
+  const supabase = getSupabase();
+  if (!supabase) return { regions: [], baseYmd: null };
+  const { data, error } = await supabase.functions.invoke<{
+    regions?: DataLabRegion[];
+    baseYmd?: string | null;
+  }>('tour-datalab', { body: { level, ymd } });
+  if (error) throw error;
+  return { regions: data?.regions ?? [], baseYmd: data?.baseYmd ?? null };
+}
+
 /** KorPetTourService2 / KorWithService2 areaBasedList2·searchKeyword2 의 contentTypeId */
 export const TOUR_CONTENT_TYPE_IDS = ['12', '14', '15', '25', '28', '32', '38', '39'] as const;
 export type TourContentTypeId = (typeof TOUR_CONTENT_TYPE_IDS)[number];
