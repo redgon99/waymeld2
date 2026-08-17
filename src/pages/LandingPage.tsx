@@ -8,6 +8,14 @@ import { plannerPath } from '../lib/routes';
 import i18n from '../lib/i18n';
 import { isGuidesConfigured, listPublishedGuides } from '../lib/guides';
 import type { GuideArticle } from '../types/guides';
+import {
+  collectNoticeTexts,
+  LandingCmsNav,
+  LandingCmsSections,
+  landingNavItems,
+} from '../components/LandingCms';
+import { findFirstEnabledOfType, landingAnchor } from '../lib/landingMenu';
+import { fetchLandingPromo, type LandingPromo } from '../lib/landingPromo';
 import '../styles/landing.css';
 
 function LandingBrand({ className = '' }: { className?: string }) {
@@ -38,6 +46,7 @@ export default function LandingPage() {
   const loginPath = pathWithLocale('/login', locale);
   const year = new Date().getFullYear();
   const [tipGuides, setTipGuides] = useState<GuideArticle[]>([]);
+  const [promo, setPromo] = useState<LandingPromo | null>(null);
 
   useEffect(() => {
     document.title = t('meta.title');
@@ -60,6 +69,20 @@ export default function LandingPage() {
     };
   }, []);
 
+  useEffect(() => {
+    let alive = true;
+    void fetchLandingPromo(locale, { publishedOnly: true })
+      .then((row) => {
+        if (alive) setPromo(row);
+      })
+      .catch(() => {
+        if (alive) setPromo(null);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [locale]);
+
   const compareRows = [
     t('compare.row1', { returnObjects: true }) as string[],
     t('compare.row2', { returnObjects: true }) as string[],
@@ -67,13 +90,23 @@ export default function LandingPage() {
   ];
 
   const steps = ['step1', 'step2', 'step3', 'step4'] as const;
+  const menu = promo?.menu ?? [];
+  const heroCopy = findFirstEnabledOfType(menu, 'copy');
+  const noticeTexts = menu.length > 0 ? collectNoticeTexts(menu) : [t('notice.trial')];
+  const cmsNav = landingNavItems(menu, heroCopy?.id);
+  const heroEyebrow = heroCopy?.heroEyebrow.trim() || t('hero.eyebrow');
+  const heroTitle = heroCopy?.heroTitle.trim() || t('hero.title');
+  const heroSubtitle = heroCopy?.heroSubtitle.trim() || t('hero.subtitle');
+  const heroNote = heroCopy?.heroNote.trim() || t('hero.note');
 
   return (
     <div className="landing-page">
       <div className="landing-top">
-        <p className="landing-notice" role="status">
-          {t('notice.trial')}
-        </p>
+        {noticeTexts.map((text, i) => (
+          <p key={`${i}-${text}`} className="landing-notice" role="status">
+            {text}
+          </p>
+        ))}
       <header className="landing-nav">
         <Link to={pathWithLocale('/', locale)} className="landing-brand">
           <span className="landing-brand-mark" aria-hidden>
@@ -82,6 +115,7 @@ export default function LandingPage() {
           <LandingBrand />
         </Link>
         <nav className="landing-nav-links" aria-label="Main">
+          <LandingCmsNav items={cmsNav} />
           <a href="#features">{t('nav.features')}</a>
           <a href="#how">{t('nav.howItWorks')}</a>
           <Link to={plazaPath}>{t('nav.plaza')}</Link>
@@ -100,11 +134,14 @@ export default function LandingPage() {
       </header>
       </div>
 
-      <section className="landing-section landing-hero">
+      <section
+        className="landing-section landing-hero"
+        id={heroCopy ? landingAnchor(heroCopy.id) : undefined}
+      >
         <div className="landing-hero-copy">
-          <p className="landing-eyebrow">{t('hero.eyebrow')}</p>
-          <h1>{t('hero.title')}</h1>
-          <p className="landing-hero-lead">{t('hero.subtitle')}</p>
+          <p className="landing-eyebrow">{heroEyebrow}</p>
+          <h1 style={{ whiteSpace: 'pre-line' }}>{heroTitle}</h1>
+          <p className="landing-hero-lead">{heroSubtitle}</p>
           <div className="landing-hero-ctas">
             <Link to={planPath} className="landing-btn landing-btn-primary">
               {t('hero.ctaPrimary')}
@@ -113,7 +150,7 @@ export default function LandingPage() {
               {t('hero.ctaSecondary')}
             </Link>
           </div>
-          <p className="landing-hero-note">{t('hero.note')}</p>
+          <p className="landing-hero-note">{heroNote}</p>
         </div>
         <div className="landing-hero-visual">
           <div className="landing-phone">
@@ -124,6 +161,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {menu.length > 0 ? <LandingCmsSections tree={menu} skipId={heroCopy?.id} /> : null}
 
       <section className="landing-section" id="features" aria-labelledby="pillars-title">
         <div className="landing-section-header">
@@ -253,18 +292,20 @@ export default function LandingPage() {
         )}
       </section>
 
-      <section className="landing-section" aria-labelledby="gallery-title">
-        <div className="landing-section-header">
-          <h2 id="gallery-title">{t('gallery.title')}</h2>
-        </div>
-        <div className="landing-gallery">
-          {GALLERY.map((item) => (
-            <div key={item.src} className="landing-gallery-item">
-              <img src={item.src} alt={item.alt} loading="lazy" />
-            </div>
-          ))}
-        </div>
-      </section>
+      {!promo && (
+        <section className="landing-section" aria-labelledby="gallery-title">
+          <div className="landing-section-header">
+            <h2 id="gallery-title">{t('gallery.title')}</h2>
+          </div>
+          <div className="landing-gallery">
+            {GALLERY.map((item) => (
+              <div key={item.src} className="landing-gallery-item">
+                <img src={item.src} alt={item.alt} loading="lazy" />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="landing-cta-band" aria-labelledby="cta-title">
         <h2 id="cta-title">{t('cta.title')}</h2>

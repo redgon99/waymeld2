@@ -2,7 +2,13 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthBar } from './AuthBar';
 
-export type AdminPageKey = 'admin' | 'insights' | 'guides' | 'distribution' | 'scenarios';
+export type AdminPageKey =
+  | 'admin'
+  | 'insights'
+  | 'guides'
+  | 'distribution'
+  | 'scenarios'
+  | 'landing';
 
 interface Props {
   /** 페이지별 설명. 화면 제목은 항상 「관리자 페이지」로 고정. */
@@ -21,6 +27,7 @@ const NAV_ITEMS: Array<{ key: AdminPageKey; label: string; to: string }> = [
   { key: 'guides', label: '가이드 카드', to: '/admin/guides' },
   { key: 'distribution', label: '배포관리', to: '/admin/distribution' },
   { key: 'scenarios', label: '시나리오 카탈로그', to: '/admin/scenarios' },
+  { key: 'landing', label: '랜딩페이지 관리', to: '/admin/landing' },
 ];
 
 export function AdminHeader({
