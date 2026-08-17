@@ -8,6 +8,7 @@ import { corsHeaders } from '../_shared/cors.ts';
 import { getServiceClient } from '../_shared/insightDb.ts';
 import { requireAdminCaller } from '../_shared/adminAuth.ts';
 import { fetchThemeRegionClusters, SCENARIO_THEME_QUERIES, type ScenarioTheme } from '../_shared/tourScenario.ts';
+import { fetchStopTags } from '../_shared/tourTags.ts';
 import {
   buildNarratePrompt,
   buildSelectPrompt,
@@ -33,6 +34,8 @@ interface GroundedStop {
   lng: number;
   thumbnailUrl?: string;
   sourceApi?: 'gocamping';
+  petFriendly?: boolean;
+  accessible?: boolean;
 }
 interface GroundedDay {
   day: number;
@@ -58,6 +61,8 @@ interface LocaleContent {
       lng: number;
       thumbnailUrl?: string;
       sourceApi?: 'gocamping';
+      petFriendly?: boolean;
+      accessible?: boolean;
       note: string;
     }>;
   }>;
@@ -170,6 +175,17 @@ Deno.serve(async (req) => {
       );
     }
 
+    // 확정된 스팟(언어 무관, 1회만)에 반려동물 동반가능/무장애 배지를 붙인다.
+    const allStopIds = grounded.flatMap((d) => d.stops.map((s) => s.contentId));
+    const stopTags = await fetchStopTags(allStopIds, tourApiKey);
+    for (const d of grounded) {
+      for (const s of d.stops) {
+        const tags = stopTags.get(s.contentId);
+        if (tags?.petFriendly) s.petFriendly = true;
+        if (tags?.accessible) s.accessible = true;
+      }
+    }
+
     function localeContentFromDraft(draft: ScenarioDraft): LocaleContent {
       const noteById = new Map<string, { title: string; note: string }>();
       for (const d of draft.days) {
@@ -198,6 +214,8 @@ Deno.serve(async (req) => {
               lng: s.lng,
               thumbnailUrl: s.thumbnailUrl,
               sourceApi: s.sourceApi,
+              petFriendly: s.petFriendly,
+              accessible: s.accessible,
               note: narrated?.note || '',
             };
           }),

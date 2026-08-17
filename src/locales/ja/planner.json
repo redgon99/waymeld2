@@ -384,6 +384,10 @@
     "dayCount": "{{count}}日間",
     "regionBadge": "おすすめ地域: {{region}}",
     "dayTitle": "{{day}}日目",
+    "badges": {
+      "petFriendly": "ペット同伴可",
+      "accessible": "バリアフリー"
+    },
     "apply": "ピンに反映",
     "applied": "{{count}}か所を旅程に反映しました。",
     "newSearch": "別のテーマで作り直す"

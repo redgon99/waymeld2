@@ -41,6 +41,9 @@ export interface ScenarioStop {
   note: string;
   /** 'gocamping'이면 contentId가 GoCamping 자체 ID 공간이라 visitkorea가 아닌 gocamping.or.kr로 링크해야 함 */
   sourceApi?: 'gocamping';
+  /** KorPetTourService2/KorWithService2에 등록된 스팟인지 (반려동물 동반가능/무장애 시설) */
+  petFriendly?: boolean;
+  accessible?: boolean;
 }
 
 export interface ScenarioDay {

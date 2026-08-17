@@ -191,6 +191,16 @@ export function ThemeScenarioPanel({
                         {stop.titleKo && stop.titleKo !== stop.title && (
                           <span className="theme-scenario-stop-name-ko">{stop.titleKo}</span>
                         )}
+                        {(stop.petFriendly || stop.accessible) && (
+                          <span className="theme-scenario-stop-badges">
+                            {stop.petFriendly && (
+                              <span className="theme-scenario-stop-badge">{t('scenario.badges.petFriendly')}</span>
+                            )}
+                            {stop.accessible && (
+                              <span className="theme-scenario-stop-badge">{t('scenario.badges.accessible')}</span>
+                            )}
+                          </span>
+                        )}
                         <span className="theme-scenario-stop-note">{stop.note}</span>
                       </span>
                     </button>

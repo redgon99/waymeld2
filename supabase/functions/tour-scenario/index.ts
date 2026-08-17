@@ -1,5 +1,6 @@
 import { corsHeaders } from '../_shared/cors.ts';
 import { fetchThemeRegionClusters, SCENARIO_THEME_QUERIES, type ScenarioTheme } from '../_shared/tourScenario.ts';
+import { fetchStopTags } from '../_shared/tourTags.ts';
 import {
   buildSelectPrompt,
   callClaude,
@@ -114,6 +115,8 @@ Deno.serve(async (req) => {
         lng: number;
         thumbnailUrl?: string;
         sourceApi?: 'gocamping';
+        petFriendly?: boolean;
+        accessible?: boolean;
         note: string;
       }>;
     }> = [];
@@ -144,6 +147,18 @@ Deno.serve(async (req) => {
       }
       if (stops.length > 0) {
         days_.push({ day: d.day, dayTitle: String(d.dayTitle ?? '').trim(), stops });
+      }
+    }
+
+    const stopTags = await fetchStopTags(
+      days_.flatMap((d) => d.stops.map((s) => s.contentId)),
+      tourApiKey
+    );
+    for (const d of days_) {
+      for (const s of d.stops) {
+        const tags = stopTags.get(s.contentId);
+        if (tags?.petFriendly) s.petFriendly = true;
+        if (tags?.accessible) s.accessible = true;
       }
     }
 

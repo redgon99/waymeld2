@@ -415,6 +415,14 @@ export default function AdminScenariosPage() {
                       {day.stops.map((stop) => (
                         <li key={stop.placeId} style={{ marginBottom: 4 }}>
                           <span>{stop.title}</span>
+                          {(stop.petFriendly || stop.accessible) && (
+                            <span className="admin-cell-sub">
+                              {' '}
+                              {[stop.petFriendly && '반려동반', stop.accessible && '무장애']
+                                .filter(Boolean)
+                                .join(' · ')}
+                            </span>
+                          )}
                           {stop.note && <div className="admin-cell-sub">{stop.note}</div>}
                         </li>
                       ))}

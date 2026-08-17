@@ -384,6 +384,10 @@
     "dayCount": "{{count}}天",
     "regionBadge": "推荐地区：{{region}}",
     "dayTitle": "第{{day}}天",
+    "badges": {
+      "petFriendly": "可携带宠物",
+      "accessible": "无障碍设施"
+    },
     "apply": "添加到行程",
     "applied": "已将{{count}}个地点添加到行程。",
     "newSearch": "换个主题重新生成"

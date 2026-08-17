@@ -605,6 +605,10 @@
     "dayCount": "{{count}} days",
     "regionBadge": "Recommended region: {{region}}",
     "dayTitle": "Day {{day}}",
+    "badges": {
+      "petFriendly": "Pet-friendly",
+      "accessible": "Accessible"
+    },
     "apply": "Add to pins",
     "applied": "Added {{count}} places to your trip.",
     "newSearch": "Try another theme"

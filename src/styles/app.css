@@ -11171,6 +11171,19 @@ button {
   color: var(--color-text-secondary);
   line-height: 1.45;
 }
+.theme-scenario-stop-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.theme-scenario-stop-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--color-accent-soft, #fffbeb);
+  color: var(--color-accent-hover, #b45309);
+}
 .theme-scenario-result-actions {
   display: flex;
   gap: 8px;
