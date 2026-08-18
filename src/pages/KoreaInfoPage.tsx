@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type MouseEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthBar } from '../components/AuthBar';
@@ -70,6 +70,38 @@ function formatHours(totalMinutes: number): string {
   return m > 0 ? `${h}h ${m}m` : `${h}h`;
 }
 
+/**
+ * 해외 관광객이 택시기사·지도앱에 그대로 보여줄 수 있도록 TourAPI 원문(한국어) 주소를
+ * 복사하는 버튼. 로케일이 en/ja/zh여도 이 카드들의 address/region 필드는 항상 한국어
+ * 원문이라(다국어 TourAPI 미연동 상태) 번역 텍스트가 아니라 원문 그대로를 복사해 준다.
+ */
+function CopyAddressButton({ text }: { text: string }) {
+  const { t } = useTranslation('korInfo');
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      className="place-detail-copy-btn info-copy-btn"
+      onClick={(e) => void handleCopy(e)}
+      aria-label={t('list.copyAria')}
+    >
+      {copied ? t('list.copied') : t('list.copyAddress')}
+    </button>
+  );
+}
+
 /** 반려동물 동반여행(KorPetTourService2)/무장애여행(KorWithService2) — 검색 가능한 목록 브라우징 */
 function FilteredPlaceSection({
   kind,
@@ -137,7 +169,12 @@ function FilteredPlaceSection({
             )}
             <figcaption>
               <strong>{p.title}</strong>
-              <span>{p.address}</span>
+              {p.address && (
+                <span className="info-address-row">
+                  <span>{p.address}</span>
+                  <CopyAddressButton text={p.address} />
+                </span>
+              )}
             </figcaption>
           </figure>
         ))}
@@ -596,7 +633,10 @@ export default function KoreaInfoPage() {
                   )}
                   <figcaption>
                     <strong>{s.title}</strong>
-                    <span>{[s.region, s.themeCategory].filter(Boolean).join(' · ')}</span>
+                    <span className="info-address-row">
+                      <span>{[s.region, s.themeCategory].filter(Boolean).join(' · ')}</span>
+                      {s.region && <CopyAddressButton text={s.region} />}
+                    </span>
                   </figcaption>
                 </figure>
               ))}
