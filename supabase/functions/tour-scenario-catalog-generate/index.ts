@@ -9,6 +9,7 @@ import { getServiceClient } from '../_shared/insightDb.ts';
 import { requireAdminCaller } from '../_shared/adminAuth.ts';
 import { fetchThemeRegionClusters, SCENARIO_THEME_QUERIES, type ScenarioTheme } from '../_shared/tourScenario.ts';
 import { fetchStopTags } from '../_shared/tourTags.ts';
+import { fetchOfficialAddress, type MultilingualLocale } from '../_shared/tourMultilingual.ts';
 import {
   buildNarratePrompt,
   buildSelectPrompt,
@@ -223,6 +224,23 @@ Deno.serve(async (req) => {
       };
     }
 
+    /**
+     * 확정된 좌표는 그대로 두고 주소 표시 텍스트만 해당 언어의 공식 TourAPI
+     * 다국어서비스(EngService2 등)로 반경매칭해 승격한다. GoCamping처럼 접두사가
+     * 붙은 스팟(gocamping:*)은 다국어 서비스 대상이 아니므로 건너뛴다. 매칭 실패시
+     * 원문(한국어) 주소를 그대로 둔다 — 커버리지가 KorService2의 일부뿐이라 흔한 경우다.
+     */
+    async function overlayOfficialAddresses(localeContent: LocaleContent, locale: MultilingualLocale) {
+      const stops = localeContent.days.flatMap((d) => d.stops);
+      await Promise.all(
+        stops.map(async (s) => {
+          if (s.sourceApi) return;
+          const match = await fetchOfficialAddress(locale, tourApiKey, s.titleKo, s.lat, s.lng);
+          if (match) s.address = match.address;
+        })
+      );
+    }
+
     const content: Record<string, LocaleContent> = {
       ko: localeContentFromDraft(selectDraft),
     };
@@ -247,6 +265,7 @@ Deno.serve(async (req) => {
         );
       }
       content[locale] = localeContentFromDraft(narrateDraft);
+      await overlayOfficialAddresses(content[locale], locale);
     }
 
     const { data: inserted, error: insertError } = await getServiceClient()
