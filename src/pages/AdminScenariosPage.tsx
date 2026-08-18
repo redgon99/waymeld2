@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { AdminHeader } from '../components/AdminHeader';
@@ -68,6 +68,11 @@ export default function AdminScenariosPage() {
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [previewLocale, setPreviewLocale] = useState<(typeof PREVIEW_LOCALES)[number]>('ko');
   const [busyId, setBusyId] = useState<string | null>(null);
+
+  const [bulkRunning, setBulkRunning] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState<{ done: number; total: number; label: string } | null>(null);
+  const [bulkResults, setBulkResults] = useState<Array<{ theme: ScenarioTheme; days: number; error?: string }>>([]);
+  const bulkCancelRef = useRef(false);
 
   const loadEntries = useCallback(async () => {
     setRefreshing(true);
@@ -139,6 +144,54 @@ export default function AdminScenariosPage() {
       setError(e instanceof Error ? e.message : '시나리오 생성 실패');
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const publishedCombos = useMemo(() => {
+    const seen = new Set<string>();
+    const combos: Array<{ theme: ScenarioTheme; days: number }> = [];
+    for (const e of entries) {
+      if (e.status !== 'published') continue;
+      const key = `${e.theme}:${e.days}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      combos.push({ theme: e.theme as ScenarioTheme, days: e.days });
+    }
+    return combos;
+  }, [entries]);
+
+  const handleBulkRegenerate = async () => {
+    if (publishedCombos.length === 0) return;
+    const ok = window.confirm(
+      `현재 게시된 ${publishedCombos.length}개 조합(테마+일수)을 새로 재생성합니다. ` +
+        `각 조합마다 AI 호출이 다시 일어나며 시간이 다소 걸립니다. 새로 만든 항목은 초안으로 저장되고, ` +
+        `게시는 검토 후 직접 눌러야 합니다(기존 게시 항목은 그대로 유지됩니다). 진행할까요?`
+    );
+    if (!ok) return;
+
+    bulkCancelRef.current = false;
+    setBulkRunning(true);
+    setBulkResults([]);
+    setError(null);
+    try {
+      for (let i = 0; i < publishedCombos.length; i++) {
+        if (bulkCancelRef.current) break;
+        const { theme, days } = publishedCombos[i];
+        setBulkProgress({ done: i, total: publishedCombos.length, label: `${THEME_LABEL[theme]} · ${days}일` });
+        try {
+          await generateScenarioCatalogEntry(theme, days);
+          setBulkResults((prev) => [...prev, { theme, days }]);
+        } catch (e) {
+          setBulkResults((prev) => [
+            ...prev,
+            { theme, days, error: e instanceof Error ? e.message : '생성 실패' },
+          ]);
+        }
+      }
+    } finally {
+      setBulkProgress(null);
+      setBulkRunning(false);
+      await loadEntries();
     }
   };
 
@@ -275,6 +328,59 @@ export default function AdminScenariosPage() {
               >
                 {generating ? '생성 중… (4개 언어, 다소 걸려요)' : 'AI 시나리오 생성'}
               </button>
+            </div>
+          )}
+        </section>
+
+        <section className="admin-section">
+          <h2>기존 게시 항목 일괄 재생성</h2>
+          <p className="admin-cell-sub" style={{ marginBottom: 10 }}>
+            생성 로직이 개선됐을 때(예: 다국어 공식 주소 반영) 이미 게시된 항목에도 반영하려면 사용합니다. 현재
+            게시된 테마+일수 조합을 하나씩 다시 생성합니다 — 결과는 새 초안으로 저장되고 기존 게시 항목은
+            그대로 유지되니, 검토 후 직접 게시하고 예전 항목을 게시중지/삭제하세요.
+          </p>
+          <div className="admin-action-row">
+            <button
+              type="button"
+              className="admin-create-btn"
+              disabled={bulkRunning || publishedCombos.length === 0}
+              onClick={() => void handleBulkRegenerate()}
+            >
+              {bulkRunning ? '재생성 중…' : `게시된 항목 전체 재생성 (${publishedCombos.length}개)`}
+            </button>
+            {bulkRunning && (
+              <button
+                type="button"
+                onClick={() => {
+                  bulkCancelRef.current = true;
+                }}
+              >
+                중단
+              </button>
+            )}
+          </div>
+          {bulkProgress && (
+            <p className="admin-cell-sub" style={{ marginTop: 8 }}>
+              {bulkProgress.done + 1} / {bulkProgress.total} 진행 중 — {bulkProgress.label}
+            </p>
+          )}
+          {!bulkRunning && bulkResults.length > 0 && (
+            <div style={{ marginTop: 10 }}>
+              <p className="admin-cell-sub">
+                완료: 성공 {bulkResults.filter((r) => !r.error).length}개, 실패{' '}
+                {bulkResults.filter((r) => r.error).length}개
+              </p>
+              {bulkResults.some((r) => r.error) && (
+                <ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>
+                  {bulkResults
+                    .filter((r) => r.error)
+                    .map((r, i) => (
+                      <li key={i} className="admin-cell-sub">
+                        {THEME_LABEL[r.theme]} · {r.days}일 — {r.error}
+                      </li>
+                    ))}
+                </ul>
+              )}
             </div>
           )}
         </section>
