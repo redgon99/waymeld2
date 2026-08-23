@@ -84,6 +84,9 @@ export async function fetchTourTrails(options: {
 
 export type PlaceListKind = 'pet' | 'with';
 
+/** en/ja/zh일 때만 공식 다국어 주소 오버레이를 시도한다. ko는 원문 그대로. */
+export type MultilingualLocale = 'en' | 'ja' | 'zh';
+
 export interface TourFilteredPlace {
   contentId: string;
   contentTypeId: string;
@@ -92,11 +95,19 @@ export interface TourFilteredPlace {
   lat: number;
   lng: number;
   thumbnailUrl?: string;
+  /** 매칭 성공시 공식 현지어 주소(EngService2 등). 매칭 실패/ko 로케일이면 undefined — address(원문)로 폴백 */
+  officialAddress?: string;
 }
 
 export async function fetchFilteredPlaces(
   kind: PlaceListKind,
-  options: { keyword?: string; contentTypeId?: string; pageNo?: number; numOfRows?: number }
+  options: {
+    keyword?: string;
+    contentTypeId?: string;
+    pageNo?: number;
+    numOfRows?: number;
+    locale?: MultilingualLocale;
+  }
 ): Promise<{ items: TourFilteredPlace[]; totalCount: number }> {
   const supabase = getSupabase();
   if (!supabase) return { items: [], totalCount: 0 };
@@ -117,6 +128,8 @@ export interface OdiiSite {
   lat: number;
   lng: number;
   imageUrl?: string;
+  /** 매칭 성공시 공식 현지어 주소. 매칭 실패/ko 로케일이면 undefined — region(원문)으로 폴백 */
+  officialAddress?: string;
 }
 
 export interface OdiiStory {
@@ -134,6 +147,7 @@ export async function fetchOdiiSites(options: {
   keyword?: string;
   pageNo?: number;
   numOfRows?: number;
+  locale?: MultilingualLocale;
 }): Promise<{ items: OdiiSite[]; totalCount: number }> {
   const supabase = getSupabase();
   if (!supabase) return { items: [], totalCount: 0 };

@@ -19,6 +19,7 @@ import {
   TOUR_CONTENT_TYPE_IDS,
   type DataLabLevel,
   type DataLabRegion,
+  type MultilingualLocale,
   type OdiiSite,
   type PlaceListKind,
   type TourContentTypeId,
@@ -29,6 +30,11 @@ import {
 import '../styles/app.css';
 
 type InfoTab = 'photos' | 'trails' | 'audio' | 'stats' | 'pet' | 'with';
+
+/** ko는 오버레이 대상이 아니라 서버에 아예 안 보낸다(원문 그대로) */
+function toMultilingualLocale(locale: string): MultilingualLocale | undefined {
+  return locale === 'en' || locale === 'ja' || locale === 'zh' ? locale : undefined;
+}
 
 function ymdInputDefault(): string {
   // DataLab 집계는 최신 데이터까지 약 한 달의 시차가 있어 35일 전을 기본값으로 둔다.
@@ -106,9 +112,11 @@ function CopyAddressButton({ text }: { text: string }) {
 function FilteredPlaceSection({
   kind,
   contentTypeId,
+  locale,
 }: {
   kind: PlaceListKind;
   contentTypeId: TourContentTypeId | '';
+  locale?: MultilingualLocale;
 }) {
   const { t } = useTranslation('korInfo');
   const [keyword, setKeyword] = useState('');
@@ -130,6 +138,7 @@ function FilteredPlaceSection({
         keyword,
         contentTypeId: contentTypeId || undefined,
         numOfRows: 24,
+        locale,
       })
         .then(({ items }) => {
           if (alive) setPlaces(items);
@@ -145,7 +154,7 @@ function FilteredPlaceSection({
       alive = false;
       clearTimeout(timer);
     };
-  }, [kind, keyword, contentTypeId, t]);
+  }, [kind, keyword, contentTypeId, locale, t]);
 
   return (
     <section>
@@ -171,7 +180,7 @@ function FilteredPlaceSection({
               <strong>{p.title}</strong>
               {p.address && (
                 <span className="info-address-row">
-                  <span>{p.address}</span>
+                  <span>{p.officialAddress ?? p.address}</span>
                   <CopyAddressButton text={p.address} />
                 </span>
               )}
@@ -186,6 +195,7 @@ function FilteredPlaceSection({
 export default function KoreaInfoPage() {
   const { t } = useTranslation('korInfo');
   const locale = normalizeLocale(i18n.language);
+  const multilingualLocale = toMultilingualLocale(locale);
   const planPath = plannerPath(locale);
 
   const [tab, setTab] = useState<InfoTab>('photos');
@@ -293,7 +303,7 @@ export default function KoreaInfoPage() {
     setAudioLoading(true);
     setAudioError(null);
     const timer = setTimeout(() => {
-      fetchOdiiSites({ keyword: audioKeyword, numOfRows: 24 })
+      fetchOdiiSites({ keyword: audioKeyword, numOfRows: 24, locale: multilingualLocale })
         .then(({ items }) => {
           if (alive) setAudioSites(items);
         })
@@ -308,7 +318,7 @@ export default function KoreaInfoPage() {
       alive = false;
       clearTimeout(timer);
     };
-  }, [audioKeyword, t]);
+  }, [audioKeyword, multilingualLocale, t]);
 
   useEffect(() => {
     if (!isTourInfoConfigured()) {
@@ -634,7 +644,7 @@ export default function KoreaInfoPage() {
                   <figcaption>
                     <strong>{s.title}</strong>
                     <span className="info-address-row">
-                      <span>{[s.region, s.themeCategory].filter(Boolean).join(' · ')}</span>
+                      <span>{[s.officialAddress ?? s.region, s.themeCategory].filter(Boolean).join(' · ')}</span>
                       {s.region && <CopyAddressButton text={s.region} />}
                     </span>
                   </figcaption>
@@ -695,8 +705,12 @@ export default function KoreaInfoPage() {
             </div>
           </section>
         )}
-        {tab === 'pet' && <FilteredPlaceSection kind="pet" contentTypeId={placeTypeId} />}
-        {tab === 'with' && <FilteredPlaceSection kind="with" contentTypeId={placeTypeId} />}
+        {tab === 'pet' && (
+          <FilteredPlaceSection kind="pet" contentTypeId={placeTypeId} locale={multilingualLocale} />
+        )}
+        {tab === 'with' && (
+          <FilteredPlaceSection kind="with" contentTypeId={placeTypeId} locale={multilingualLocale} />
+        )}
       </div>
 
       <TrailRouteModal course={routeModalCourse} onClose={() => setRouteModalCourse(null)} />

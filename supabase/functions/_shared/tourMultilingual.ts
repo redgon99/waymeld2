@@ -13,7 +13,12 @@
  * 나오는 극히 드문 경우에만 좌표 근접도를 보조 필터로 쓴다.
  */
 
+import type { SupabaseClient } from 'npm:@supabase/supabase-js@2';
+
 export type MultilingualLocale = 'en' | 'ja' | 'zh';
+export function isMultilingualLocale(v: unknown): v is MultilingualLocale {
+  return v === 'en' || v === 'ja' || v === 'zh';
+}
 
 const SERVICE_BY_LOCALE: Record<MultilingualLocale, string> = {
   en: 'EngService2',
@@ -121,4 +126,77 @@ export async function fetchOfficialAddress(
   } catch {
     return null;
   }
+}
+
+/**
+ * /info 페이지처럼 라이브 렌더링되는 화면에서 매번 TourAPI를 다시 부르지 않도록
+ * (content_id, kind, locale) 단위로 결과를 DB에 캐싱한다. TourAPI 원본이 "일 1회"
+ * 갱신이라 캐시도 오래 유지해도 된다. 매칭 실패(no-match)도 캐싱해 반복 미스를 막는다.
+ */
+export type OverlayKind = 'pet' | 'with' | 'odii';
+
+const CACHE_TABLE = 'tour_address_overlay_cache';
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+export async function fetchOfficialAddressCached(
+  sb: SupabaseClient,
+  kind: OverlayKind,
+  contentId: string,
+  locale: MultilingualLocale,
+  serviceKey: string,
+  titleKo: string,
+  lat: number,
+  lng: number
+): Promise<OfficialAddressMatch | null> {
+  const { data: cached } = await sb
+    .from(CACHE_TABLE)
+    .select('official_address, matched_content_id, matched_title, distance_m, fetched_at')
+    .eq('content_id', contentId)
+    .eq('kind', kind)
+    .eq('locale', locale)
+    .maybeSingle();
+
+  if (cached && Date.now() - new Date(cached.fetched_at as string).getTime() < CACHE_TTL_MS) {
+    if (!cached.official_address) return null;
+    return {
+      contentId: (cached.matched_content_id as string) ?? '',
+      title: (cached.matched_title as string) ?? '',
+      address: cached.official_address as string,
+      distanceM: (cached.distance_m as number) ?? 0,
+    };
+  }
+
+  const fresh = await fetchOfficialAddress(locale, serviceKey, titleKo, lat, lng);
+  await sb.from(CACHE_TABLE).upsert(
+    {
+      content_id: contentId,
+      kind,
+      locale,
+      official_address: fresh?.address ?? null,
+      matched_content_id: fresh?.contentId ?? null,
+      matched_title: fresh?.title ?? null,
+      distance_m: fresh?.distanceM ?? null,
+      fetched_at: new Date().toISOString(),
+    },
+    { onConflict: 'content_id,kind,locale' }
+  );
+
+  return fresh;
+}
+
+/** 목록 응답 하나에 대해 캐시-우선 오버레이를 일괄 적용하는 헬퍼 */
+export async function overlayAddressesOnList<T extends { contentId: string; title: string; lat: number; lng: number }>(
+  sb: SupabaseClient,
+  kind: OverlayKind,
+  locale: MultilingualLocale | null,
+  serviceKey: string,
+  items: T[]
+): Promise<Array<T & { officialAddress?: string }>> {
+  if (!locale) return items;
+  return Promise.all(
+    items.map(async (it) => {
+      const match = await fetchOfficialAddressCached(sb, kind, it.contentId, locale, serviceKey, it.title, it.lat, it.lng);
+      return { ...it, officialAddress: match?.address };
+    })
+  );
 }

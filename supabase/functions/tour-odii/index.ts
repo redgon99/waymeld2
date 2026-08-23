@@ -1,5 +1,7 @@
 import { corsHeaders } from '../_shared/cors.ts';
 import { buildOdiiSitesUrl, buildOdiiStoriesUrl, fetchOdiiSites, fetchOdiiStories } from '../_shared/tourOdii.ts';
+import { getServiceClient } from '../_shared/insightDb.ts';
+import { fetchOfficialAddressCached, isMultilingualLocale } from '../_shared/tourMultilingual.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -27,6 +29,7 @@ Deno.serve(async (req) => {
     numOfRows?: number;
     tid?: string;
     tlid?: string;
+    locale?: string;
   };
   try {
     body = await req.json();
@@ -58,7 +61,29 @@ Deno.serve(async (req) => {
     const numOfRows = Math.min(48, Math.max(1, Math.round(Number(body.numOfRows ?? 24))));
     const url = buildOdiiSitesUrl(serviceKey, { keyword: body.keyword, pageNo, numOfRows });
     const { items, totalCount } = await fetchOdiiSites(url);
-    return new Response(JSON.stringify({ items, totalCount }), {
+
+    const locale = isMultilingualLocale(body.locale) ? body.locale : null;
+    let overlaid: Array<(typeof items)[number] & { officialAddress?: string }> = items;
+    if (locale) {
+      const sb = getServiceClient();
+      overlaid = await Promise.all(
+        items.map(async (site) => {
+          const match = await fetchOfficialAddressCached(
+            sb,
+            'odii',
+            `${site.tid}:${site.tlid}`,
+            locale,
+            serviceKey,
+            site.title,
+            site.lat,
+            site.lng
+          );
+          return { ...site, officialAddress: match?.address };
+        })
+      );
+    }
+
+    return new Response(JSON.stringify({ items: overlaid, totalCount }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (e) {

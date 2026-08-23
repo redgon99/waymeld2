@@ -1,5 +1,7 @@
 import { corsHeaders } from '../_shared/cors.ts';
 import { buildPlaceListUrl, fetchFilteredPlaces, type PlaceListKind } from '../_shared/tourPetWith.ts';
+import { getServiceClient } from '../_shared/insightDb.ts';
+import { isMultilingualLocale, overlayAddressesOnList } from '../_shared/tourMultilingual.ts';
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -25,6 +27,7 @@ Deno.serve(async (req) => {
   let contentTypeId = '';
   let pageNo = 1;
   let numOfRows = 24;
+  let locale: 'en' | 'ja' | 'zh' | null = null;
   try {
     const body = (await req.json()) as {
       kind?: string;
@@ -32,6 +35,7 @@ Deno.serve(async (req) => {
       contentTypeId?: string;
       pageNo?: number;
       numOfRows?: number;
+      locale?: string;
     };
     kind = body.kind === 'pet' || body.kind === 'with' ? body.kind : '';
     keyword = body.keyword?.trim() ?? '';
@@ -39,6 +43,7 @@ Deno.serve(async (req) => {
     contentTypeId = ['12', '14', '15', '25', '28', '32', '38', '39'].includes(rawType) ? rawType : '';
     pageNo = Math.max(1, Math.round(Number(body.pageNo ?? 1)));
     numOfRows = Math.min(48, Math.max(1, Math.round(Number(body.numOfRows ?? 24))));
+    locale = isMultilingualLocale(body.locale) ? body.locale : null;
   } catch {
     return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
       status: 400,
@@ -61,7 +66,10 @@ Deno.serve(async (req) => {
       numOfRows,
     });
     const { items, totalCount } = await fetchFilteredPlaces(url);
-    return new Response(JSON.stringify({ items, totalCount }), {
+    const overlaid = locale
+      ? await overlayAddressesOnList(getServiceClient(), kind, locale, serviceKey, items)
+      : items;
+    return new Response(JSON.stringify({ items: overlaid, totalCount }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (e) {
