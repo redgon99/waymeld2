@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from './Icon';
 
 export type PlannerPanelTab = 'search' | 'pins' | 'route' | 'scenario';
@@ -15,13 +16,6 @@ interface Props {
   scenarioSlot?: ReactNode;
 }
 
-const TAB_LABELS: Record<PlannerPanelTab, string> = {
-  search: 'Search 검색',
-  pins: 'Pins',
-  route: 'Route 동선',
-  scenario: 'AI 시나리오',
-};
-
 export function PlannerSidePanel({
   open,
   tab,
@@ -33,6 +27,7 @@ export function PlannerSidePanel({
   routeSlot,
   scenarioSlot,
 }: Props) {
+  const { t } = useTranslation('planner');
   if (!open) return null;
 
   const tabs = scenarioSlot
@@ -40,7 +35,7 @@ export function PlannerSidePanel({
     : (['search', 'pins', 'route'] as const);
 
   return (
-    <aside className="planner-side-panel desktop-only-overlay" aria-label="플래너 패널">
+    <aside className="planner-side-panel desktop-only-overlay" aria-label={t('chrome.panelAria')}>
       <div className="planner-side-tabs">
         <div className="planner-side-tabs-track" role="tablist">
           {tabs.map((id) => (
@@ -52,7 +47,10 @@ export function PlannerSidePanel({
               className={`planner-side-tab ${tab === id ? 'active' : ''}`}
               onClick={() => onTabChange(id)}
             >
-              {id === 'pins' ? `Pins 핀 ${pinCount}` : TAB_LABELS[id]}
+              {id === 'search' && t('chrome.tabSearch')}
+              {id === 'pins' && t('chrome.tabPins', { count: pinCount })}
+              {id === 'route' && t('chrome.tabRoute')}
+              {id === 'scenario' && t('chrome.tabScenario')}
             </button>
           ))}
         </div>
@@ -69,8 +67,8 @@ export function PlannerSidePanel({
         type="button"
         className="planner-side-collapse"
         onClick={onCollapse}
-        aria-label="패널 접기"
-        title="패널 접기"
+        aria-label={t('chrome.panelCollapse')}
+        title={t('chrome.panelCollapse')}
       >
         <Icon name="chevronLeft" size={16} />
       </button>

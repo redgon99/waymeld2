@@ -20,6 +20,7 @@ import {
 } from '../lib/mapZoom';
 import { useLongPress } from '../hooks/useLongPress';
 import { mapCentersNear, searchResultFitPadding, shouldAnimateMapCenter, validMapPoints, type MapLatLng } from '../lib/mapCenterMotion';
+import i18n from '../lib/i18n';
 
 interface Props {
   mapsReady?: boolean;
@@ -405,7 +406,7 @@ export function GoogleMapView({
       originMarkerRef.current = new window.google.maps.Marker({
         map: mapRef.current,
         position: { lat: origin.lat, lng: origin.lng },
-        title: '출발지',
+        title: i18n.t('map.origin', { ns: 'planner' }),
         icon: {
           path: window.google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
           fillColor: '#2563eb',
@@ -416,7 +417,7 @@ export function GoogleMapView({
         },
       });
     }
-  }, [origin?.lat, origin?.lng]);
+  }, [origin?.lat, origin?.lng, i18n.language]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -439,7 +440,7 @@ export function GoogleMapView({
     draftPinRef.current = new window.google.maps.Marker({
       map: mapRef.current,
       position: draftPinLocation,
-      title: '선택 위치',
+      title: i18n.t('map.pickedLocation', { ns: 'planner' }),
       icon: {
         path: window.google.maps.SymbolPath.CIRCLE,
         fillColor: '#1f2937',
@@ -449,7 +450,7 @@ export function GoogleMapView({
         scale: 8,
       },
     });
-  }, [draftPinLocation?.lat, draftPinLocation?.lng]);
+  }, [draftPinLocation?.lat, draftPinLocation?.lng, i18n.language]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -543,7 +544,7 @@ export function GoogleMapView({
       ref={mapEl}
       className={`map-canvas ${pickingOriginFromMap || pickingPinFromMap ? 'picking' : ''}`}
       role="application"
-      aria-label="지도"
+      aria-label={i18n.t('map.ariaLabel', { ns: 'planner' })}
       onContextMenu={(e) => e.preventDefault()}
       {...longPress}
     />

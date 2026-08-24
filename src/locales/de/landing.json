@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "title": "WayMeld — Orte sammeln. Route zusammenfügen.",
+    "description": "Suchen, Orte anpinnen und einen zeitlich geplanten Reiseplan bauen. Kakao und Google Maps, mehrtägige Reisen, teilbare Links."
+  },
+  "brand": {
+    "primary": "WayMeld",
+    "secondary": ""
+  },
+  "notice": {
+    "trial": "Probebetrieb bis August. Offizieller Start im September."
+  },
+  "nav": {
+    "features": "Funktionen",
+    "howItWorks": "Loslegen",
+    "plaza": "Teilen-Platz",
+    "tips": "Reisetipps",
+    "info": "Korea-Reiseinfos",
+    "start": "Route planen",
+    "login": "Anmelden"
+  },
+  "hero": {
+    "eyebrow": "Routenplaner",
+    "title": "Orte sammeln.\nRoute zusammenfügen.",
+    "subtitle": "Suchen und pinnen — die Orte gruppieren sich nach Kategorie. Ziehen zum Umsortieren, dann einen zeitlichen Plan erstellen. Keine Besuchskarte, sondern ein Werkzeug für die nächste Route.",
+    "ctaPrimary": "Kostenlos starten",
+    "ctaSecondary": "Platz ansehen",
+    "note": "Web-App · funktioniert lokal ohne Anmeldung"
+  },
+  "pillars": {
+    "title": "Drei Schritte",
+    "search": {
+      "title": "Suchen & sammeln",
+      "body": "Orte per Stichwort oder Kategorie finden und aus Suche oder Karte anpinnen. Essen, Cafés und Sehenswürdigkeiten erscheinen als Chips."
+    },
+    "route": {
+      "title": "Route zusammenfügen",
+      "body": "Zeitplan mit Aufenthaltsdauern und Essensfenstern. Echte Straßendistanzen über Kakao Mobility, wenn verfügbar."
+    },
+    "share": {
+      "title": "Teilen & remixen",
+      "body": "Senden Sie einen Nur-Lesen-Link an Freunde oder importieren Sie öffentliche Reisen vom Platz in Ihren Plan."
+    }
+  },
+  "features": {
+    "title": "Fürs Routing gebaut",
+    "subtitle": "Anders als Apps, die merken, wo Sie waren, geht es bei WayMeld darum, wohin Sie als Nächstes wollen — und wann.",
+    "multiDay": {
+      "title": "Mehrtägige Tabs",
+      "body": "Pins und Routen auf Tag 1, Tag 2, Tag 3 aufteilen. Lange Reisen bleiben übersichtlich."
+    },
+    "category": {
+      "title": "Kategorie-Pinleiste",
+      "body": "Chips ziehen zum Umsortieren oder Verschieben. Karte auf eine Kategorie filtern."
+    },
+    "maps": {
+      "title": "Kakao + Google",
+      "body": "Kakao in Korea, Google Places im Ausland. Oberfläche auf Koreanisch, Englisch, Japanisch, Chinesisch, Spanisch, Französisch, Deutsch und Russisch."
+    },
+    "presentation": {
+      "title": "Präsentationsmodus",
+      "body": "Zeigen Sie Ihre Route klar in Meetings, Unterricht oder Führungen."
+    }
+  },
+  "compare": {
+    "title": "Positionierung",
+    "us": "WayMeld",
+    "them": "Besuchs-Tracker / Wunschliste",
+    "row1": ["Routen für heute und morgen", "Orte, an denen Sie schon waren"],
+    "row2": ["Zeitlicher Reiseplan", "Pins auf einer Karte"],
+    "row3": ["Mehrere Tage + echte Straßen", "Erinnerungen, Fotos, Stats"]
+  },
+  "steps": {
+    "title": "So starten Sie",
+    "step1": { "title": "Im Browser öffnen", "body": "Ohne Installation — Planer im Browser öffnen." },
+    "step2": { "title": "Suchen & pinnen", "body": "Suchen oder auf die Karte tippen, um Orte hinzuzufügen." },
+    "step3": { "title": "Umsortieren & Route bauen", "body": "Chips ziehen, dann Route erstellen für Zeiten und Teilstrecken." },
+    "step4": { "title": "Teilen", "body": "Link teilen oder auf dem Platz veröffentlichen." }
+  },
+  "gallery": {
+    "title": "Screenshots"
+  },
+  "tips": {
+    "title": "Reisetipps",
+    "subtitle": "Praktische Guides zu Verkehr, Zahlung und Verbindung in Korea",
+    "more": "Alle ansehen",
+    "empty": "Nützliche Tipps folgen bald."
+  },
+  "cta": {
+    "title": "Planen Sie heute Ihre nächste Route",
+    "subtitle": "Lokal speichern ohne Anmeldung. Cloud-Sync und mehrsprachiger Export mit Plus.",
+    "button": "Routenplaner öffnen"
+  },
+  "footer": {
+    "tagline": "Sammeln → Zusammenfügen → Route → Teilen",
+    "plaza": "Teilen-Platz",
+    "tips": "Reisetipps",
+    "info": "Korea-Reiseinfos",
+    "login": "Anmelden",
+    "plan": "Planer",
+    "rights": "© {{year}} WayMeld"
+  }
+}

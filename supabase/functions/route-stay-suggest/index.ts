@@ -9,14 +9,29 @@ const LOCALE_LABELS: Record<string, string> = {
   ko: '한국어',
   en: 'English',
   ja: '日本語',
+  'zh-CN': '简体中文',
+  'zh-TW': '繁體中文',
   zh: '简体中文',
 };
 
 function normalizeRequestLocale(raw: string): string {
-  const s = raw.toLowerCase().trim();
+  const s = raw.toLowerCase().trim().replace(/_/g, '-');
   if (s.startsWith('ko')) return 'ko';
   if (s.startsWith('ja')) return 'ja';
-  if (s.startsWith('zh')) return 'zh';
+  if (s.startsWith('zh')) {
+    if (
+      s.includes('hant') ||
+      s.includes('-tw') ||
+      s.endsWith('tw') ||
+      s.includes('-hk') ||
+      s.endsWith('hk') ||
+      s.includes('-mo') ||
+      s.endsWith('mo')
+    ) {
+      return 'zh-TW';
+    }
+    return 'zh-CN';
+  }
   return 'en';
 }
 

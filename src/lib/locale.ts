@@ -1,6 +1,16 @@
-export type AppLocale = 'ko' | 'en' | 'ja' | 'zh';
+export type AppLocale = 'ko' | 'en' | 'ja' | 'zh-CN' | 'zh-TW' | 'es' | 'fr' | 'de' | 'ru';
 
-export const SUPPORTED_LOCALES: AppLocale[] = ['ko', 'en', 'ja', 'zh'];
+export const SUPPORTED_LOCALES: AppLocale[] = [
+  'ko',
+  'en',
+  'ja',
+  'zh-CN',
+  'zh-TW',
+  'es',
+  'fr',
+  'de',
+  'ru',
+];
 
 export const DEFAULT_LOCALE: AppLocale = 'ko';
 
@@ -10,12 +20,16 @@ export const LOCALE_LABELS: Record<AppLocale, string> = {
   ko: '한국어',
   en: 'English',
   ja: '日本語',
-  zh: '中文',
+  'zh-CN': '简体中文',
+  'zh-TW': '繁體中文',
+  es: 'Español',
+  fr: 'Français',
+  de: 'Deutsch',
+  ru: 'Русский',
 };
 
-/** BCP 47 for Intl APIs */
+/** BCP 47 for Intl APIs / html lang */
 export function localeToBcp47(locale: AppLocale): string {
-  if (locale === 'zh') return 'zh-CN';
   return locale;
 }
 
@@ -24,13 +38,35 @@ export function googleMapsLanguage(locale: AppLocale): string {
   return localeToBcp47(locale);
 }
 
+function isTraditionalChineseTag(lower: string): boolean {
+  return (
+    lower.includes('hant') ||
+    lower.includes('-tw') ||
+    lower.endsWith('tw') ||
+    lower.includes('-hk') ||
+    lower.endsWith('hk') ||
+    lower.includes('-mo') ||
+    lower.endsWith('mo')
+  );
+}
+
 export function normalizeLocale(input?: string | null): AppLocale {
   if (!input) return DEFAULT_LOCALE;
-  const base = input.toLowerCase().split('-')[0];
-  if (base === 'ko' || input.toLowerCase().startsWith('ko')) return 'ko';
+  const lower = input.toLowerCase().trim();
+
+  // Legacy single "zh" and Hans/Hant tags before base split
+  if (lower === 'zh' || lower.startsWith('zh-') || lower.startsWith('zh_')) {
+    return isTraditionalChineseTag(lower.replace(/_/g, '-')) ? 'zh-TW' : 'zh-CN';
+  }
+
+  const base = lower.split(/[-_]/)[0];
+  if (base === 'ko' || lower.startsWith('ko')) return 'ko';
   if (base === 'en') return 'en';
   if (base === 'ja') return 'ja';
-  if (base === 'zh') return 'zh';
+  if (base === 'es') return 'es';
+  if (base === 'fr') return 'fr';
+  if (base === 'de') return 'de';
+  if (base === 'ru') return 'ru';
   return DEFAULT_LOCALE;
 }
 
@@ -49,7 +85,10 @@ export function detectBrowserLocale(): AppLocale {
 export function readStoredLocale(): AppLocale | null {
   try {
     const raw = localStorage.getItem(LOCALE_STORAGE_KEY);
-    if (raw && SUPPORTED_LOCALES.includes(raw as AppLocale)) return raw as AppLocale;
+    if (!raw) return null;
+    // Legacy stored value "zh" → Simplified
+    if (raw === 'zh') return 'zh-CN';
+    if (SUPPORTED_LOCALES.includes(raw as AppLocale)) return raw as AppLocale;
   } catch {
     /* ignore */
   }
@@ -68,17 +107,20 @@ export function resolveInitialLocale(): AppLocale {
   return readStoredLocale() ?? detectBrowserLocale();
 }
 
-/** URL path prefix e.g. /en/plaza → en */
+/** URL path prefix e.g. /en/plaza → en; /zh → zh-CN (legacy) */
 export function localeFromPathname(pathname: string): AppLocale | null {
   const seg = pathname.split('/').filter(Boolean)[0];
-  if (seg && SUPPORTED_LOCALES.includes(seg as AppLocale)) return seg as AppLocale;
+  if (!seg) return null;
+  if (seg === 'zh') return 'zh-CN';
+  if (SUPPORTED_LOCALES.includes(seg as AppLocale)) return seg as AppLocale;
   return null;
 }
 
 export function stripLocalePrefix(pathname: string): string {
   const locale = localeFromPathname(pathname);
   if (!locale) return pathname || '/';
-  const rest = pathname.replace(new RegExp(`^/${locale}`), '') || '/';
+  const seg = pathname.split('/').filter(Boolean)[0];
+  const rest = pathname.replace(new RegExp(`^/${seg}`), '') || '/';
   return rest.startsWith('/') ? rest : `/${rest}`;
 }
 

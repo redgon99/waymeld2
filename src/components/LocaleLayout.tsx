@@ -3,6 +3,7 @@ import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { setAppLocale } from '../lib/i18n';
 import {
   DEFAULT_LOCALE,
+  SUPPORTED_LOCALES,
   localeFromPathname,
   normalizeLocale,
   pathWithLocale,
@@ -18,18 +19,27 @@ export function LocaleLayout() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Legacy /zh/... → /zh-CN/...
+    if (lang === 'zh') {
+      const rest = stripLocalePrefix(location.pathname);
+      navigate(`${pathWithLocale(rest, 'zh-CN')}${location.search}${location.hash}`, {
+        replace: true,
+      });
+      return;
+    }
+
     const fromPath = lang ? normalizeLocale(lang) : localeFromPathname(location.pathname);
     const fromQuery = new URLSearchParams(location.search).get('lang');
     const locale: AppLocale = fromQuery
       ? normalizeLocale(fromQuery)
       : fromPath ?? DEFAULT_LOCALE;
     setAppLocale(locale);
-  }, [lang, location.pathname, location.search]);
+  }, [lang, location.pathname, location.search, location.hash, navigate]);
 
   useEffect(() => {
+    if (lang === 'zh') return;
     const current = lang ? normalizeLocale(lang) : localeFromPathname(location.pathname);
     const locale = current ?? normalizeLocale(document.documentElement.lang);
-    const paths = ['', '/plan', '/plaza', '/login', '/admin'];
     const basePath = stripLocalePrefix(location.pathname);
     const canonical = `${SITE_ORIGIN}${pathWithLocale(basePath, locale)}`;
 
@@ -42,10 +52,10 @@ export function LocaleLayout() {
     linkCanonical.href = canonical;
 
     document.querySelectorAll('link[rel="alternate"][hreflang]').forEach((el) => el.remove());
-    (['ko', 'en', 'ja', 'zh'] as AppLocale[]).forEach((loc) => {
+    SUPPORTED_LOCALES.forEach((loc) => {
       const link = document.createElement('link');
       link.rel = 'alternate';
-      link.hreflang = loc === 'zh' ? 'zh-CN' : loc;
+      link.hreflang = loc;
       link.href = `${SITE_ORIGIN}${pathWithLocale(basePath, loc)}`;
       document.head.appendChild(link);
     });

@@ -38,7 +38,7 @@
     "subtitle": "「行った場所」を集めるアプリではなく、「次にどう回るか」を作るツールです。",
     "multiDay": { "title": "複数日タブ", "body": "1日目・2日目でピンとルートを管理。" },
     "category": { "title": "カテゴリピンバー", "body": "ドラッグで順序・グループ変更。地図フィルター連動。" },
-    "maps": { "title": "カカオ + Google", "body": "韓国はカカオ、海外はGoogle Places。UIは4言語。" },
+    "maps": { "title": "カカオ + Google", "body": "韓国はカカオ、海外はGoogle Places。UIは韓・英・日・中・西・仏・独・露。" },
     "presentation": { "title": "発表モード", "body": "ミーティングやガイドツアー向け表示。" }
   },
   "compare": {

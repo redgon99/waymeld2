@@ -1,0 +1,45 @@
+{
+  "brand": "Guías WayMeld",
+  "list": {
+    "metaTitle": "Guías de viaje · WayMeld",
+    "title": "Guías de viaje",
+    "subtitle": "Rutas recomendadas, consejos prácticos y listas de preparación. Solo se publican fichas revisadas por un administrador.",
+    "loading": "Cargando…",
+    "empty": "Aún no hay guías publicadas.",
+    "kindFilter": "Tipos de guía"
+  },
+  "detail": {
+    "back": "Todas las guías",
+    "notFound": "No se encontró la guía.",
+    "sources": "Fuentes",
+    "disclaimer": "Tarifas, normas y horarios pueden cambiar. Consulta la información oficial antes de ir."
+  },
+  "cta": {
+    "planner": "Abrir el planificador",
+    "autoRoute": "Crear este recorrido automáticamente",
+    "setup": "Lista de preparación para Corea",
+    "plaza": "Plaza de compartir"
+  },
+  "kinds": {
+    "all": "Todo",
+    "course": "Rutas recomendadas",
+    "practical": "Consejos prácticos",
+    "prepare": "Preparar el viaje",
+    "food": "Comida y cafés",
+    "culture": "Cultura y etiqueta",
+    "shopping": "Compras y duty-free",
+    "safety": "Seguridad y emergencias"
+  },
+  "tags": {
+    "transport": "Transporte",
+    "payment": "Pagos",
+    "sim": "SIM / datos",
+    "etiquette": "Etiqueta",
+    "food": "Comida",
+    "other": "Otro"
+  },
+  "errors": {
+    "notConfigured": "Hay que configurar Supabase para mostrar las guías.",
+    "loadFailed": "No se pudieron cargar las guías."
+  }
+}

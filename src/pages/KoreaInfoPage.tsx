@@ -31,9 +31,14 @@ import '../styles/app.css';
 
 type InfoTab = 'photos' | 'trails' | 'audio' | 'stats' | 'pet' | 'with';
 
-/** ko는 오버레이 대상이 아니라 서버에 아예 안 보낸다(원문 그대로) */
+/** ko는 오버레이 대상이 아니라 서버에 아예 안 보낸다(원문 그대로).
+ *  TourAPI는 간체(Chs)만 있어 zh-CN/zh-TW 모두 zh로 매핑한다. */
 function toMultilingualLocale(locale: string): MultilingualLocale | undefined {
-  return locale === 'en' || locale === 'ja' || locale === 'zh' ? locale : undefined;
+  if (locale === 'zh-CN' || locale === 'zh-TW' || locale === 'zh') return 'zh';
+  return locale === 'en' || locale === 'ja' || locale === 'es' ||
+    locale === 'fr' || locale === 'de' || locale === 'ru'
+    ? locale
+    : undefined;
 }
 
 function ymdInputDefault(): string {
@@ -78,7 +83,7 @@ function formatHours(totalMinutes: number): string {
 
 /**
  * 해외 관광객이 택시기사·지도앱에 그대로 보여줄 수 있도록 TourAPI 원문(한국어) 주소를
- * 복사하는 버튼. 로케일이 en/ja/zh여도 이 카드들의 address/region 필드는 항상 한국어
+ * 복사하는 버튼. 다국어 UI여도 이 카드들의 address/region 필드는 항상 한국어
  * 원문이라(다국어 TourAPI 미연동 상태) 번역 텍스트가 아니라 원문 그대로를 복사해 준다.
  */
 function CopyAddressButton({ text }: { text: string }) {

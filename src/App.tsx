@@ -53,6 +53,10 @@ export default function App() {
               {PAGE_ROUTES}
             </Route>
           ))}
+          {/* Legacy Simplified Chinese prefix */}
+          <Route path="zh" element={<LocaleLayout />}>
+            {PAGE_ROUTES}
+          </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -3,15 +3,15 @@ import { useTranslation } from 'react-i18next';
 import { Icon } from './Icon';
 
 const PHRASES = [
-  { ko: '여기로 가주세요', en: 'Please go here' },
-  { ko: '이 주소로 가주세요', en: 'Please go to this address' },
-  { ko: '천천히 가주세요', en: 'Please drive slowly' },
-  { ko: '영수증 주세요', en: 'Receipt, please' },
-  { ko: '카드 됩니까?', en: 'Do you accept cards?' },
-  { ko: '화장실이 어디예요?', en: 'Where is the restroom?' },
-  { ko: '맵아요 (안 맵게)', en: 'Not spicy, please' },
-  { ko: '감사합니다', en: 'Thank you' },
-];
+  { ko: '여기로 가주세요', key: 'goHere' },
+  { ko: '이 주소로 가주세요', key: 'goToAddress' },
+  { ko: '천천히 가주세요', key: 'driveSlowly' },
+  { ko: '영수증 주세요', key: 'receipt' },
+  { ko: '카드 됩니까?', key: 'acceptCards' },
+  { ko: '화장실이 어디예요?', key: 'restroom' },
+  { ko: '맵아요 (안 맵게)', key: 'notSpicy' },
+  { ko: '감사합니다', key: 'thankYou' },
+] as const;
 
 export function HelpContent({ airportFocus = false }: { airportFocus?: boolean }) {
   const { t } = useTranslation('planner');
@@ -68,7 +68,7 @@ export function HelpContent({ airportFocus = false }: { airportFocus?: boolean }
           {PHRASES.map((p) => (
             <li key={p.ko} className="phrase-card">
               <p className="phrase-ko">{p.ko}</p>
-              <p className="phrase-en">{p.en}</p>
+              <p className="phrase-en">{t(`help.phrases.${p.key}`)}</p>
               <button type="button" onClick={() => void copy(p.ko)}>
                 <Icon name="note" size={14} /> {t('help.copyPhrase')}
               </button>

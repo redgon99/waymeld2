@@ -1,5 +1,5 @@
 /**
- * TourAPI 다국어 서비스(EngService2/JpnService2/ChsService2/ChtService2)로 KorService2
+ * TourAPI 다국어 서비스(Eng/Jpn/Chs/Spn/Fre/Ger/RusService2)로 KorService2
  * 장소의 공식 현지어 주소를 찾아 덮어씌운다.
  *
  * 라이브 검증 결과 이 4개 서비스는 KorService2와 contentId 공간이 완전히 분리돼
@@ -15,15 +15,19 @@
 
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2';
 
-export type MultilingualLocale = 'en' | 'ja' | 'zh';
+export type MultilingualLocale = 'en' | 'ja' | 'zh' | 'es' | 'fr' | 'de' | 'ru';
 export function isMultilingualLocale(v: unknown): v is MultilingualLocale {
-  return v === 'en' || v === 'ja' || v === 'zh';
+  return v === 'en' || v === 'ja' || v === 'zh' || v === 'es' || v === 'fr' || v === 'de' || v === 'ru';
 }
 
 const SERVICE_BY_LOCALE: Record<MultilingualLocale, string> = {
   en: 'EngService2',
   ja: 'JpnService2',
   zh: 'ChsService2',
+  es: 'SpnService2',
+  fr: 'FreService2',
+  de: 'GerService2',
+  ru: 'RusService2',
 };
 
 function keyParam(serviceKey: string): string {

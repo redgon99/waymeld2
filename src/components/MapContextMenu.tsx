@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { Icon } from './Icon';
 
 interface Props {
@@ -20,6 +21,7 @@ export function MapContextMenu({
   onSetSearchCenter,
   onClose,
 }: Props) {
+  const { t } = useTranslation('planner');
   const ref = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ left: x, top: y });
 
@@ -82,7 +84,7 @@ export function MapContextMenu({
         <span className="map-context-menu-icon" aria-hidden="true">
           <Icon name="location" size={18} />
         </span>
-        <span className="map-context-menu-label">현재 위치를 중심으로</span>
+        <span className="map-context-menu-label">{t('map.centerHere')}</span>
       </button>
     </div>,
     document.body

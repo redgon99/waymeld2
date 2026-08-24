@@ -92,17 +92,20 @@ function matchedThemes(place: Place, preferences: TripTheme[]) {
   );
 }
 
-function insightBadge(place: Place): { kind: 'y' | 'g' | 'n'; label: string } | null {
+function insightBadge(
+  place: Place,
+  labels: { top: string; positive: string; wait: string }
+): { kind: 'y' | 'g' | 'n'; label: string } | null {
   const rating = place.rating;
   const reviews = place.reviewCount ?? 0;
   if (rating != null && rating >= 4.5 && reviews >= 500) {
-    return { kind: 'y', label: '#1 pick by visitors 방문자 1위' };
+    return { kind: 'y', label: labels.top };
   }
   if (rating != null && rating >= 4.0 && reviews >= 50) {
-    return { kind: 'g', label: '92% positive reviews' };
+    return { kind: 'g', label: labels.positive };
   }
   if (rating != null && rating < 3.5 && reviews >= 20) {
-    return { kind: 'n', label: 'Long wait 웨이팅 김' };
+    return { kind: 'n', label: labels.wait };
   }
   return null;
 }
@@ -402,11 +405,11 @@ export function SearchPanel({
         });
 
   const categoryChipLabel = (code: SearchCategoryFilter, fallback: string) => {
-    if (code === null) return `All ${tc('category.all')}`;
-    if (code === 'FD6') return `Food ${tc('category.food')}`;
-    if (code === 'AT4') return `Sights ${tc('category.tour')}`;
-    if (code === 'AD5') return `Stay ${tc('category.stay')}`;
-    if (code === 'MT1') return `Mart ${tc('category.shop')}`;
+    if (code === null) return tc('category.all');
+    if (code === 'FD6') return tc('category.food');
+    if (code === 'AT4') return tc('category.tour');
+    if (code === 'AD5') return tc('category.stay');
+    if (code === 'MT1') return tc('category.shop');
     return fallback;
   };
 
@@ -608,7 +611,11 @@ export function SearchPanel({
         <ul className="search-result-list" ref={resultListRef}>
           {sorted.map((place) => {
             const isPinned = pinnedIds.has(place.id);
-            const badge = insightBadge(place);
+            const badge = insightBadge(place, {
+              top: t('search.insightTop'),
+              positive: t('search.insightPositive'),
+              wait: t('search.insightWait'),
+            });
             const enHint = place.categoryDetail || place.categoryLabel || '';
             const themeMatches = matchedThemes(place, preferences);
             return (
@@ -686,7 +693,7 @@ export function SearchPanel({
           disabled={loadingMore}
           onClick={onLoadMore}
         >
-          {loadingMore ? '불러오는 중…' : '더보기'}
+          {loadingMore ? t('search.loadingMore') : t('search.loadMore')}
         </button>
       )}
 
@@ -700,7 +707,7 @@ export function SearchPanel({
           }}
           disabled={loading}
         >
-          <Icon name="refresh" size={14} /> 결과 초기화
+          <Icon name="refresh" size={14} /> {t('search.resetResults')}
         </button>
       )}
     </div>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Icon } from '../Icon';
 
 export type MobileDockTab = 'search' | 'pins' | null;
@@ -23,8 +24,9 @@ export function MobileDock({
   onPinFromMap,
   pickingPinFromMap = false,
 }: Props) {
+  const { t } = useTranslation('planner');
   return (
-    <nav className="mobile-dock" aria-label="주요 메뉴">
+    <nav className="mobile-dock" aria-label={t('chrome.dockAria')}>
       <button
         type="button"
         className={`mobile-dock-btn ${activeSheet === 'search' ? 'active' : ''}`}
@@ -32,7 +34,7 @@ export function MobileDock({
         aria-pressed={activeSheet === 'search'}
       >
         <Icon name="search" size={18} />
-        <span>검색</span>
+        <span>{t('chrome.tabSearch')}</span>
       </button>
       <button
         type="button"
@@ -41,25 +43,25 @@ export function MobileDock({
         aria-pressed={activeSheet === 'pins'}
       >
         <Icon name="pin" size={18} />
-        <span>핀 {pinCount > 0 ? pinCount : ''}</span>
+        <span>{pinCount > 0 ? t('chrome.tabPins', { count: pinCount }) : t('pinup.titleShort')}</span>
       </button>
       <button
         type="button"
         className="mobile-dock-btn mobile-dock-route"
         onClick={onOpenRoute}
         disabled={routeDisabled}
-        title={routeDisabled ? '핀 2개 이상 필요' : '동선 만들기'}
+        title={routeDisabled ? t('chrome.routeNeedPins') : t('chrome.routeBuild')}
       >
         <Icon name="route" size={18} />
-        <span>동선</span>
+        <span>{t('chrome.tabRoute')}</span>
       </button>
       <button
         type="button"
         className={`mobile-dock-fab ${pickingPinFromMap ? 'active' : ''}`}
         onClick={onPinFromMap}
         aria-pressed={pickingPinFromMap}
-        aria-label="지도에서 핀업"
-        title="지도에서 핀업"
+        aria-label={t('chrome.pinFromMap')}
+        title={t('chrome.pinFromMap')}
       >
         <Icon name="pinPlus" size={22} />
       </button>

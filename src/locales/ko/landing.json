@@ -55,7 +55,7 @@
     },
     "maps": {
       "title": "카카오 + Google",
-      "body": "한국은 카카오, 해외·인바운드는 Google Places. UI는 ko·en·ja·zh 지원."
+      "body": "한국은 카카오, 해외·인바운드는 Google Places. UI는 ko·en·ja·zh·es·fr·de·ru 지원."
     },
     "presentation": {
       "title": "발표 모드",

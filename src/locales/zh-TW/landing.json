@@ -1,0 +1,124 @@
+{
+  "meta": {
+    "title": "WayMeld — 收藏地點，編織路線",
+    "description": "搜索、標記地點，生成帶時間的行程。Kakao與Google地圖、多日行程、分享鏈接。"
+  },
+  "brand": {
+    "primary": "WayMeld",
+    "secondary": "여로담"
+  },
+  "notice": {
+    "trial": "8月試運營，9月起正式運營。"
+  },
+  "nav": {
+    "features": "功能",
+    "howItWorks": "開始",
+    "plaza": "分享廣場",
+    "tips": "旅行貼士",
+    "info": "韓國旅行信息",
+    "start": "創建路線",
+    "login": "登錄"
+  },
+  "hero": {
+    "eyebrow": "WayMeld",
+    "title": "收藏想去的地方，\n編織旅行路線",
+    "subtitle": "搜索並標記地點，按分類整理。拖動調整順序，生成幾點到幾點的行程。不是去過哪裡，而是規劃下一步怎麼走。",
+    "ctaPrimary": "免費開始",
+    "ctaSecondary": "瀏覽分享廣場",
+    "note": "無需安裝 · 可本地保存"
+  },
+  "pillars": {
+    "title": "三步",
+    "search": {
+      "title": "搜索與收藏",
+      "body": "關鍵詞或分類搜索，從地圖或結果中標記。美食、咖啡、景點以標籤展示。"
+    },
+    "route": {
+      "title": "編織路線",
+      "body": "含停留與午餐時段的時間表，Kakao實際道路計算移動時間。"
+    },
+    "share": {
+      "title": "分享",
+      "body": "只讀鏈接分享，或從廣場導入他人行程。"
+    }
+  },
+  "features": {
+    "title": "WayMeld 的方式",
+    "subtitle": "不同於記錄「去過哪裡」的應用，WayMeld 規劃「接下來怎麼走」。",
+    "multiDay": {
+      "title": "多日標籤",
+      "body": "第1天、第2天分別管理標記與路線。"
+    },
+    "category": {
+      "title": "分類標記欄",
+      "body": "拖動調整順序與分類，聯動地圖篩選。"
+    },
+    "maps": {
+      "title": "Kakao + Google",
+      "body": "韓國用Kakao，海外用Google Places。界面支持韓、英、日、中、西、法、德、俄語。"
+    },
+    "presentation": {
+      "title": "演示模式",
+      "body": "適合會議、課堂或導遊講解。"
+    }
+  },
+  "compare": {
+    "title": "定位",
+    "us": "WayMeld",
+    "them": "到訪記錄應用",
+    "row1": [
+      "今日明日路線",
+      "去過的地方"
+    ],
+    "row2": [
+      "帶時間的行程",
+      "僅地圖標記"
+    ],
+    "row3": [
+      "多日+實際道路",
+      "回憶與照片為主"
+    ]
+  },
+  "steps": {
+    "title": "如何開始",
+    "step1": {
+      "title": "瀏覽器打開",
+      "body": "無需安裝。"
+    },
+    "step2": {
+      "title": "搜索與標記",
+      "body": "搜索或點擊地圖添加。"
+    },
+    "step3": {
+      "title": "排序與路線",
+      "body": "拖動標籤，創建路線。"
+    },
+    "step4": {
+      "title": "分享",
+      "body": "鏈接或分享廣場。"
+    }
+  },
+  "gallery": {
+    "title": "界面預覽"
+  },
+  "tips": {
+    "title": "旅行貼士",
+    "subtitle": "交通、支付、通訊等韓國旅行實用指南",
+    "more": "查看更多",
+    "empty": "實用貼士即將上線。"
+  },
+  "cta": {
+    "title": "開始規劃下一段旅程",
+    "subtitle": "無需登錄即可本地保存。Plus 提供雲同步。",
+    "button": "打開路線規劃"
+  },
+  "footer": {
+    "tagline": "收藏 → 編織 → 路線 → 分享",
+    "plaza": "分享廣場",
+    "tips": "旅行貼士",
+    "info": "韓國旅行信息",
+    "login": "登錄",
+    "plan": "規劃器",
+    "rights": "© {{year}} WayMeld"
+  }
+}

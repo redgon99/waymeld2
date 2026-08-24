@@ -359,7 +359,12 @@ async function listPlazaRemote(localeFilter?: string | null): Promise<PlazaListi
     .eq('listed_in_plaza', true)
     .eq('is_public', true);
   if (localeFilter) {
-    query = query.eq('plaza_locale', localeFilter);
+    // Legacy plaza rows may still have plaza_locale = 'zh'
+    if (localeFilter === 'zh-CN') {
+      query = query.in('plaza_locale', ['zh-CN', 'zh']);
+    } else {
+      query = query.eq('plaza_locale', localeFilter);
+    }
   }
   const { data, error } = await query.order('plaza_listed_at', { ascending: false });
   if (error || !data) return [];

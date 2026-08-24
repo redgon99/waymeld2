@@ -113,7 +113,7 @@ export function PlannerAppBar({
           여
         </span>
         <span className="planner-brand-text">
-          WayMeld <span className="planner-brand-ko">여로담</span>
+          WayMeld <span className="planner-brand-ko">{t('chrome.brandKo')}</span>
         </span>
       </Link>
 
@@ -171,7 +171,7 @@ export function PlannerAppBar({
           aria-pressed={presentationMode}
           onClick={onTogglePresentation}
         >
-          Overview
+          {t('view.overview')}
         </button>
         {onToggleTableView && (
           <button

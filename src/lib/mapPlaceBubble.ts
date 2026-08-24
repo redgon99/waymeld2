@@ -1,5 +1,6 @@
 import type { Place } from '../types';
 import { iconSvgMarkup } from '../icons/waymeld-icons';
+import i18n from './i18n';
 import { getCategoryMeta } from './categories';
 import { getPlaceEmoji } from './categoryEmoji';
 import { buildPlaceMapLinks } from './mapLinks';
@@ -29,7 +30,7 @@ function thumbInnerHtml(place: Place): string {
   const meta = getCategoryMeta(place.categoryCode, place.category);
   const accent = escapeHtml(meta.bgColor);
   const emoji = escapeHtml(getPlaceEmoji(place));
-  const label = escapeHtml(`${place.name} 사진 보기`);
+  const label = escapeHtml(i18n.t('map.viewPhoto', { ns: 'planner', name: place.name }));
 
   return `
     <button
@@ -46,7 +47,9 @@ function thumbInnerHtml(place: Place): string {
 
 function bubbleInnerHtml(place: Place, isPinned = false): string {
   const addr = place.roadAddress || place.address || '';
-  const pinLabel = isPinned ? '핀업됨' : '핀업';
+  const pinLabel = isPinned
+    ? i18n.t('map.pinned', { ns: 'planner' })
+    : i18n.t('map.pin', { ns: 'planner' });
   return `
     <div class="map-place-bubble-card">
       ${thumbInnerHtml(place)}

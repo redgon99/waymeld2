@@ -58,8 +58,8 @@ function pickVisibleDays(
   return selected;
 }
 
-function dayLabel(day: number, count: number): string {
-  return count > 0 ? `Day ${day} · ${count}` : `Day ${day}`;
+function dayLabel(label: string, count: number): string {
+  return count > 0 ? `${label} · ${count}` : label;
 }
 
 export function PlannerDayPills({
@@ -70,7 +70,7 @@ export function PlannerDayPills({
   onAddDay,
   onRemoveDay,
 }: Props) {
-  const { t } = useTranslation('planner');
+  const { t, i18n } = useTranslation('planner');
   const wrapRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
   const [visibleDays, setVisibleDays] = useState<number[]>(() =>
@@ -135,7 +135,7 @@ export function PlannerDayPills({
     ro.observe(wrap);
     update();
     return () => ro.disconnect();
-  }, [days, currentDay, countsByDay, totalDays]);
+  }, [days, currentDay, countsByDay, totalDays, i18n.language, t]);
 
   useLayoutEffect(() => {
     if (!menuOpen) return;
@@ -160,14 +160,14 @@ export function PlannerDayPills({
       <div className="planner-day-pills-measure" ref={measureRef} aria-hidden>
         {days.map((d) => (
           <span key={d} className="planner-day-pill" data-measure-day={d}>
-            {dayLabel(d, countsByDay[d] ?? 0)}
+            {dayLabel(t('day.tab', { n: d }), countsByDay[d] ?? 0)}
           </span>
         ))}
         <span className="planner-day-ellipsis" data-measure="ellipsis">
           …
         </span>
         <span className="planner-day-add" data-measure="add">
-          + Day
+          {t('chrome.addDayShort')}
         </span>
         {totalDays > 1 && (
           <span className="planner-day-remove" data-measure="remove">
@@ -189,7 +189,7 @@ export function PlannerDayPills({
               className={`planner-day-pill ${active ? 'active' : ''}`}
               onClick={() => onSelectDay(d)}
             >
-              {dayLabel(d, count)}
+              {dayLabel(t('day.tab', { n: d }), count)}
             </button>
           );
         })}
@@ -229,7 +229,7 @@ export function PlannerDayPills({
                         setMenuOpen(false);
                       }}
                     >
-                      {dayLabel(d, count)}
+                      {dayLabel(t('day.tab', { n: d }), count)}
                     </button>
                   );
                 })}
@@ -244,7 +244,7 @@ export function PlannerDayPills({
           onClick={onAddDay}
           aria-label={t('trip.addDay')}
         >
-          + Day
+          {t('chrome.addDayShort')}
         </button>
         {totalDays > 1 && (
           <button

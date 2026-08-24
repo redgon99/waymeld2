@@ -18,26 +18,33 @@ import i18n from '../lib/i18n';
 import { plannerPath } from '../lib/routes';
 import '../styles/app.css';
 
-const FEATURES = [
-  {
-    icon: 'cloudOk' as const,
-    title: '클라우드 저장',
-    desc: '핀업·동선·자료를 계정에 안전하게 보관합니다',
-  },
-  {
-    icon: 'route' as const,
-    title: '여러 기기 동기화',
-    desc: 'PC·태블릿·휴대폰에서 이어서 계획하세요',
-  },
-  {
-    icon: 'share' as const,
-    title: '공유 링크',
-    desc: '완성된 일정을 친구에게 링크로 전달합니다',
-  },
-];
+const FEATURE_ICONS = ['cloudOk', 'route', 'share'] as const;
 
 export default function LoginPage() {
   const { t } = useTranslation('common');
+  const { t: ta } = useTranslation('auth');
+  const { t: tp } = useTranslation('planner');
+
+  useEffect(() => {
+    document.title = tp('chrome.appTitle');
+  }, [tp]);
+  const features = [
+    {
+      icon: FEATURE_ICONS[0],
+      title: ta('login.featureCloudTitle'),
+      desc: ta('login.featureCloudDesc'),
+    },
+    {
+      icon: FEATURE_ICONS[1],
+      title: ta('login.featureSyncTitle'),
+      desc: ta('login.featureSyncDesc'),
+    },
+    {
+      icon: FEATURE_ICONS[2],
+      title: ta('login.featureShareTitle'),
+      desc: ta('login.featureShareDesc'),
+    },
+  ];
   const locale = normalizeLocale(i18n.language);
   const planPath = plannerPath(locale);
   const navigate = useNavigate();
@@ -134,8 +141,8 @@ export default function LoginPage() {
           </div>
         </header>
 
-        <section className="login-page-features" aria-label="주요 기능">
-          {FEATURES.map((item) => (
+        <section className="login-page-features" aria-label={ta('login.featuresAria')}>
+          {features.map((item) => (
             <article key={item.title} className="login-feature-card">
               <span className="login-feature-icon">
                 <Icon name={item.icon} size={20} />
@@ -152,26 +159,22 @@ export default function LoginPage() {
           {!configured ? (
             <div className="login-page-unconfigured">
               <Icon name="save" size={22} />
-              <h2>로컬 저장 모드</h2>
+              <h2>{ta('login.localTitle')}</h2>
               <p>
-                Supabase 환경 변수가 설정되지 않아 이 기기에만 저장됩니다.
+                {ta('login.localBody')}
                 <br />
                 클라우드 동기화를 쓰려면 <code>VITE_SUPABASE_URL</code>과{' '}
                 <code>VITE_SUPABASE_ANON_KEY</code>를 설정하세요.
               </p>
               <Link to={planPath} className="login-primary-btn">
-                로그인 없이 시작
+                {ta('login.startWithoutLogin')}
               </Link>
             </div>
           ) : sent ? (
             <div className="login-page-sent">
               <Icon name="mailOk" size={28} />
-              <h2>메일을 확인해 주세요</h2>
-              <p>
-                <strong>{email}</strong>로 로그인 링크를 보냈습니다.
-                <br />
-                메일함에서 링크를 누르면 자동으로 로그인됩니다.
-              </p>
+              <h2>{ta('login.sentTitle')}</h2>
+              <p>{ta('login.sentBody', { email })}</p>
               <button
                 type="button"
                 className="login-secondary-btn"
@@ -180,19 +183,17 @@ export default function LoginPage() {
                   setEmail('');
                 }}
               >
-                다른 이메일로 받기
+                {ta('login.otherEmail')}
               </button>
             </div>
           ) : (
             <>
-              <h2>로그인하고 시작하기</h2>
-              <p className="login-page-lead">
-                이메일로 매직 링크를 보내드립니다. 비밀번호는 필요 없습니다.
-              </p>
+              <h2>{ta('login.startTitle')}</h2>
+              <p className="login-page-lead">{ta('login.startLead')}</p>
 
               <form className="login-form" onSubmit={submit}>
                 <label className="login-label" htmlFor="login-email">
-                  이메일
+                  {ta('login.email')}
                 </label>
                 <input
                   id="login-email"
@@ -206,14 +207,14 @@ export default function LoginPage() {
                   autoComplete="email"
                 />
                 <button type="submit" className="login-primary-btn" disabled={sending || loading}>
-                  {sending ? '전송 중…' : '매직 링크 받기'}
+                  {sending ? ta('login.sending') : ta('login.sendLink')}
                 </button>
               </form>
 
               {googleAuthEnabled ? (
                 <>
                   <div className="login-divider">
-                    <span>또는</span>
+                    <span>{ta('login.or')}</span>
                   </div>
 
                   <button
@@ -222,7 +223,7 @@ export default function LoginPage() {
                     onClick={() => void handleGoogle()}
                   >
                     <Icon name="globe" size={18} />
-                    Google로 계속
+                    {ta('login.google')}
                   </button>
                 </>
               ) : configured ? (
@@ -269,11 +270,11 @@ export default function LoginPage() {
 
         <footer className="login-page-footer">
           <button type="button" className="login-guest-link" onClick={() => navigate(planPath)}>
-            로그인 없이 시작하기
+            {ta('login.guestStart')}
           </button>
           {migrating && (
             <p className="login-migrating">
-              <Icon name="loader" spin size={14} /> 여행 데이터 동기화 중…
+              <Icon name="loader" spin size={14} /> {ta('login.syncing')}
             </p>
           )}
         </footer>

@@ -1,0 +1,45 @@
+{
+  "brand": "WayMeld-Reiseführer",
+  "list": {
+    "metaTitle": "Reiseführer · WayMeld",
+    "title": "Reiseführer",
+    "subtitle": "Empfohlene Routen, praktische Tipps und Checklisten. Nur von Admins geprüfte Karten werden veröffentlicht.",
+    "loading": "Laden…",
+    "empty": "Noch keine veröffentlichten Guides.",
+    "kindFilter": "Guide-Typen"
+  },
+  "detail": {
+    "back": "Alle Guides",
+    "notFound": "Guide nicht gefunden.",
+    "sources": "Quellen",
+    "disclaimer": "Preise, Regeln und Öffnungszeiten können sich ändern. Prüfen Sie offizielle Infos vor der Reise."
+  },
+  "cta": {
+    "planner": "Planer öffnen",
+    "autoRoute": "Diese Route automatisch erstellen",
+    "setup": "Korea-Vorbereitungsliste",
+    "plaza": "Teilen-Platz"
+  },
+  "kinds": {
+    "all": "Alle",
+    "course": "Empfohlene Routen",
+    "practical": "Praktische Tipps",
+    "prepare": "Reisevorbereitung",
+    "food": "Essen & Cafés",
+    "culture": "Kultur & Etikette",
+    "shopping": "Shopping & Duty-free",
+    "safety": "Sicherheit & Notfall"
+  },
+  "tags": {
+    "transport": "Verkehr",
+    "payment": "Zahlung",
+    "sim": "SIM / Daten",
+    "etiquette": "Etikette",
+    "food": "Essen",
+    "other": "Sonstiges"
+  },
+  "errors": {
+    "notConfigured": "Supabase muss konfiguriert sein, um Guides anzuzeigen.",
+    "loadFailed": "Guides konnten nicht geladen werden."
+  }
+}

@@ -33,12 +33,17 @@ const STATUS_LABEL: Record<ScenarioCatalogStatus, string> = {
   archived: '보관됨',
 };
 
-const PREVIEW_LOCALES = ['ko', 'en', 'ja', 'zh'] as const;
+const PREVIEW_LOCALES = ['ko', 'en', 'ja', 'zh-CN', 'zh-TW', 'es', 'fr', 'de', 'ru'] as const;
 const LOCALE_LABEL: Record<(typeof PREVIEW_LOCALES)[number], string> = {
   ko: '한국어',
   en: 'English',
   ja: '日本語',
-  zh: '中文',
+  'zh-CN': '简体中文',
+  'zh-TW': '繁體中文',
+  es: 'Español',
+  fr: 'Français',
+  de: 'Deutsch',
+  ru: 'Русский',
 };
 
 function formatDateTime(iso: string | null): string {

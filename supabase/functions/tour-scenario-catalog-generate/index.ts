@@ -1,6 +1,6 @@
 /**
  * 관리자 전용: 테마+일수 하나에 대해 지역·스팟을 1회 선정(한국어)한 뒤,
- * 같은 스팟 구성을 고정한 채 en/ja/zh 서술문을 추가로 생성해 scenario_catalog에
+ * 같은 스팟 구성을 고정한 채 en/ja/zh/es/fr/de/ru 서술문을 추가로 생성해 scenario_catalog에
  * draft 행으로 저장한다. 플래너는 이 테이블만 읽으므로(카탈로그 전용) 언어별로
  * 다른 장소가 나오는 일이 없도록 select(장소 선정)와 narrate(서술문 작성)를 분리했다.
  */
@@ -23,7 +23,7 @@ import {
 } from '../_shared/scenarioGen.ts';
 
 const MAX_REGIONS_OFFERED = 3;
-const NARRATE_LOCALES = ['en', 'ja', 'zh'] as const;
+const NARRATE_LOCALES = ['en', 'ja', 'zh-CN', 'zh-TW', 'es', 'fr', 'de', 'ru'] as const;
 
 interface GroundedStop {
   placeId: string;
@@ -245,7 +245,7 @@ Deno.serve(async (req) => {
       ko: localeContentFromDraft(selectDraft),
     };
 
-    // 2) 확정된 스팟 구성을 고정한 채 en/ja/zh 서술문만 새로 생성 (그라운딩: contentId는 원본 스팟에서만 매핑)
+    // 2) 확정된 스팟 구성을 고정한 채 다국어 서술문만 새로 생성 (그라운딩: contentId는 원본 스팟에서만 매핑)
     const fixedDays: FixedDay[] = grounded.map((d) => ({
       day: d.day,
       dayTitle: d.dayTitleKo,

@@ -199,7 +199,7 @@ export function RouteOptionsPanel({
               <Icon name="clock" size={16} />
               <input
                 type="time"
-                lang={i18n.language === 'zh' ? 'zh-CN' : i18n.language}
+                lang={normalizeLocale(i18n.language)}
                 value={options.departTime}
                 onChange={(e) => patch('departTime', e.target.value)}
                 aria-label={t('route.options.departTime')}

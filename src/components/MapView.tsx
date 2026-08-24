@@ -12,6 +12,7 @@ import { GoogleMapView } from './GoogleMapView';
 import type { MapProvider } from '../lib/mapProvider';
 import { useLongPress } from '../hooks/useLongPress';
 import { mapCentersNear, searchResultFitPadding, shouldAnimateMapCenter, validMapPoints, type MapLatLng } from '../lib/mapCenterMotion';
+import i18n from '../lib/i18n';
 
 interface Props {
   provider?: MapProvider;
@@ -556,7 +557,7 @@ function KakaoMapView({
       const content = document.createElement('div');
       content.className = 'map-marker draft-pin';
       content.innerHTML = `
-        <div class="marker-label draft-pin-label">선택 위치</div>
+        <div class="marker-label draft-pin-label">${i18n.t('map.pickedLocation', { ns: 'planner' })}</div>
         <div class="marker-dot draft-pin-dot">
           ${iconSvgMarkup('pinPlus', { size: 16, color: '#fff' })}
         </div>
@@ -576,6 +577,7 @@ function KakaoMapView({
     pinSelectionActive,
     draftPinLocation,
     plazaMarkers.length,
+    i18n.language,
   ]);
 
   // 선택 장소 마커 하이라이트 (호버/클릭 시 재생성 없이 class만 갱신)
@@ -704,7 +706,7 @@ function KakaoMapView({
       const content = document.createElement('div');
       content.className = 'origin-marker';
       content.innerHTML = `
-        <div class="origin-label">${iconSvgMarkup('flag', { size: 14 })} 출발지</div>
+        <div class="origin-label">${iconSvgMarkup('flag', { size: 14 })} ${i18n.t('map.origin', { ns: 'planner' })}</div>
         <div class="origin-dot"></div>
       `;
       const overlay = new window.kakao.maps.CustomOverlay({
@@ -715,7 +717,7 @@ function KakaoMapView({
       overlay.setMap(mapRef.current);
       originMarkerRef.current = overlay;
     }
-  }, [origin?.lat, origin?.lng]);
+  }, [origin?.lat, origin?.lng, i18n.language]);
 
   // 지도 주변 검색 중심 마커
   useEffect(() => {
@@ -788,7 +790,7 @@ function KakaoMapView({
       ref={mapEl}
       className={`map-canvas ${pickingOriginFromMap || pickingPinFromMap ? 'picking' : ''}`}
       role="application"
-      aria-label="지도"
+      aria-label={i18n.t('map.ariaLabel', { ns: 'planner' })}
       onContextMenu={(e) => e.preventDefault()}
       {...longPress}
     />

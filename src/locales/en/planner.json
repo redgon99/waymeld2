@@ -3,7 +3,7 @@
     "placeholder": "Search places",
     "placeholderWithYoutube": "Place name or YouTube link",
     "placeholderWithLink": "Place · YouTube · web · SNS link",
-    "placeholderDesign": "Place, YouTube, blog link · 장소·링크 검색",
+    "placeholderDesign": "Place, YouTube, or blog link",
     "pasteExtracted": "Extracted {{count}} places from paste. Press search.",
     "metaNearby": "Near map center · 지도 주변 {{km}} km · {{count}} results",
     "metaNationwide": "Nationwide · 전국 · {{count}} results",
@@ -41,7 +41,13 @@
     "batchHint": "Separate multiple places with commas or new lines (up to 5)",
     "youtubeHint": "YouTube link detected. Tap Extract places to get candidates",
     "linkExtractHint": "Link detected. Tap Extract places to get candidates",
-    "linkSnsHint": "Instagram/TikTok auto-extract is limited. Open the original post instead"
+    "linkSnsHint": "Instagram/TikTok auto-extract is limited. Open the original post instead",
+    "loadMore": "Load more",
+    "loadingMore": "Loading…",
+    "resetResults": "Reset results",
+    "insightTop": "Top pick",
+    "insightPositive": "Well reviewed",
+    "insightWait": "Long wait"
   },
   "trip": {
     "newTrip": "New trip",
@@ -80,7 +86,11 @@
     "table": "Table view",
     "tableShort": "Table",
     "tableExit": "Close table",
-    "segmentAria": "Switch view"
+    "segmentAria": "Switch view",
+    "overview": "Overview",
+    "overviewTitle": "Overview",
+    "overviewExit": "Exit",
+    "overviewAll": "All"
   },
   "table": {
     "col": {
@@ -509,7 +519,17 @@
     "airportStep3": "Show your hotel address in Korean to staff or taxi.",
     "airportStep4": "Save the hotel pin in this app before you land.",
     "phrasesTitle": "Phrase cards",
-    "copyPhrase": "Copy Korean"
+    "copyPhrase": "Copy Korean",
+    "phrases": {
+      "goHere": "Please go here",
+      "goToAddress": "Please go to this address",
+      "driveSlowly": "Please drive slowly",
+      "receipt": "Receipt, please",
+      "acceptCards": "Do you accept cards?",
+      "restroom": "Where is the restroom?",
+      "notSpicy": "Not spicy, please",
+      "thankYou": "Thank you"
+    }
   },
   "save": {
     "saved": "Saved",
@@ -612,5 +632,73 @@
     "apply": "Add to pins",
     "applied": "Added {{count}} places to your trip.",
     "newSearch": "Try another theme"
+  },
+  "chrome": {
+    "appTitle": "WayMeld — Collect places. Meld your route.",
+    "brandKo": "여로담",
+    "panelAria": "Planner panel",
+    "panelCollapse": "Collapse panel",
+    "railAria": "Panel shortcuts",
+    "tabSearch": "Search",
+    "tabPins": "Pins {{count}}",
+    "tabRoute": "Route",
+    "tabScenario": "Scenario",
+    "openSearch": "Open search",
+    "openPins": "Open pins",
+    "openRoute": "Open route",
+    "openScenario": "Open theme trip scenario",
+    "dockAria": "Main menu",
+    "routeNeedPins": "Need 2+ pins",
+    "routeBuild": "Build route",
+    "addDayShort": "+ Day",
+    "pinFromMap": "Pin from map",
+    "sheetRouteTitle": "Day {{n}} route",
+    "sheetPinsSummary": "{{count}} pins · Day {{n}}"
+  },
+  "map": {
+    "centerHere": "Search around here",
+    "ariaLabel": "Map",
+    "origin": "Start",
+    "pickedLocation": "Selected point",
+    "viewPhoto": "View photo of {{name}}",
+    "insightLabel": "Traveler insight",
+    "insightHigh": "Highly rated by travelers.",
+    "insightMixed": "Check recent reviews, hours, and payment.",
+    "pin": "Pin",
+    "pinned": "Pinned"
+  },
+  "toast": {
+    "searchAtCenter": "Searching around this point",
+    "searchAtMyLocation": "Searching around your location",
+    "needTwoPins": "Pin or select at least 2 places to build a route",
+    "routeRefined": "Real road data applied",
+    "originNotFound": "Could not find that address or place. Try again.",
+    "gpsUnavailable": "GPS unavailable. Using the first stop as start.",
+    "pickOriginOnMap": "Pick a start point on the map.",
+    "originUnknown": "Could not confirm the start point.",
+    "deleteTripFailed": "Could not delete the trip",
+    "shareSaveFailed": "Could not save the share. Sign in and try again.",
+    "cloudSynced": "Synced with your cloud account",
+    "searchError": "Search failed. Please try again.",
+    "autoRouteHint": "Auto route — pin 2+ places, then build the itinerary",
+    "guideRouteHint": "「{{title}}」 — pin 2+ places, then build the route",
+    "importedTrip": "Added 「{{title}}」 to your trips",
+    "pinned": "Pinned {{name}} ({{n}})",
+    "unpinned": "Unpinned {{name}}",
+    "clearedPins": "Cleared all pins on day {{day}}",
+    "deletedTrip": "Deleted 「{{title}}」",
+    "shareCopied": "Share link copied (saved as public)",
+    "shareCopiedPlaza": "Share link copied (saved as public · listed on plaza)",
+    "copiedDepart": "Copied day {{day}} departure settings",
+    "pickOriginHint": "Tap the map to set the start point"
+  },
+  "confirm": {
+    "newTrip": "Save 「{{title}}」 and start a new trip?\nPins and route on this screen will switch to the new trip.",
+    "deleteTrip": "Delete 「{{title}}」?\nPins, route, and materials will be permanently removed.",
+    "deleteLastTrip": "「{{title}}」 is your last trip.\nDeleting it will create an empty new trip. Continue?",
+    "clearPins": "Day {{day}} has {{count}} pins. Clear all?\nThis cannot be undone.",
+    "removeDay": "Delete day {{day}}?",
+    "shareWithoutLogin": "Without signing in, the share link may not open on other devices or browsers.\nShare anyway?",
+    "shareLocalMode": "Local save mode. The share link may only open in this browser.\nContinue?"
   }
 }

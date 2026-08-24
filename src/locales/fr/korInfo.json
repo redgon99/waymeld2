@@ -1,0 +1,105 @@
+{
+  "brand": "WayMeld",
+  "metaTitle": "Infos voyage en Corée · WayMeld",
+  "title": "Infos voyage en Corée",
+  "subtitle": "Pas épinglable, mais utile : photos touristiques, sentiers Durunubi, audioguides, stats de visiteurs, lieux pet-friendly et accessibles.",
+  "cta": {
+    "planner": "Créer mon itinéraire"
+  },
+  "tabs": {
+    "label": "Type de contenu",
+    "photos": "Galerie photo",
+    "trails": "Sentiers",
+    "audio": "Audioguides",
+    "stats": "Visiteurs par région",
+    "pet": "Voyage avec animal",
+    "with": "Voyage accessible",
+    "desc": {
+      "photos": "Photos touristiques de l’Organisation du tourisme de Corée : sites, fêtes et paysages. Recherchez par lieu ou mot-clé.",
+      "trails": "Parcours à pied Durunubi Korea Dulle-gil (Haeparang, Namparang, Seohaerang et la DMZ). Filtrez par marque et difficulté.",
+      "audio": "Audioguides « Odii » qui racontent l’histoire des sites de Corée. Choisissez un lieu pour ouvrir ses récits.",
+      "stats": "Visiteurs quotidiens par région (DataLab), estimés via télécoms et cartes. Il y a environ un mois de décalage jusqu’aux données les plus récentes.",
+      "pet": "Hébergements, restaurants et visites où vous pouvez aller avec un animal. Vérifiez la politique de chaque lieu.",
+      "with": "Lieux sans barrières, plus faciles en fauteuil ou avec poussette. L’accessibilité peut varier."
+    }
+  },
+  "kinds": {
+    "all": "Tout"
+  },
+  "subcats": {
+    "label": "Sous-catégories"
+  },
+  "contentTypes": {
+    "12": "Sites",
+    "14": "Culture",
+    "15": "Festivals",
+    "25": "Parcours",
+    "28": "Loisirs sportifs",
+    "32": "Hébergement",
+    "38": "Shopping",
+    "39": "Gastronomie"
+  },
+  "list": {
+    "loading": "Chargement…",
+    "empty": "Aucun résultat.",
+    "copyAddress": "Copier l’adresse",
+    "copied": "Copié",
+    "copyAria": "Copier l’adresse coréenne d’origine (à montrer au taxi ou à l’app de cartes)"
+  },
+  "photos": {
+    "searchPlaceholder": "Rechercher par lieu ou mot (ex. Gyeongbokgung, vue nocturne)",
+    "themes": {
+      "night": "Vue nocturne",
+      "festival": "Festival",
+      "hanok": "Hanok",
+      "nature": "Nature",
+      "beach": "Plage",
+      "temple": "Temple"
+    }
+  },
+  "trails": {
+    "searchPlaceholder": "Rechercher par nom de parcours (ex. Haeparang-gil)",
+    "filterLabel": "Filtres de parcours",
+    "levelFilterLabel": "Difficulté",
+    "brand": {
+      "해파랑길": "Haeparang-gil (côte est)",
+      "남파랑길": "Namparang-gil (côte sud)",
+      "서해랑길": "Seohaerang-gil (côte ouest)",
+      "DMZ 평화의 길": "Sentier de la paix DMZ"
+    },
+    "levelLow": "Facile",
+    "levelMid": "Moyen",
+    "levelHigh": "Difficile",
+    "viewRoute": "Voir le parcours sur la carte",
+    "start": "Départ",
+    "finish": "Arrivée",
+    "close": "Fermer",
+    "mapNotConfigured": "Google Maps doit être configuré pour afficher ce parcours.",
+    "routeUnavailable": "Impossible de charger les données du parcours."
+  },
+  "audio": {
+    "searchPlaceholder": "Rechercher par nom de lieu (ex. Gyeongbokgung, Daeheungsa)",
+    "noStories": "Pas encore de récits."
+  },
+  "stats": {
+    "level": {
+      "metco": "Province/ville",
+      "locgo": "District (si/gun/gu)"
+    },
+    "searchPlaceholder": "Filtrer par nom de région",
+    "baseYmd": "Au {{date}}",
+    "local": "Local",
+    "domestic": "National",
+    "foreign": "Étranger"
+  },
+  "pet": {
+    "searchPlaceholder": "Rechercher par lieu ou mot (ex. café, pension)"
+  },
+  "with": {
+    "searchPlaceholder": "Rechercher par lieu ou mot (ex. Gyeongbokgung, musée)"
+  },
+  "errors": {
+    "notConfigured": "Supabase doit être configuré pour afficher ce contenu.",
+    "loadFailed": "Impossible de charger ce contenu."
+  }
+}

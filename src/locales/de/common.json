@@ -1,0 +1,80 @@
+{
+  "appName": "WayMeld",
+  "appNameEn": "WayMeld",
+  "appTagline": "Orte sammeln. Route zusammenfügen.",
+  "loadingMap": "Karte wird geladen…",
+  "search": "Suchen",
+  "clear": "Löschen",
+  "close": "Schließen",
+  "cancel": "Abbrechen",
+  "confirm": "OK",
+  "save": "Speichern",
+  "delete": "Löschen",
+  "share": "Teilen",
+  "next": "Weiter",
+  "back": "Zurück",
+  "retry": "Erneut",
+  "more": "Mehr",
+  "all": "Alle",
+  "day": "Tag {{count}}",
+  "dayShort": "Tag {{n}}",
+  "reviews": "{{count}} Bewertungen",
+  "reviewsCount": "{{count}} Bewertungen",
+  "rating": "Bewertung",
+  "distance": "Entfernung",
+  "locale": "Sprache",
+  "localeLabel": "Sprache wählen",
+  "mapProvider": {
+    "kakao": "Kakao Map",
+    "google": "Google Maps",
+    "switchedKakao": "Zu Kakao Map gewechselt",
+    "switchedGoogle": "Zu Google Maps gewechselt"
+  },
+  "auth": {
+    "localMode": "Lokales Speichern",
+    "cloudLogin": "Cloud speichern (anmelden)",
+    "logout": "Abmelden",
+    "admin": "Admin",
+    "beforeLogin": "Nicht angemeldet"
+  },
+  "openStatus": {
+    "open": "Geöffnet",
+    "scheduled": "Öffnet bald",
+    "closed": "Geschlossen",
+    "offday": "Heute geschlossen"
+  },
+  "sort": {
+    "distance": "Entfernung",
+    "rating": "Bewertung",
+    "review": "Bewertungen"
+  },
+  "category": {
+    "all": "Alle",
+    "food": "Essen",
+    "cafe": "Café",
+    "tour": "Sehenswürdigkeiten",
+    "stay": "Unterkunft",
+    "culture": "Kultur",
+    "shop": "Laden",
+    "beauty": "Beauty",
+    "market": "Markt",
+    "transport": "Verkehr",
+    "road": "Straße",
+    "parking": "Parken",
+    "other": "Sonstiges"
+  },
+  "travelMode": {
+    "car": "Auto",
+    "walk": "Zu Fuß",
+    "transit": "ÖPNV",
+    "bike": "Fahrrad"
+  },
+  "payment": {
+    "creditCard": "Kreditkarte",
+    "debitCard": "Debitkarte",
+    "nfc": "NFC"
+  },
+  "mobility": {
+    "straightLineOnly": "Außerhalb Koreas wird die Entfernung als Luftlinie geschätzt."
+  }
+}

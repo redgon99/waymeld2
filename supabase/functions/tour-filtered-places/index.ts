@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
   let contentTypeId = '';
   let pageNo = 1;
   let numOfRows = 24;
-  let locale: 'en' | 'ja' | 'zh' | null = null;
+  let locale: 'en' | 'ja' | 'zh' | 'es' | 'fr' | 'de' | 'ru' | null = null;
   try {
     const body = (await req.json()) as {
       kind?: string;

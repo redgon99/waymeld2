@@ -1,0 +1,80 @@
+{
+  "appName": "WayMeld",
+  "appNameEn": "WayMeld",
+  "appTagline": "Reúne lugares. Une tu ruta.",
+  "loadingMap": "Cargando mapa…",
+  "search": "Buscar",
+  "clear": "Borrar",
+  "close": "Cerrar",
+  "cancel": "Cancelar",
+  "confirm": "Aceptar",
+  "save": "Guardar",
+  "delete": "Eliminar",
+  "share": "Compartir",
+  "next": "Siguiente",
+  "back": "Atrás",
+  "retry": "Reintentar",
+  "more": "Más",
+  "all": "Todo",
+  "day": "Día {{count}}",
+  "dayShort": "Día {{n}}",
+  "reviews": "{{count}} reseñas",
+  "reviewsCount": "{{count}} reseñas",
+  "rating": "Valoración",
+  "distance": "Distancia",
+  "locale": "Idioma",
+  "localeLabel": "Elegir idioma",
+  "mapProvider": {
+    "kakao": "Kakao Map",
+    "google": "Google Maps",
+    "switchedKakao": "Cambiado a Kakao Map",
+    "switchedGoogle": "Cambiado a Google Maps"
+  },
+  "auth": {
+    "localMode": "Guardado local",
+    "cloudLogin": "Guardado en la nube (iniciar sesión)",
+    "logout": "Cerrar sesión",
+    "admin": "Admin",
+    "beforeLogin": "Sin iniciar sesión"
+  },
+  "openStatus": {
+    "open": "Abierto",
+    "scheduled": "Abre pronto",
+    "closed": "Cerrado",
+    "offday": "Cerrado hoy"
+  },
+  "sort": {
+    "distance": "Distancia",
+    "rating": "Valoración",
+    "review": "Reseñas"
+  },
+  "category": {
+    "all": "Todo",
+    "food": "Comida",
+    "cafe": "Café",
+    "tour": "Visitas",
+    "stay": "Alojamiento",
+    "culture": "Cultura",
+    "shop": "Tienda",
+    "beauty": "Belleza",
+    "market": "Mercado",
+    "transport": "Transporte",
+    "road": "Calle",
+    "parking": "Parking",
+    "other": "Otro"
+  },
+  "travelMode": {
+    "car": "Coche",
+    "walk": "A pie",
+    "transit": "Transporte público",
+    "bike": "Bicicleta"
+  },
+  "payment": {
+    "creditCard": "Tarjeta de crédito",
+    "debitCard": "Tarjeta de débito",
+    "nfc": "NFC"
+  },
+  "mobility": {
+    "straightLineOnly": "Fuera de Corea, la distancia se estima en línea recta."
+  }
+}

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Icon } from './Icon';
 import type { PlannerPanelTab } from './PlannerSidePanel';
 
@@ -9,16 +10,17 @@ interface Props {
 }
 
 export function PanelIconRail({ visible, pinCount, activeTab, onOpen }: Props) {
+  const { t } = useTranslation('planner');
   if (!visible) return null;
 
   return (
-    <nav className="planner-icon-rail desktop-only-overlay" aria-label="패널 바로가기">
+    <nav className="planner-icon-rail desktop-only-overlay" aria-label={t('chrome.railAria')}>
       <button
         type="button"
         className={`planner-rail-btn ${activeTab === 'search' ? 'active' : ''}`}
         onClick={() => onOpen('search')}
-        title="Search 검색"
-        aria-label="검색 열기"
+        title={t('chrome.tabSearch')}
+        aria-label={t('chrome.openSearch')}
       >
         <Icon name="search" size={18} />
       </button>
@@ -26,8 +28,8 @@ export function PanelIconRail({ visible, pinCount, activeTab, onOpen }: Props) {
         type="button"
         className={`planner-rail-btn ${activeTab === 'pins' ? 'active' : ''}`}
         onClick={() => onOpen('pins')}
-        title="Pins 핀"
-        aria-label="핀 목록 열기"
+        title={t('chrome.tabPins', { count: pinCount })}
+        aria-label={t('chrome.openPins')}
       >
         <Icon name="pin" size={18} />
         {pinCount > 0 && <span className="planner-rail-badge">{pinCount}</span>}
@@ -36,8 +38,8 @@ export function PanelIconRail({ visible, pinCount, activeTab, onOpen }: Props) {
         type="button"
         className={`planner-rail-btn ${activeTab === 'route' ? 'active' : ''}`}
         onClick={() => onOpen('route')}
-        title="Route 동선"
-        aria-label="동선 열기"
+        title={t('chrome.tabRoute')}
+        aria-label={t('chrome.openRoute')}
       >
         <Icon name="route" size={18} />
       </button>
@@ -45,8 +47,8 @@ export function PanelIconRail({ visible, pinCount, activeTab, onOpen }: Props) {
         type="button"
         className={`planner-rail-btn ${activeTab === 'scenario' ? 'active' : ''}`}
         onClick={() => onOpen('scenario')}
-        title="AI 시나리오"
-        aria-label="테마 여행 시나리오 열기"
+        title={t('chrome.tabScenario')}
+        aria-label={t('chrome.openScenario')}
       >
         <Icon name="sparkles" size={18} />
       </button>

@@ -1,5 +1,6 @@
 import type { Place } from '../types';
 import { iconSvgMarkup } from '../icons/waymeld-icons';
+import i18n from './i18n';
 import { getCategoryMeta } from './categories';
 import { proxiedThumbnailUrl } from './kakaoPlaceApi';
 import { buildPlaceMapLinks } from './mapLinks';
@@ -39,7 +40,7 @@ export function createMapInfoCardElement(
   const root = document.createElement('div');
   root.className = 'map-info-card';
   root.innerHTML = `
-    <button type="button" class="map-info-close" aria-label="닫기">
+    <button type="button" class="map-info-close" aria-label="${escapeHtml(i18n.t('close', { ns: 'common' }))}">
       ${iconSvgMarkup('close', { size: 16 })}
     </button>
     <div class="map-info-card-body result-item ${opts.isPinned ? 'pinned' : ''} ${opts.isClosed ? 'closed' : ''}">
@@ -47,8 +48,8 @@ export function createMapInfoCardElement(
         type="button"
         class="result-thumb map-info-thumb"
         style="border-color:${borderColor};box-shadow:0 0 0 1px ${borderColor}33"
-        title="${escapeHtml(place.name)} 사진 보기"
-        aria-label="${escapeHtml(place.name)} 사진 보기"
+        title="${escapeHtml(i18n.t('map.viewPhoto', { ns: 'planner', name: place.name }))}"
+        aria-label="${escapeHtml(i18n.t('map.viewPhoto', { ns: 'planner', name: place.name }))}"
       >
         ${
           thumbSrc
@@ -83,13 +84,13 @@ export function createMapInfoCardElement(
         ${
           place.rating != null && place.rating >= 4
             ? `<div class="traveler-insight-box map-info-insight">
-                <div class="traveler-insight-label">✦ TRAVELER INSIGHT</div>
-                <div class="traveler-insight-text">Highly rated by travelers · 여행자 평점이 높은 장소입니다.</div>
+                <div class="traveler-insight-label">✦ ${escapeHtml(i18n.t('map.insightLabel', { ns: 'planner' }))}</div>
+                <div class="traveler-insight-text">${escapeHtml(i18n.t('map.insightHigh', { ns: 'planner' }))}</div>
                </div>`
             : place.rating != null && place.rating < 3.2
               ? `<div class="traveler-insight-box map-info-insight">
-                <div class="traveler-insight-label">✦ TRAVELER INSIGHT</div>
-                <div class="traveler-insight-text">Mixed recent reviews — check hours & payment · 최근 후기를 확인해 보세요.</div>
+                <div class="traveler-insight-label">✦ ${escapeHtml(i18n.t('map.insightLabel', { ns: 'planner' }))}</div>
+                <div class="traveler-insight-text">${escapeHtml(i18n.t('map.insightMixed', { ns: 'planner' }))}</div>
                </div>`
               : ''
         }
@@ -99,15 +100,15 @@ export function createMapInfoCardElement(
           ? `<div class="map-info-quick">
               ${
                 addr
-                  ? `<button type="button" class="map-info-quick-btn" data-copy="${escapeHtml(addr)}" title="주소 복사">
-                      ${iconSvgMarkup('note', { size: 14 })} 주소
+                  ? `<button type="button" class="map-info-quick-btn" data-copy="${escapeHtml(addr)}" title="${escapeHtml(i18n.t('taxi.copyAddress', { ns: 'planner' }))}">
+                      ${iconSvgMarkup('note', { size: 14 })} ${escapeHtml(i18n.t('taxi.address', { ns: 'planner' }))}
                      </button>`
                   : ''
               }
               ${
                 opts.onShowTaxiCard
-                  ? `<button type="button" class="map-info-quick-btn map-info-taxi" title="택시 카드">
-                      ${iconSvgMarkup('transportCar', { size: 14 })} Taxi
+                  ? `<button type="button" class="map-info-quick-btn map-info-taxi" title="${escapeHtml(i18n.t('taxi.showCard', { ns: 'planner' }))}">
+                      ${iconSvgMarkup('transportCar', { size: 14 })} ${escapeHtml(i18n.t('taxi.showCard', { ns: 'planner' }))}
                      </button>`
                   : ''
               }
@@ -120,7 +121,7 @@ export function createMapInfoCardElement(
       <div class="result-actions map-info-actions">
         ${
           opts.onRoadview
-            ? `<button type="button" class="result-aux-btn result-roadview-btn map-info-roadview" title="로드뷰" aria-label="로드뷰">
+            ? `<button type="button" class="result-aux-btn result-roadview-btn map-info-roadview" title="${escapeHtml(i18n.t('search.roadview', { ns: 'planner' }))}" aria-label="${escapeHtml(i18n.t('search.roadview', { ns: 'planner' }))}">
                 ${iconSvgMarkup('roadview', { size: 18 })}
                </button>`
             : ''
@@ -128,8 +129,8 @@ export function createMapInfoCardElement(
         <button type="button" class="pin-btn map-info-pin ${opts.isPinned ? 'pinned' : ''}" ${opts.isClosed ? 'disabled' : ''}>
           ${
             opts.isPinned
-              ? `${iconSvgMarkup('check', { size: 16 })} 핀업됨`
-              : `${iconSvgMarkup('pinPlus', { size: 18 })} 핀업`
+              ? `${iconSvgMarkup('check', { size: 16 })} ${escapeHtml(i18n.t('map.pinned', { ns: 'planner' }))}`
+              : `${iconSvgMarkup('pinPlus', { size: 18 })} ${escapeHtml(i18n.t('map.pin', { ns: 'planner' }))}`
           }
         </button>
       </div>

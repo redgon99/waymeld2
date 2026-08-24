@@ -36,7 +36,7 @@ import {
   writeMapViewport,
 } from '../lib/mapViewport';
 import { computeTripCenter } from '../lib/tripGeo';
-import { googleMapsLanguage, normalizeLocale } from '../lib/locale';
+import { googleMapsLanguage, normalizeLocale, SUPPORTED_LOCALES } from '../lib/locale';
 import i18n from '../lib/i18n';
 import {
   canCreateTrip,
@@ -145,11 +145,17 @@ function centerFromTrip(trip: Pick<Trip, 'pinnedByDay' | 'currentDay' | 'plazaCe
   return null;
 }
 
+function defaultNewTripTitles(): Set<string> {
+  return new Set(
+    SUPPORTED_LOCALES.map((lng) => i18n.t('trip.newTrip', { ns: 'planner', lng }))
+  );
+}
+
 function makeEmptyTrip(): Trip {
   return normalizeTrip({
     id: createTripId(),
     slug: createSlug(),
-    title: '새 여행',
+    title: i18n.t('trip.newTrip', { ns: 'planner' }),
     totalDays: 1,
     currentDay: 1,
     pinnedByDay: { 1: [] },
@@ -166,8 +172,13 @@ export default function PlannerPage() {
   const location = useLocation();
   const { user, configured: authConfigured, plan, isAdmin } = useAuth();
   const { t: tc } = useTranslation('common');
-  const { t: tp } = useTranslation('planner');
+  const { t: tp, i18n: plannerI18n } = useTranslation('planner');
   const { t: tb } = useTranslation('billing');
+
+  useEffect(() => {
+    document.title = tp('chrome.appTitle');
+  }, [tp, plannerI18n.language]);
+
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [scenarioOpen, setScenarioOpen] = useState(false);
   const [kakaoReady, setKakaoReady] = useState(false);
@@ -175,6 +186,17 @@ export default function PlannerPage() {
   const [trip, setTrip] = useState<Trip>(() => makeEmptyTrip());
   const [tripSummaries, setTripSummaries] = useState<TripSummary[]>([]);
   const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const localized = tp('trip.newTrip');
+    setTrip((prev) =>
+      defaultNewTripTitles().has(prev.title) && prev.title !== localized
+        ? { ...prev, title: localized }
+        : prev
+    );
+  }, [hydrated, tp, plannerI18n.language]);
+
   const [savePending, setSavePending] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const [shareModalOpen, setShareModalOpen] = useState(false);
@@ -401,8 +423,8 @@ export default function PlannerPage() {
     setPanelOpen(true);
     showToast(
       guideTitle
-        ? `「${guideTitle}」코스 — 장소를 2곳 이상 핀업한 뒤 자동 동선을 만드세요`
-        : '자동 동선 모드 — 장소를 2곳 이상 핀업한 뒤 일정을 만드세요'
+        ? i18n.t('toast.guideRouteHint', { ns: 'planner', title: guideTitle })
+        : i18n.t('toast.autoRouteHint', { ns: 'planner' })
     );
   }, [location.search]);
 
@@ -459,7 +481,7 @@ export default function PlannerPage() {
         focusMapOnTrip(next);
         setLastSavedAt(loaded.updatedAt);
         await refreshTripList(userId);
-        showToast(`「${loaded.title}」을 내 여행에 추가했습니다`);
+        showToast(i18n.t('toast.importedTrip', { ns: 'planner', title: loaded.title }));
       }
     })();
   }, [hydrated, pendingOpenTripId, user?.id, navigate, location.pathname, refreshTripList, focusMapOnTrip]);
@@ -496,7 +518,7 @@ export default function PlannerPage() {
         setTrip((prevTrip) => ({ ...prevTrip, ownerId: userId, updatedAt: Date.now() }));
       }
       if (userId && !prev) {
-        showToast('클라우드 계정과 동기화했습니다');
+        showToast(i18n.t('toast.cloudSynced', { ns: 'planner' }));
       }
     })();
   }, [user?.id, hydrated, refreshTripList, focusMapOnTrip]);
@@ -809,7 +831,7 @@ export default function PlannerPage() {
           setResults([]);
           setSearchEmpty(true);
         }
-        setSearchError('검색 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+        setSearchError(i18n.t('toast.searchError', { ns: 'planner' }));
       } finally {
         setSearching(false);
         setLoadingMore(false);
@@ -1001,7 +1023,7 @@ export default function PlannerPage() {
     setSearchScope('nearby');
     setFitSearchBounds(false);
     openSearchPanel();
-    showToast('이 위치를 중심으로 검색합니다');
+    showToast(tp('toast.searchAtCenter'));
     void runSearch(1, false, {
       scope: 'nearby',
       center,
@@ -1016,7 +1038,7 @@ export default function PlannerPage() {
   const handleUseMyLocationForSearch = useCallback(() => {
     void getApproximateLocation().then((center) => {
       if (!center) {
-        showToast('현재 위치를 가져올 수 없습니다');
+        showToast(tp('search.locationFailed'));
         return;
       }
       nearbySearchCenterRef.current = center;
@@ -1025,7 +1047,7 @@ export default function PlannerPage() {
       setSearchScope('nearby');
       setFitSearchBounds(false);
       openSearchPanel();
-      showToast('현재 위치를 중심으로 검색합니다');
+      showToast(tp('toast.searchAtMyLocation'));
       void runSearch(1, false, {
         scope: 'nearby',
         center,
@@ -1086,10 +1108,10 @@ export default function PlannerPage() {
       };
       setPinnedForDay(currentDay, [...current, pinnedPlace]);
       setRouteForDay(currentDay, null);
-      showToast(`${place.name} 핀업 (${current.length + 1}번째)`);
+      showToast(tp('toast.pinned', { name: place.name, n: current.length + 1 }));
       return pinnedPlace;
     },
-    [trip.pinnedByDay, currentDay]
+    [trip.pinnedByDay, currentDay, tp]
   );
 
   const handleTogglePin = useCallback(
@@ -1102,7 +1124,7 @@ export default function PlannerPage() {
           .map((p, i) => ({ ...p, order: i + 1 }));
         setPinnedForDay(currentDay, next);
         setInfoWindowPlace((prev) => (prev?.id === place.id ? null : prev));
-        showToast(`${place.name} 핀업 해제`);
+        showToast(tp('toast.unpinned', { name: place.name }));
       } else {
         const pinnedPlace: PinnedPlace = {
           ...place,
@@ -1113,10 +1135,10 @@ export default function PlannerPage() {
           day: currentDay,
         };
         setPinnedForDay(currentDay, [...current, pinnedPlace]);
-        showToast(`${place.name} 핀업 (${current.length + 1}번째)`);
+        showToast(tp('toast.pinned', { name: place.name, n: current.length + 1 }));
       }
     },
-    [trip.pinnedByDay, currentDay]
+    [trip.pinnedByDay, currentDay, tp]
   );
 
   const handleTogglePinFromInfo = useCallback(
@@ -1155,17 +1177,15 @@ export default function PlannerPage() {
     const count = (trip.pinnedByDay[currentDay] ?? []).length;
     if (count === 0) return;
     if (
-      !confirm(
-        `${currentDay}일차에 핀 ${count}개가 있습니다. 모두 해제할까요?\n(되돌릴 수 없습니다)`
-      )
+      !confirm(tp('confirm.clearPins', { day: currentDay, count }))
     ) {
       return;
     }
     setPinnedForDay(currentDay, []);
     setRouteForDay(currentDay, null);
     setSelectedPinIds(new Set());
-    showToast(`${currentDay}일차 핀을 모두 해제했습니다`);
-  }, [trip.pinnedByDay, currentDay]);
+    showToast(tp('toast.clearedPins', { day: currentDay }));
+  }, [trip.pinnedByDay, currentDay, tp]);
 
   const handleRemovePin = useCallback(
     (id: string) => {
@@ -1233,7 +1253,7 @@ export default function PlannerPage() {
   const handleOpenRouteOptions = useCallback(() => {
     const targetCount = selectedPinIds.size > 0 ? selectedPinIds.size : pinned.length;
     if (targetCount < 2) {
-      showToast('일정을 만들려면 장소를 2곳 이상 선택하거나 핀업해 주세요');
+      showToast(tp('toast.needTwoPins'));
       return;
     }
     setMobileSheet(null);
@@ -1408,7 +1428,7 @@ export default function PlannerPage() {
         const refined = await refineRouteWithRealLegs(base, fetchLegs);
         setRouteForDay(currentDay, refined);
         if (refined.legs.some((l) => l.source === 'api')) {
-          showToast('실제 경로 정보가 반영되었습니다');
+          showToast(tp('toast.routeRefined'));
         }
       } catch (e) {
         console.warn('경로 보강 실패', e);
@@ -1423,9 +1443,9 @@ export default function PlannerPage() {
     } catch (err) {
       const code = (err as Error).message;
       if (code === 'ADDRESS_NOT_FOUND') {
-        showToast('주소·장소명을 찾을 수 없습니다. 다시 입력해 주세요.');
+        showToast(tp('toast.originNotFound'));
       } else if (code === 'GPS_UNAVAILABLE') {
-        showToast('GPS를 사용할 수 없습니다. 첫 장소를 출발지로 사용합니다.');
+        showToast(tp('toast.gpsUnavailable'));
         await buildAndGenerate({
           ...routeOptions.origin,
           lat: routePins[0].lat,
@@ -1434,9 +1454,9 @@ export default function PlannerPage() {
         });
         return;
       } else if (code === 'MAP_ORIGIN_REQUIRED') {
-        showToast('지도에서 출발지를 선택해 주세요.');
+        showToast(tp('toast.pickOriginOnMap'));
       } else {
-        showToast('출발지를 확인할 수 없습니다.');
+        showToast(tp('toast.originUnknown'));
       }
       return;
     }
@@ -1470,7 +1490,7 @@ export default function PlannerPage() {
   }
   function removeDay(day: number) {
     if (trip.totalDays <= 1) return;
-    if (!confirm(`${day}일차 일정을 삭제하시겠어요?`)) return;
+    if (!confirm(tp('confirm.removeDay', { day }))) return;
     // 일차를 뒤에서부터 압축
     const remainingDays = Array.from({ length: trip.totalDays }, (_, i) => i + 1).filter(
       (d) => d !== day
@@ -1526,9 +1546,7 @@ export default function PlannerPage() {
       return;
     }
     if (
-      !confirm(
-        `「${trip.title}」을 저장한 뒤 새 여행을 만듭니다.\n현재 화면의 핀·동선은 새 여행으로 전환됩니다. 계속할까요?`
-      )
+      !confirm(tp('confirm.newTrip', { title: trip.title }))
     ) {
       return;
     }
@@ -1551,15 +1569,15 @@ export default function PlannerPage() {
     const others = tripSummaries.filter((s) => s.id !== trip.id);
     const msg =
       others.length > 0
-        ? `「${trip.title}」 여행을 삭제할까요?\n핀·동선·자료가 모두 지워지며 되돌릴 수 없습니다.`
-        : `「${trip.title}」이(가) 마지막 여행입니다.\n삭제하면 빈 새 여행이 만들어집니다. 계속할까요?`;
+        ? tp('confirm.deleteTrip', { title: trip.title })
+        : tp('confirm.deleteLastTrip', { title: trip.title });
     if (!confirm(msg)) return;
 
     try {
       await tripsRepo.delete(userId, trip.id);
     } catch (e) {
       console.error(e);
-      showToast('여행 삭제에 실패했습니다');
+      showToast(tp('toast.deleteTripFailed'));
       return;
     }
 
@@ -1596,24 +1614,20 @@ export default function PlannerPage() {
     setSelectedPinIds(new Set());
     setInfoWindowPlace(null);
     setMapPinCategoryFilter(null);
-    showToast(`「${trip.title}」 여행을 삭제했습니다`);
+    showToast(tp('toast.deletedTrip', { title: trip.title }));
   }, [trip, tripSummaries, user?.id, refreshTripList, focusMapOnTrip]);
 
   // ============== 공유 / 저장 ==============
   const openShareModal = useCallback(() => {
     if (authConfigured && !user) {
       if (
-        !confirm(
-          '로그인하지 않으면 다른 기기·브라우저에서 공유 링크가 열리지 않을 수 있습니다.\n그래도 공유할까요?'
-        )
+        !confirm(tp('confirm.shareWithoutLogin'))
       ) {
         return;
       }
     } else if (!authConfigured) {
       if (
-        !confirm(
-          '로컬 저장 모드입니다. 공유 링크는 이 브라우저에 저장된 경우에만 열릴 수 있습니다.\n계속할까요?'
-        )
+        !confirm(tp('confirm.shareLocalMode'))
       ) {
         return;
       }
@@ -1638,7 +1652,7 @@ export default function PlannerPage() {
         await tripsRepo.save(publicTrip);
       } catch (e) {
         console.error(e);
-        showToast('공유 저장 실패 — 로그인 후 다시 시도해 주세요');
+        showToast(tp('toast.shareSaveFailed'));
         setShareSaving(false);
         return;
       }
@@ -1650,8 +1664,7 @@ export default function PlannerPage() {
 
       const url = `${window.location.origin}/trip/${trip.slug}`;
       const copied = () => {
-        const plazaMsg = opts.listInPlaza ? ' · 공유마당에 등록됨' : '';
-        showToast(`공유 링크가 복사되었습니다 (공개 저장됨${plazaMsg})`);
+        showToast(opts.listInPlaza ? tp('toast.shareCopiedPlaza') : tp('toast.shareCopied'));
       };
       if (navigator.share) {
         navigator.share({ title: trip.title, url }).catch(() => {
@@ -1914,7 +1927,7 @@ export default function PlannerPage() {
                 onUpdateStayMinutes={handleUpdateStayMinutes}
                 onCopyFromPreviousDay={() => {
                   setTrip((prev) => copyRouteOptionsFromDay(prev, currentDay - 1, currentDay));
-                  showToast(`${currentDay - 1}일차 출발 설정을 복사했습니다`);
+                  showToast(tp('toast.copiedDepart', { day: currentDay - 1 }));
                 }}
                 onClose={() => setPanelOpen(false)}
                 onGenerate={() => void handleGenerate()}
@@ -1965,31 +1978,31 @@ export default function PlannerPage() {
           )}
 
           <div className="overview-chrome">
-            <span style={{ fontWeight: 700, fontSize: 13 }}>Overview · 조감</span>
+            <span style={{ fontWeight: 700, fontSize: 13 }}>{tp('view.overviewTitle')}</span>
             <button
               type="button"
               className={`overview-chrome-btn ${!mapPinCategoryFilter ? 'active' : ''}`}
               onClick={() => setMapPinCategoryFilter(null)}
             >
-              All
+              {tp('view.overviewAll')}
             </button>
             <button
               type="button"
               className="overview-chrome-exit"
               onClick={handleTogglePresentation}
             >
-              Exit
+              {tp('view.overviewExit')}
             </button>
           </div>
           <div className="overview-legend">
             {(
               [
-                ['food', '#c2410c', 'Food'],
-                ['tour', '#0e7490', 'Sights'],
-                ['stay', '#475569', 'Stay'],
-                ['shop', '#4d7c0f', 'Mart'],
-              ] as const
-            ).map(([cat, color, label]) => (
+                ['food', '#c2410c'] as const,
+                ['tour', '#0e7490'] as const,
+                ['stay', '#475569'] as const,
+                ['shop', '#4d7c0f'] as const,
+              ]
+            ).map(([cat, color]) => (
               <button
                 key={cat}
                 type="button"
@@ -2001,7 +2014,7 @@ export default function PlannerPage() {
                   setMapPinCategoryFilter((prev) => (prev === cat ? null : cat))
                 }
               >
-                {label}
+                {tc(`category.${cat}`)}
               </button>
             ))}
           </div>
@@ -2039,7 +2052,7 @@ export default function PlannerPage() {
                 onClick={() => setMobileSheet('search')}
               >
                 <Icon name="search" size={18} />
-                Search places · 장소 검색
+                {tp('search.ariaLabel')}
               </button>
               <button
                 type="button"
@@ -2063,12 +2076,12 @@ export default function PlannerPage() {
                   className={`mobile-planner-day ${d === currentDay ? 'active' : ''}`}
                   onClick={() => selectDay(d)}
                 >
-                  Day {d}
+                  {tp('day.tab', { n: d })}
                   {(countsByDay[d] ?? 0) > 0 ? ` · ${countsByDay[d]}` : ''}
                 </button>
               ))}
               <button type="button" className="mobile-planner-day" onClick={addDay}>
-                + Day
+                {tp('chrome.addDayShort')}
               </button>
             </div>
           </div>
@@ -2108,13 +2121,13 @@ export default function PlannerPage() {
             <div className="mobile-sheet-head">
               <span className="mobile-sheet-head-title">
                 {mobileSheetTab === 'route' && generatedRoute
-                  ? `Day ${currentDay} route · ${currentDay}일차 동선`
+                  ? tp('chrome.sheetRouteTitle', { n: currentDay })
                   : trip.title}
               </span>
               <span className="mobile-sheet-head-summary">
                 {mobileSheetTab === 'route' && generatedRoute
                   ? `${generatedRoute.totalDistanceKm} km · ${generatedRoute.totalTravelMinutes}m`
-                  : `${pinned.length} pins · Day ${currentDay}`}
+                  : tp('chrome.sheetPinsSummary', { count: pinned.length, n: currentDay })}
               </span>
             </div>
             <div className="mobile-sheet-tabs">
@@ -2123,7 +2136,7 @@ export default function PlannerPage() {
                 className={`mobile-sheet-tab ${mobileSheetTab === 'pins' ? 'active' : ''}`}
                 onClick={() => setMobileSheetTab('pins')}
               >
-                Pins 핀 {pinned.length}
+                {tp('chrome.tabPins', { count: pinned.length })}
               </button>
               <button
                 type="button"
@@ -2133,7 +2146,7 @@ export default function PlannerPage() {
                   setRouteOptionsOpen(true);
                 }}
               >
-                Route 동선
+                {tp('chrome.tabRoute')}
               </button>
             </div>
             <div className="mobile-sheet-content">
@@ -2261,7 +2274,7 @@ export default function PlannerPage() {
       {pickingOriginFromMap && (
         <div className="picking-toast">
           <Icon name="pinSelect" />
-          지도를 클릭해 출발지를 지정하세요
+          {tp('toast.pickOriginHint')}
         </div>
       )}
 

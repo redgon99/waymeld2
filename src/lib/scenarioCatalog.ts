@@ -31,11 +31,32 @@ function mapRow(row: Record<string, unknown>): ScenarioCatalogEntry {
   };
 }
 
-/** content jsonb에서 요청 로케일 → en → ko → 아무 값이나 순으로 폴백 */
+/** content jsonb에서 요청 로케일 → en → ko → 아무 값이나 순으로 폴백.
+ *  중국어는 zh-CN/zh-TW/레거시 zh 를 서로 폴백한다. */
 function pickLocaleContent(
   content: ScenarioCatalogEntry['content'],
   locale: string
 ): ScenarioCatalogLocaleContent | undefined {
+  if (locale === 'zh-CN' || locale === 'zh') {
+    return (
+      content['zh-CN'] ??
+      content.zh ??
+      content['zh-TW'] ??
+      content.en ??
+      content.ko ??
+      Object.values(content)[0]
+    );
+  }
+  if (locale === 'zh-TW') {
+    return (
+      content['zh-TW'] ??
+      content['zh-CN'] ??
+      content.zh ??
+      content.en ??
+      content.ko ??
+      Object.values(content)[0]
+    );
+  }
   return content[locale] ?? content.en ?? content.ko ?? Object.values(content)[0];
 }
 

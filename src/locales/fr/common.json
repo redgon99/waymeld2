@@ -1,0 +1,80 @@
+{
+  "appName": "WayMeld",
+  "appNameEn": "WayMeld",
+  "appTagline": "Collectez des lieux. Assemblez votre itinéraire.",
+  "loadingMap": "Chargement de la carte…",
+  "search": "Rechercher",
+  "clear": "Effacer",
+  "close": "Fermer",
+  "cancel": "Annuler",
+  "confirm": "OK",
+  "save": "Enregistrer",
+  "delete": "Supprimer",
+  "share": "Partager",
+  "next": "Suivant",
+  "back": "Retour",
+  "retry": "Réessayer",
+  "more": "Plus",
+  "all": "Tout",
+  "day": "Jour {{count}}",
+  "dayShort": "Jour {{n}}",
+  "reviews": "{{count}} avis",
+  "reviewsCount": "{{count}} avis",
+  "rating": "Note",
+  "distance": "Distance",
+  "locale": "Langue",
+  "localeLabel": "Choisir la langue",
+  "mapProvider": {
+    "kakao": "Kakao Map",
+    "google": "Google Maps",
+    "switchedKakao": "Passage à Kakao Map",
+    "switchedGoogle": "Passage à Google Maps"
+  },
+  "auth": {
+    "localMode": "Enregistrement local",
+    "cloudLogin": "Enregistrement cloud (connexion)",
+    "logout": "Se déconnecter",
+    "admin": "Admin",
+    "beforeLogin": "Non connecté"
+  },
+  "openStatus": {
+    "open": "Ouvert",
+    "scheduled": "Ouvre bientôt",
+    "closed": "Fermé",
+    "offday": "Fermé aujourd’hui"
+  },
+  "sort": {
+    "distance": "Distance",
+    "rating": "Note",
+    "review": "Avis"
+  },
+  "category": {
+    "all": "Tout",
+    "food": "Restaurant",
+    "cafe": "Café",
+    "tour": "Visites",
+    "stay": "Hébergement",
+    "culture": "Culture",
+    "shop": "Commerce",
+    "beauty": "Beauté",
+    "market": "Marché",
+    "transport": "Transport",
+    "road": "Rue",
+    "parking": "Parking",
+    "other": "Autre"
+  },
+  "travelMode": {
+    "car": "Voiture",
+    "walk": "À pied",
+    "transit": "Transports",
+    "bike": "Vélo"
+  },
+  "payment": {
+    "creditCard": "Carte de crédit",
+    "debitCard": "Carte de débit",
+    "nfc": "NFC"
+  },
+  "mobility": {
+    "straightLineOnly": "Hors de Corée, la distance est estimée à vol d’oiseau."
+  }
+}

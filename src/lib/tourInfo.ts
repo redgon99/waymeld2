@@ -84,8 +84,8 @@ export async function fetchTourTrails(options: {
 
 export type PlaceListKind = 'pet' | 'with';
 
-/** en/ja/zh일 때만 공식 다국어 주소 오버레이를 시도한다. ko는 원문 그대로. */
-export type MultilingualLocale = 'en' | 'ja' | 'zh';
+/** en/ja/zh/es/fr/de/ru일 때만 공식 다국어 주소 오버레이를 시도한다. ko는 원문 그대로. */
+export type MultilingualLocale = 'en' | 'ja' | 'zh' | 'es' | 'fr' | 'de' | 'ru';
 
 export interface TourFilteredPlace {
   contentId: string;

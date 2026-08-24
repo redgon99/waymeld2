@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "title": "WayMeld — Collectez des lieux. Assemblez votre itinéraire.",
+    "description": "Recherchez, épinglez des lieux et créez un itinéraire horodaté. Kakao et Google Maps, voyages de plusieurs jours, liens à partager."
+  },
+  "brand": {
+    "primary": "WayMeld",
+    "secondary": ""
+  },
+  "notice": {
+    "trial": "Fonctionnement d’essai jusqu’en août. Lancement officiel en septembre."
+  },
+  "nav": {
+    "features": "Fonctions",
+    "howItWorks": "Commencer",
+    "plaza": "Place de partage",
+    "tips": "Conseils de voyage",
+    "info": "Infos voyage en Corée",
+    "start": "Planifier un itinéraire",
+    "login": "Connexion"
+  },
+  "hero": {
+    "eyebrow": "Planificateur d’itinéraires",
+    "title": "Collectez des lieux.\nAssemblez votre itinéraire.",
+    "subtitle": "Recherchez et épinglez des spots : ils se regroupent par catégorie. Glissez pour réordonner, puis créez un itinéraire horodaté. Pas une carte des visites — un outil pour tisser votre prochaine route.",
+    "ctaPrimary": "Commencer gratuitement",
+    "ctaSecondary": "Voir la place",
+    "note": "App web · fonctionne en local sans connexion"
+  },
+  "pillars": {
+    "title": "Trois étapes",
+    "search": {
+      "title": "Chercher et collecter",
+      "body": "Trouvez des lieux par mot-clé ou catégorie et épinglez-les depuis la recherche ou la carte. Restauration, cafés et visites apparaissent en pastilles."
+    },
+    "route": {
+      "title": "Assembler l’itinéraire",
+      "body": "Planning avec durées de visite et créneaux repas. Distances routières réelles via Kakao Mobility quand c’est possible."
+    },
+    "share": {
+      "title": "Partager et remixer",
+      "body": "Envoyez un lien en lecture seule à des amis ou importez des voyages publics de la place dans votre plan."
+    }
+  },
+  "features": {
+    "title": "Conçu pour l’itinéraire",
+    "subtitle": "Contrairement aux apps qui retiennent où vous êtes allé, WayMeld sert à savoir où vous allez — et à quelle heure.",
+    "multiDay": {
+      "title": "Onglets multi-jours",
+      "body": "Séparez épingles et routes entre Jour 1, Jour 2, Jour 3. Les longs voyages restent clairs."
+    },
+    "category": {
+      "title": "Barre d’épingles par catégorie",
+      "body": "Glissez les pastilles pour réordonner ou changer de catégorie. Filtrez la carte sur une catégorie."
+    },
+    "maps": {
+      "title": "Kakao + Google",
+      "body": "Kakao en Corée, Google Places à l’étranger. Interface en coréen, anglais, japonais, chinois, espagnol, français, allemand et russe."
+    },
+    "presentation": {
+      "title": "Mode présentation",
+      "body": "Montrez clairement votre itinéraire en réunion, en cours ou en visite guidée."
+    }
+  },
+  "compare": {
+    "title": "Positionnement",
+    "us": "WayMeld",
+    "them": "Carnet de visites / liste de souhaits",
+    "row1": ["Itinéraires pour aujourd’hui et demain", "Lieux où vous êtes déjà allé"],
+    "row2": ["Planning horodaté", "Épingles sur une carte"],
+    "row3": ["Plusieurs jours + vraies routes", "Souvenirs, photos, stats"]
+  },
+  "steps": {
+    "title": "Comment commencer",
+    "step1": { "title": "Ouvrir dans le navigateur", "body": "Sans installer — ouvrez le planificateur dans le navigateur." },
+    "step2": { "title": "Chercher et épingler", "body": "Recherchez ou touchez la carte pour ajouter des lieux." },
+    "step3": { "title": "Réordonner et créer la route", "body": "Glissez les pastilles, puis appuyez sur Créer l’itinéraire pour horaires et étapes." },
+    "step4": { "title": "Partager", "body": "Partagez un lien ou publiez sur la place." }
+  },
+  "gallery": {
+    "title": "Captures"
+  },
+  "tips": {
+    "title": "Conseils de voyage",
+    "subtitle": "Guides pratiques transports, paiements et connexion en Corée",
+    "more": "Voir tout",
+    "empty": "Des conseils utiles arrivent bientôt."
+  },
+  "cta": {
+    "title": "Planifiez votre prochaine route aujourd’hui",
+    "subtitle": "Enregistrez en local sans compte. Sync cloud et export multilingue avec Plus.",
+    "button": "Ouvrir le planificateur"
+  },
+  "footer": {
+    "tagline": "Collecter → Assembler → Route → Partager",
+    "plaza": "Place de partage",
+    "tips": "Conseils de voyage",
+    "info": "Infos voyage en Corée",
+    "login": "Connexion",
+    "plan": "Planificateur",
+    "rights": "© {{year}} WayMeld"
+  }
+}

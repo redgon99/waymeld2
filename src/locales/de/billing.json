@@ -1,0 +1,30 @@
+{
+  "plan": {
+    "free": "Gratis",
+    "plus": "Plus",
+    "team": "Team"
+  },
+  "upgrade": {
+    "title": "WayMeld Plus",
+    "subtitle": "Unbegrenzte Cloud · mehrsprachiger Export · echte Routen",
+    "cta": "Auf Plus upgraden",
+    "manage": "Abo verwalten",
+    "currentPlan": "Aktueller Plan: {{plan}}"
+  },
+  "limits": {
+    "tripCount": "Der Gratisplan erlaubt bis zu {{max}} Reisen.",
+    "exportPlus": "Export ist eine Plus-Funktion.",
+    "cloudLogin": "Melden Sie sich an, um in der Cloud zu speichern.",
+    "searchCap": "Tägliches Suchlimit erreicht. Plus erhöht das Limit."
+  },
+  "features": {
+    "unlimitedTrips": "Unbegrenzte Reisen",
+    "cloudSync": "Cloud-Sync",
+    "exportI18n": "Reiseplan in Ihrer Sprache exportieren",
+    "realRoute": "Unbegrenzte echte Straßenrouten"
+  },
+  "checkout": {
+    "redirecting": "Zahlung wird geöffnet…",
+    "notConfigured": "Die Zahlung ist noch nicht eingerichtet."
+  }
+}

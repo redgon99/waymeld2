@@ -1,0 +1,80 @@
+{
+  "appName": "WayMeld",
+  "appNameEn": "WayMeld",
+  "appTagline": "Собирайте места. Собирайте маршрут.",
+  "loadingMap": "Загрузка карты…",
+  "search": "Поиск",
+  "clear": "Очистить",
+  "close": "Закрыть",
+  "cancel": "Отмена",
+  "confirm": "ОК",
+  "save": "Сохранить",
+  "delete": "Удалить",
+  "share": "Поделиться",
+  "next": "Далее",
+  "back": "Назад",
+  "retry": "Повторить",
+  "more": "Ещё",
+  "all": "Все",
+  "day": "День {{count}}",
+  "dayShort": "День {{n}}",
+  "reviews": "{{count}} отзывов",
+  "reviewsCount": "{{count}} отзывов",
+  "rating": "Оценка",
+  "distance": "Расстояние",
+  "locale": "Язык",
+  "localeLabel": "Выбрать язык",
+  "mapProvider": {
+    "kakao": "Kakao Map",
+    "google": "Google Maps",
+    "switchedKakao": "Переключено на Kakao Map",
+    "switchedGoogle": "Переключено на Google Maps"
+  },
+  "auth": {
+    "localMode": "Локальное сохранение",
+    "cloudLogin": "Облако (войти)",
+    "logout": "Выйти",
+    "admin": "Админ",
+    "beforeLogin": "Не выполнен вход"
+  },
+  "openStatus": {
+    "open": "Открыто",
+    "scheduled": "Скоро откроется",
+    "closed": "Закрыто",
+    "offday": "Сегодня закрыто"
+  },
+  "sort": {
+    "distance": "Расстояние",
+    "rating": "Оценка",
+    "review": "Отзывы"
+  },
+  "category": {
+    "all": "Все",
+    "food": "Еда",
+    "cafe": "Кафе",
+    "tour": "Достопримечательности",
+    "stay": "Жильё",
+    "culture": "Культура",
+    "shop": "Магазин",
+    "beauty": "Красота",
+    "market": "Рынок",
+    "transport": "Транспорт",
+    "road": "Улица",
+    "parking": "Парковка",
+    "other": "Другое"
+  },
+  "travelMode": {
+    "car": "Авто",
+    "walk": "Пешком",
+    "transit": "Общественный транспорт",
+    "bike": "Велосипед"
+  },
+  "payment": {
+    "creditCard": "Кредитная карта",
+    "debitCard": "Дебетовая карта",
+    "nfc": "NFC"
+  },
+  "mobility": {
+    "straightLineOnly": "За пределами Кореи расстояние считается по прямой."
+  }
+}

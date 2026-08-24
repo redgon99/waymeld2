@@ -21,7 +21,8 @@ function countryToLocale(country: string): string {
   const c = country.trim().toUpperCase();
   if (c === 'KR') return 'ko';
   if (c === 'JP') return 'ja';
-  if (['CN', 'TW', 'HK', 'MO'].includes(c)) return 'zh';
+  if (c === 'CN' || c === 'SG') return 'zh-CN';
+  if (['TW', 'HK', 'MO'].includes(c)) return 'zh-TW';
   return 'en';
 }
 

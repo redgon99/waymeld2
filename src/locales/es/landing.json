@@ -1,0 +1,103 @@
+{
+  "meta": {
+    "title": "WayMeld — Reúne lugares. Une tu ruta.",
+    "description": "Busca, fija lugares y arma un itinerario con horarios. Kakao y Google Maps, viajes de varios días, enlaces para compartir."
+  },
+  "brand": {
+    "primary": "WayMeld",
+    "secondary": ""
+  },
+  "notice": {
+    "trial": "Operación de prueba hasta agosto. Lanzamiento oficial en septiembre."
+  },
+  "nav": {
+    "features": "Funciones",
+    "howItWorks": "Empezar",
+    "plaza": "Plaza de compartir",
+    "tips": "Consejos de viaje",
+    "info": "Info de viaje en Corea",
+    "start": "Planear una ruta",
+    "login": "Iniciar sesión"
+  },
+  "hero": {
+    "eyebrow": "Planificador de rutas",
+    "title": "Reúne lugares.\nUne tu ruta.",
+    "subtitle": "Busca y fija sitios: se agrupan por categoría. Arrastra para reordenar y crea un itinerario con horarios. No es un mapa de visitas: es una herramienta para tejer tu próxima ruta.",
+    "ctaPrimary": "Empezar gratis",
+    "ctaSecondary": "Ver la plaza",
+    "note": "App web · funciona en local sin iniciar sesión"
+  },
+  "pillars": {
+    "title": "Tres pasos",
+    "search": {
+      "title": "Busca y reúne",
+      "body": "Encuentra lugares por palabra o categoría y fíjalos desde la búsqueda o el mapa. Comida, cafés y visitas aparecen como fichas."
+    },
+    "route": {
+      "title": "Une tu ruta",
+      "body": "Horario con tiempos de estancia y huecos para comidas. Distancia por carretera real con Kakao Mobility cuando esté disponible."
+    },
+    "share": {
+      "title": "Comparte y remezcla",
+      "body": "Envía un enlace de solo lectura a amigos o importa viajes públicos de la plaza a tu plan."
+    }
+  },
+  "features": {
+    "title": "Hecho para enrutar",
+    "subtitle": "A diferencia de las apps que recuerdan dónde has estado, WayMeld es para a dónde vas y a qué hora.",
+    "multiDay": {
+      "title": "Pestañas de varios días",
+      "body": "Separa pines y rutas en Día 1, Día 2, Día 3. Los viajes largos se mantienen ordenados."
+    },
+    "category": {
+      "title": "Barra de pines por categoría",
+      "body": "Arrastra fichas para reordenar o cambiar de categoría. Filtra el mapa a una categoría."
+    },
+    "maps": {
+      "title": "Kakao + Google",
+      "body": "Kakao en Corea, Google Places en el extranjero. Interfaz en coreano, inglés, japonés, chino, español, francés, alemán y ruso."
+    },
+    "presentation": {
+      "title": "Modo presentación",
+      "body": "Muestra tu ruta con claridad en reuniones, clases o visitas guiadas."
+    }
+  },
+  "compare": {
+    "title": "Posicionamiento",
+    "us": "WayMeld",
+    "them": "Registro de visitas / lista de deseos",
+    "row1": ["Rutas para hoy y mañana", "Sitios donde ya has estado"],
+    "row2": ["Itinerario con horarios", "Pines en un mapa"],
+    "row3": ["Varios días + carreteras reales", "Recuerdos, fotos, estadísticas"]
+  },
+  "steps": {
+    "title": "Cómo empezar",
+    "step1": { "title": "Abre en el navegador", "body": "Sin instalar: abre el planificador en el navegador." },
+    "step2": { "title": "Busca y fija", "body": "Busca o toca el mapa para añadir lugares." },
+    "step3": { "title": "Reordena y crea la ruta", "body": "Arrastra las fichas y pulsa Crear ruta para horarios y tramos." },
+    "step4": { "title": "Comparte", "body": "Comparte un enlace o publícalo en la plaza." }
+  },
+  "gallery": {
+    "title": "Capturas"
+  },
+  "tips": {
+    "title": "Consejos de viaje",
+    "subtitle": "Guías prácticas de transporte, pagos y conexión en Corea",
+    "more": "Ver todo",
+    "empty": "Pronto habrá consejos útiles."
+  },
+  "cta": {
+    "title": "Planea tu próxima ruta hoy",
+    "subtitle": "Guarda en local sin iniciar sesión. Sincronización en la nube y exportación multilingüe en Plus.",
+    "button": "Abrir el planificador"
+  },
+  "footer": {
+    "tagline": "Reunir → Unir → Ruta → Compartir",
+    "plaza": "Plaza de compartir",
+    "tips": "Consejos de viaje",
+    "info": "Info de viaje en Corea",
+    "login": "Iniciar sesión",
+    "plan": "Planificador",
+    "rights": "© {{year}} WayMeld"
+  }
+}

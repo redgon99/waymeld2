@@ -1,6 +1,7 @@
 {
   "search": {
     "placeholder": "場所を検索",
+    "placeholderDesign": "場所・YouTube・ブログリンク",
     "ariaLabel": "場所検索",
     "clearAria": "検索をクリア",
     "submitAria": "検索",
@@ -30,7 +31,13 @@
     "photos": "写真",
     "centerSet": "この位置を検索中心に設定しました",
     "locationCenterSet": "現在地を検索中心に設定しました",
-    "locationFailed": "現在地を取得できませんでした"
+    "locationFailed": "現在地を取得できませんでした",
+    "loadMore": "もっと見る",
+    "loadingMore": "読み込み中…",
+    "resetResults": "結果をリセット",
+    "insightTop": "人気1位",
+    "insightPositive": "高評価",
+    "insightWait": "待ち時間長め"
   },
   "trip": {
     "newTrip": "新しい旅行",
@@ -69,7 +76,11 @@
     "table": "表で見る",
     "tableShort": "表",
     "tableExit": "表を閉じる",
-    "segmentAria": "表示切替"
+    "segmentAria": "表示切替",
+    "overview": "俯瞰",
+    "overviewTitle": "俯瞰",
+    "overviewExit": "終了",
+    "overviewAll": "すべて"
   },
   "table": {
     "col": {
@@ -349,6 +360,32 @@
       "map": "地図リンク"
     }
   },
+  "help": {
+    "title": "ヘルプ・フレーズ",
+    "lead": "緊急連絡先と便利な韓国語フレーズ。",
+    "backToPlan": "プランナーへ戻る",
+    "emergencyTitle": "緊急連絡",
+    "travelHotline": "観光案内（韓国語／英語）",
+    "police": "警察",
+    "fireAmbulance": "消防・救急",
+    "airportTitle": "空港 → 宿",
+    "airportStep1": "空港鉄道やバス乗り場の案内表示に従って進みます。",
+    "airportStep2": "Tmoneyを買うか、対応していればタッチ決済を使います。",
+    "airportStep3": "宿の韓国語住所をスタッフやタクシー運転手に見せます。",
+    "airportStep4": "着陸前にこのアプリへ宿のピンを保存しておきます。",
+    "phrasesTitle": "フレーズカード",
+    "copyPhrase": "韓国語をコピー",
+    "phrases": {
+      "goHere": "ここへ行ってください",
+      "goToAddress": "この住所へ行ってください",
+      "driveSlowly": "ゆっくり走ってください",
+      "receipt": "レシートをください",
+      "acceptCards": "カードは使えますか？",
+      "restroom": "トイレはどこですか？",
+      "notSpicy": "辛くしないでください",
+      "thankYou": "ありがとうございます"
+    }
+  },
   "scenario": {
     "menuLabel": "テーマ旅行を作る",
     "title": "テーマ旅行シナリオ",
@@ -391,5 +428,73 @@
     "apply": "ピンに反映",
     "applied": "{{count}}か所を旅程に反映しました。",
     "newSearch": "別のテーマで作り直す"
+  },
+  "chrome": {
+    "appTitle": "WayMeld — 行きたい場所を集めて、旅路にする",
+    "brandKo": "여로담",
+    "panelAria": "プランナーパネル",
+    "panelCollapse": "パネルを閉じる",
+    "railAria": "パネルショートカット",
+    "tabSearch": "検索",
+    "tabPins": "ピン {{count}}",
+    "tabRoute": "ルート",
+    "tabScenario": "シナリオ",
+    "openSearch": "検索を開く",
+    "openPins": "ピン一覧を開く",
+    "openRoute": "ルートを開く",
+    "openScenario": "テーマ旅行を開く",
+    "dockAria": "メインメニュー",
+    "routeNeedPins": "ピン2つ以上必要",
+    "routeBuild": "ルート作成",
+    "addDayShort": "+ 日",
+    "pinFromMap": "地図からピン",
+    "sheetRouteTitle": "{{n}}日目のルート",
+    "sheetPinsSummary": "ピン {{count}} · {{n}}日目"
+  },
+  "map": {
+    "centerHere": "ここを中心に検索",
+    "ariaLabel": "地図",
+    "origin": "出発地",
+    "pickedLocation": "選択位置",
+    "viewPhoto": "{{name}}の写真を見る",
+    "insightLabel": "旅行者インサイト",
+    "insightHigh": "旅行者の評価が高い場所です。",
+    "insightMixed": "最近の口コミ・営業時間・支払いを確認してください。",
+    "pin": "ピン",
+    "pinned": "ピン済み"
+  },
+  "toast": {
+    "searchAtCenter": "この地点を中心に検索します",
+    "searchAtMyLocation": "現在地を中心に検索します",
+    "needTwoPins": "ルートを作るには場所を2つ以上選ぶかピンしてください",
+    "routeRefined": "実際の道路データを反映しました",
+    "originNotFound": "住所・場所が見つかりません。もう一度入力してください。",
+    "gpsUnavailable": "GPSを使えません。最初のスポットを出発地にします。",
+    "pickOriginOnMap": "地図で出発地を選んでください。",
+    "originUnknown": "出発地を確認できません。",
+    "deleteTripFailed": "旅行を削除できませんでした",
+    "shareSaveFailed": "共有の保存に失敗しました。ログインして再試行してください。",
+    "cloudSynced": "クラウドアカウントと同期しました",
+    "searchError": "検索に失敗しました。もう一度お試しください。",
+    "autoRouteHint": "自動ルート — 場所を2つ以上ピンしてから日程を作ってください",
+    "guideRouteHint": "「{{title}}」— 場所を2つ以上ピンしてからルートを作ってください",
+    "importedTrip": "「{{title}}」を旅行に追加しました",
+    "pinned": "{{name}} をピン（{{n}}件目）",
+    "unpinned": "{{name}} のピンを外しました",
+    "clearedPins": "{{day}}日目のピンをすべて外しました",
+    "deletedTrip": "「{{title}}」を削除しました",
+    "shareCopied": "共有リンクをコピーしました（公開保存）",
+    "shareCopiedPlaza": "共有リンクをコピーしました（公開・広場に登録）",
+    "copiedDepart": "{{day}}日目の出発設定をコピーしました",
+    "pickOriginHint": "地図をタップして出発地を指定"
+  },
+  "confirm": {
+    "newTrip": "「{{title}}」を保存して新しい旅行を作りますか？\n画面のピンとルートは新しい旅行に切り替わります。",
+    "deleteTrip": "「{{title}}」を削除しますか？\nピン・ルート・資料は元に戻せません。",
+    "deleteLastTrip": "「{{title}}」は最後の旅行です。\n削除すると空の新しい旅行が作られます。続けますか？",
+    "clearPins": "{{day}}日目にピンが{{count}}件あります。すべて外しますか？\n元に戻せません。",
+    "removeDay": "{{day}}日目の日程を削除しますか？",
+    "shareWithoutLogin": "ログインしないと、他の端末・ブラウザで共有リンクが開かないことがあります。\n共有しますか？",
+    "shareLocalMode": "ローカル保存モードです。共有リンクはこのブラウザでのみ開く場合があります。\n続けますか？"
   }
 }

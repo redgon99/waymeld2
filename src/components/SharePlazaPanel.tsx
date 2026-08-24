@@ -90,24 +90,24 @@ export function SharePlazaPanel() {
         await tripsRepo.save(cloned);
         await recordPlazaImport(listing.id, cloned.id, user?.id);
         setImportedIds((prev) => new Set([...prev, listing.id]));
-        setToast(`「${listing.title}」을(를) 내 여행에 끌어왔습니다`);
+        setToast(t('plaza.importedToast', { title: listing.title }));
         setTimeout(() => setToast(null), 3500);
       } catch (e) {
         console.error(e);
-        setToast('끌어오기에 실패했습니다. 다시 시도해 주세요.');
+        setToast(t('plaza.importFailed'));
         setTimeout(() => setToast(null), 3500);
       } finally {
         setPullingId(null);
       }
     },
-    [importedIds, pullingId, user?.id]
+    [importedIds, pullingId, user?.id, t]
   );
 
   return (
     <div className="plaza-panel">
       {!isSupabaseConfigured && (
         <p className="plaza-local-notice">
-          로컬 저장 모드: 이 브라우저에 등록된 공유마당 항목만 표시됩니다.
+          {t('plaza.localNotice')}
         </p>
       )}
       <label className="plaza-locale-filter">
@@ -121,7 +121,12 @@ export function SharePlazaPanel() {
           <option value="ko">{t('plaza.localeKo')}</option>
           <option value="en">{t('plaza.localeEn')}</option>
           <option value="ja">{t('plaza.localeJa')}</option>
-          <option value="zh">{t('plaza.localeZh')}</option>
+          <option value="zh-CN">{t('plaza.localeZhCN')}</option>
+          <option value="zh-TW">{t('plaza.localeZhTW')}</option>
+          <option value="es">{t('plaza.localeEs')}</option>
+          <option value="fr">{t('plaza.localeFr')}</option>
+          <option value="de">{t('plaza.localeDe')}</option>
+          <option value="ru">{t('plaza.localeRu')}</option>
         </select>
       </label>
       <div className="plaza-tabs" role="tablist">
@@ -146,10 +151,10 @@ export function SharePlazaPanel() {
       </div>
 
       {tab === 'board' && (
-        <section className="plaza-board" aria-label="공유 게시판">
-          {loading && <p className="plaza-status">불러오는 중…</p>}
+        <section className="plaza-board" aria-label={t('plaza.boardAria')}>
+          {loading && <p className="plaza-status">{t('plaza.loading')}</p>}
           {!loading && entries.length === 0 && (
-            <p className="plaza-empty">아직 공유마당에 등록된 여행이 없습니다.</p>
+            <p className="plaza-empty">{t('plaza.empty')}</p>
           )}
           {!loading &&
             entries.map((entry) => {
@@ -159,7 +164,7 @@ export function SharePlazaPanel() {
                 <article key={entry.id} id={`plaza-row-${entry.id}`} className="plaza-board-row">
                   <div className="plaza-board-meta">
                     <span className="plaza-board-author">
-                      {entry.displayName?.trim() || '익명'}
+                      {entry.displayName?.trim() || t('plaza.anonymous')}
                     </span>
                     {entry.contactEmail && (
                       <span className="plaza-board-email">{entry.contactEmail}</span>
@@ -183,22 +188,22 @@ export function SharePlazaPanel() {
                   <p className="plaza-board-summary">{entry.pinSummary}</p>
                   <div className="plaza-board-actions">
                     <Link to={`/trip/${entry.slug}`} className="plaza-board-link">
-                      상세 보기
+                      {t('plaza.viewDetail')}
                     </Link>
                     {pulled ? (
-                      <span className="plaza-pulled-badge" title="이미 내 여행에 추가함">
-                        <Icon name="check" /> 끌어옴
+                      <span className="plaza-pulled-badge" title={t('plaza.alreadyImported')}>
+                        <Icon name="check" /> {t('plaza.imported')}
                       </span>
                     ) : (
                       <button
                         type="button"
                         className="plaza-pull-btn"
-                        title="내 여행에 끌어오기"
+                        title={t('plaza.import')}
                         disabled={isPulling}
                         onClick={() => void handlePull(entry)}
                       >
                         <Icon name="download" />
-                        {isPulling ? '끌어오는 중…' : '끌어오기'}
+                        {isPulling ? t('plaza.importing') : t('plaza.import')}
                       </button>
                     )}
                   </div>
@@ -209,7 +214,7 @@ export function SharePlazaPanel() {
       )}
 
       {tab === 'map' && (
-        <section className="plaza-map-section" aria-label="전국 지도">
+        <section className="plaza-map-section" aria-label={t('plaza.mapAria')}>
           <div className="plaza-map-wrap">
             {sdkReady ? (
               <MapView
@@ -234,12 +239,12 @@ export function SharePlazaPanel() {
                 }}
               />
             ) : (
-              <p className="plaza-status">지도를 불러오는 중…</p>
+              <p className="plaza-status">{t('plaza.mapLoading')}</p>
             )}
           </div>
           {plazaMarkers.length === 0 && !loading && (
             <p className="plaza-map-empty">
-              지도에 표시할 위치 정보가 있는 공유 여행이 없습니다.
+              {t('plaza.mapEmpty')}
             </p>
           )}
         </section>
