@@ -1,4 +1,26 @@
 {
+  "booking": {
+    "open": "Abrir",
+    "notePlaceholder": "Nota · pega un enlace de reserva",
+    "noteAria": "Nota de {{name}}"
+  },
+  "reactions": {
+    "tooltip": "{{mentions}} menciones de viajeros · {{positive}} positivas / {{negative}} negativas",
+    "tone": {
+      "positive": "Gustó a los viajeros",
+      "mixed": "Opiniones divididas",
+      "negative": "Algunas advertencias"
+    },
+    "aspect": {
+      "crowd": "Mencionan aglomeración",
+      "price": "Mencionan el precio",
+      "access": "Mencionan el acceso",
+      "food": "Mencionan el sabor",
+      "view": "Mencionan las vistas",
+      "service": "Mencionan el servicio",
+      "facility": "Mencionan las instalaciones"
+    }
+  },
   "search": {
     "placeholder": "Buscar lugares",
     "placeholderWithYoutube": "Nombre del lugar o enlace de YouTube",
@@ -106,6 +128,8 @@
     "empty": "Aún no hay itinerario. Fija lugares o genera una ruta."
   },
   "pinup": {
+    "reservedAt": "Reservado a las {{time}}",
+    "fixedArrivalAt": "Llegada fijada a las {{time}}",
     "title": "Lugares fijados",
     "titleShort": "Pines",
     "clearAll": "Borrar todo",
@@ -130,6 +154,9 @@
     "unmarkRequired": "Quitar imprescindible"
   },
   "route": {
+    "fixedArrivalAt": "Llegada fijada a las {{time}}",
+    "fixedArrivalLate": "{{minutes}} min más tarde que las {{time}} fijadas",
+    "waitMinutes": "{{minutes}} min de espera",
     "title": "Crear ruta",
     "generate": "Generar ruta",
     "refining": "Aplicando carreteras reales…",
@@ -161,6 +188,9 @@
       "high": "Fatiga alta"
     },
     "options": {
+      "fixedArrivalAria": "Hora de llegada fija de {{name}}",
+      "fixedArrivalHint": "Fija la hora de llegada de lo que ya esté reservado",
+      "fixedArrivalClear": "Quitar la hora de llegada fija",
       "panelAria": "Ajustes de ruta",
       "title": "Ajustes de ruta",
       "subtitle": "Día {{day}} · {{count}} lugares",
@@ -205,7 +235,21 @@
         "transport": "Trasbordo ~15 min",
         "road": "Paseo sugerido ~40 min",
         "other": "Estancia sugerida ~30 min"
-      }
+      },
+      "reserved": "Reserva",
+      "reservedHint": "La hora de una reserva no cambia; el resto del día se organiza a su alrededor.",
+      "date": "Fecha de visita",
+      "dateHint": "Añade la fecha para comprobar el horario según el día",
+      "hoursFilter": "Horarios por revisar {{n}}"
+    },
+    "reservedAt": "Reservado a las {{time}} · hora fija",
+    "reservedLate": "{{minutes}} min tarde para la reserva de las {{time}}",
+    "anchorConflictTitle": "{{n}} parada(s) no encajan en el horario",
+    "hours": {
+      "closed": "Llegas después del cierre ({{opens}}–{{closes}})",
+      "before-open": "Llegas antes de la apertura (abre a las {{opens}})",
+      "closes-early": "Cierra a las {{closes}} durante tu visita",
+      "offday": "Cerrado ese día"
     }
   },
   "dock": {
@@ -700,5 +744,32 @@
     "removeDay": "¿Eliminar el día {{day}}?",
     "shareWithoutLogin": "Sin iniciar sesión, el enlace puede no abrirse en otros dispositivos.\n¿Compartir igual?",
     "shareLocalMode": "Modo local. El enlace puede abrirse solo en este navegador.\n¿Continuar?"
+  },
+  "presence": {
+    "guest": "Viajero",
+    "viewing": "{{n}} personas viendo",
+    "you": "{{name}} (tú)"
+  },
+  "report": {
+    "action": "Denunciar",
+    "title": "Denunciar este contenido",
+    "reasonLegend": "Motivo",
+    "reasons": {
+      "spam": "Spam o publicidad",
+      "inappropriate": "Contenido inapropiado",
+      "wrong_info": "Información incorrecta",
+      "copyright": "Infracción de derechos de autor",
+      "other": "Otro motivo"
+    },
+    "detailLabel": "Detalles (opcional)",
+    "detailPlaceholder": "Cuéntanos cuál es el problema",
+    "submit": "Enviar denuncia",
+    "submitting": "Enviando…",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "done": "Hemos recibido tu denuncia.",
+    "doneHint": "Un administrador la revisará.",
+    "duplicate": "Ya has denunciado este contenido.",
+    "failed": "No se pudo enviar la denuncia. Inténtalo de nuevo."
   }
 }

@@ -1,4 +1,24 @@
 {
+  "meta": {
+    "tripTitle": "{{title}} · WayMeld",
+    "tripFallback": "Viaje compartido",
+    "tripDescription": "Consulta un itinerario día a día con tiempos de viaje y de estancia reales, e impórtalo a tu propio viaje.",
+    "plazaTitle": "Plaza de viajes · WayMeld",
+    "plazaDescription": "Explora itinerarios de varios días compartidos por otros viajeros e impórtalos a tu propio viaje."
+  },
+  "target": {
+    "metaTitle": "Reúne lugares desde un enlace compartido · WayMeld",
+    "title": "Lugares del enlace compartido",
+    "backToPlan": "Al planificador",
+    "extracting": "Buscando lugares en este enlace…",
+    "foundPlaces": "Se encontraron {{count}} lugares",
+    "noPlaces": "No se encontraron lugares en este enlace.",
+    "noLink": "No se encontró ningún enlace en lo que compartiste.",
+    "notConfigured": "La extracción de lugares desde enlaces no está configurada.",
+    "extractFailed": "No se pudieron extraer los lugares.",
+    "openInPlanner": "Continuar en el planificador",
+    "goPlanner": "Abrir el planificador"
+  },
   "trip": {
     "readOnly": "Viaje compartido (solo lectura)",
     "notFound": "No se encontró el viaje.",

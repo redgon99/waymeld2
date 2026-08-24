@@ -4,17 +4,20 @@ import { useTranslation } from 'react-i18next';
 import type {
   PinnedPlace,
   RouteOptions,
+  RouteStop,
   TravelMode,
   OptimizeBy,
   OriginType,
   Origin,
   SimpleCategory,
 } from '../types';
+import { isHoursProblem } from '../lib/openingHours';
 import { suggestStayMinutes, getCategoryMeta } from '../lib/categories';
 import { useTravelModeMeta } from '../lib/i18nCategories';
 import { generateRoute } from '../lib/planner';
 import { normalizeLocale } from '../lib/locale';
 import { fetchAiStaySuggestions } from '../lib/routeStaySuggest';
+import { BookingLinkCards } from './BookingLinkCards';
 
 interface Props {
   open: boolean;
@@ -30,6 +33,12 @@ interface Props {
   pickingOriginFromMap?: boolean;
   hasExistingRoute?: boolean;
   onUpdateStayMinutes?: (placeId: string, minutes: number) => void;
+  /** 도착 시각 고정 — null이면 해제 */
+  onUpdateFixedArrival?: (placeId: string, time: string | null) => void;
+  /** 예약 아이템 여부 — 예약은 시각이 움직이지 않는 하드 앵커가 된다 */
+  onUpdateItemKind?: (placeId: string, kind: PinnedPlace['itemKind']) => void;
+  /** 핀 메모 — 예약 링크를 붙여 넣으면 카드로 렌더링된다 */
+  onUpdateNote?: (placeId: string, note: string) => void;
   /** 좌측 탭 패널 안에 임베드 (고정 우측 슬라이드 비활성) */
   embedded?: boolean;
 }
@@ -56,6 +65,9 @@ export function RouteOptionsPanel({
   pickingOriginFromMap = false,
   hasExistingRoute = false,
   onUpdateStayMinutes,
+  onUpdateFixedArrival,
+  onUpdateItemKind,
+  onUpdateNote,
   embedded = false,
 }: Props) {
   const { t, i18n } = useTranslation('planner');
@@ -63,6 +75,7 @@ export function RouteOptionsPanel({
   const [originMenuOpen, setOriginMenuOpen] = useState(false);
   const [aiStayLoading, setAiStayLoading] = useState(false);
   const [aiStayReasons, setAiStayReasons] = useState<Record<string, string>>({});
+  const [hoursOnly, setHoursOnly] = useState(false);
 
   const preview = useMemo(() => {
     if (pinned.length === 0) return null;
@@ -72,6 +85,15 @@ export function RouteOptionsPanel({
       return null;
     }
   }, [pinned, options]);
+
+  // 예정 방문 시각에 문을 닫는 곳만 추려 보기
+  const hoursProblemStops = useMemo(
+    () => (preview?.stops ?? []).filter((s) => isHoursProblem(s.hoursStatus)),
+    [preview],
+  );
+  const hoursProblemCount = hoursProblemStops.length;
+  const stayRows: Array<PinnedPlace & Partial<RouteStop>> =
+    hoursOnly && hoursProblemCount > 0 ? hoursProblemStops : (preview?.stops ?? pinned);
 
   function patch<K extends keyof RouteOptions>(key: K, value: RouteOptions[K]) {
     onChange({ ...options, [key]: value });
@@ -203,6 +225,16 @@ export function RouteOptionsPanel({
                 value={options.departTime}
                 onChange={(e) => patch('departTime', e.target.value)}
                 aria-label={t('route.options.departTime')}
+              />
+            </label>
+            <label className="route-depart-chip" title={t('route.options.dateHint')}>
+              <Icon name="calendar" size={16} />
+              <input
+                type="date"
+                lang={normalizeLocale(i18n.language)}
+                value={options.date ?? ''}
+                onChange={(e) => patch('date', e.target.value || undefined)}
+                aria-label={t('route.options.date')}
               />
             </label>
             <button
@@ -340,6 +372,17 @@ export function RouteOptionsPanel({
             <span className="section-label route-v2-label">
               {t('route.options.sectionStay')}
             </span>
+            {hoursProblemCount > 0 && (
+              <button
+                type="button"
+                className={`route-hours-filter ${hoursOnly ? 'active' : ''}`}
+                onClick={() => setHoursOnly((v) => !v)}
+                aria-pressed={hoursOnly}
+              >
+                <Icon name="clock" size={12} />{' '}
+                {t('route.options.hoursFilter', { n: hoursProblemCount })}
+              </button>
+            )}
             <button
               type="button"
               className={`route-ai-suggest ${options.autoStayTime ? 'active' : ''}`}
@@ -352,7 +395,7 @@ export function RouteOptionsPanel({
             </button>
           </div>
           <div className="route-stay-list">
-            {(preview?.stops ?? pinned).map((p, idx) => {
+            {stayRows.map((p, idx) => {
               const meta = getCategoryMeta(p.categoryCode);
               const sug = suggestStayMinutes(p.category);
               const minutes = p.stayMinutes ?? sug.minutes;
@@ -370,6 +413,28 @@ export function RouteOptionsPanel({
                     <div className="route-stay-hint">
                       {options.autoStayTime ? reason : p.categoryLabel}
                     </div>
+                    {isHoursProblem(p.hoursStatus) && (
+                      <div className="route-stay-hours-warning">
+                        <Icon name="clock" size={11} />{' '}
+                        {t(`route.hours.${p.hoursStatus}`, {
+                          opens: p.hoursOpensAt ?? '',
+                          closes: p.hoursClosesAt ?? '',
+                        })}
+                      </div>
+                    )}
+                    {onUpdateNote ? (
+                      <input
+                        type="text"
+                        className="route-stay-note"
+                        value={p.note ?? ''}
+                        placeholder={t('booking.notePlaceholder')}
+                        onChange={(e) => onUpdateNote(p.id, e.target.value)}
+                        aria-label={t('booking.noteAria', { name: p.name })}
+                      />
+                    ) : (
+                      p.note && <div className="route-stay-note-text">{p.note}</div>
+                    )}
+                    <BookingLinkCards note={p.note} placeId={p.id} />
                   </div>
                   {options.autoStayTime || !onUpdateStayMinutes ? (
                     <span className="route-stay-badge">{minutes} min</span>
@@ -390,6 +455,50 @@ export function RouteOptionsPanel({
                       />
                       <span>min</span>
                     </label>
+                  )}
+                  {onUpdateFixedArrival && (
+                    <label className="route-fixed-arrival">
+                      <Icon name="clock" size={12} />
+                      <input
+                        type="time"
+                        value={p.fixedArrival ?? ''}
+                        onChange={(e) =>
+                          onUpdateFixedArrival(p.id, e.target.value || null)
+                        }
+                        aria-label={t('route.options.fixedArrivalAria', { name: p.name })}
+                        title={t('route.options.fixedArrivalHint')}
+                      />
+                      {p.fixedArrival && (
+                        <button
+                          type="button"
+                          className="route-fixed-arrival-clear"
+                          onClick={() => {
+                            onUpdateFixedArrival(p.id, null);
+                            onUpdateItemKind?.(p.id, 'place');
+                          }}
+                          aria-label={t('route.options.fixedArrivalClear')}
+                        >
+                          <Icon name="close" size={11} />
+                        </button>
+                      )}
+                    </label>
+                  )}
+                  {onUpdateItemKind && p.fixedArrival && (
+                    <button
+                      type="button"
+                      className={`route-reserved-toggle ${p.itemKind === 'reserved' ? 'active' : ''}`}
+                      onClick={() =>
+                        onUpdateItemKind(
+                          p.id,
+                          p.itemKind === 'reserved' ? 'place' : 'reserved',
+                        )
+                      }
+                      aria-pressed={p.itemKind === 'reserved'}
+                      title={t('route.options.reservedHint')}
+                    >
+                      <Icon name="facilityReservation" size={12} />{' '}
+                      {t('route.options.reserved')}
+                    </button>
                   )}
                 </div>
               );

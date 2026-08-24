@@ -283,6 +283,21 @@ export function PinupBar({
                             onDoubleClick={() => onSelectPin?.(p)}
                           >
                             <span className="chip-name">{truncatePinTitle(p.name)}</span>
+                            {p.fixedArrival && (
+                              <span
+                                className={`chip-fixed-arrival ${p.itemKind === 'reserved' ? 'reserved' : ''}`}
+                                title={
+                                  p.itemKind === 'reserved'
+                                    ? t('pinup.reservedAt', { time: p.fixedArrival })
+                                    : t('pinup.fixedArrivalAt', { time: p.fixedArrival })
+                                }
+                              >
+                                <Icon
+                                  name={p.itemKind === 'reserved' ? 'facilityReservation' : 'clock'}
+                                />
+                                {p.fixedArrival}
+                              </span>
+                            )}
                             {p.rating !== undefined && (
                               <span className="chip-rating">
                                 <Icon name="star" />

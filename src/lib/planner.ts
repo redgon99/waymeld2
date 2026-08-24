@@ -2,33 +2,24 @@ import type {
   PinnedPlace,
   RouteOptions,
   RouteLeg,
+  RouteStop,
   GeneratedRoute,
   Origin,
   TripTheme,
 } from '../types';
 import { TRAVEL_MODE_META, suggestStayMinutes } from './categories';
 import { computeFatigue } from './fatigue';
+import { haversineMeters } from './geo';
+import {
+  checkVisitWindow,
+  parseOpeningHours,
+  weekdayFromDate,
+} from './openingHours';
+import { applyTimeAnchors, hasFixedArrival, orderWithFixedArrivals } from './scheduleAnchors';
 import { themeBoostScore } from './themes';
+import { formatHHMM, parseHHMM } from './timeOfDay';
 
-// =============================================
-// Haversine 거리 계산 (meters)
-// =============================================
-
-export function haversineMeters(
-  a: { lat: number; lng: number },
-  b: { lat: number; lng: number }
-): number {
-  const R = 6371000;
-  const toRad = (d: number) => (d * Math.PI) / 180;
-  const dLat = toRad(b.lat - a.lat);
-  const dLng = toRad(b.lng - a.lng);
-  const lat1 = toRad(a.lat);
-  const lat2 = toRad(b.lat);
-  const x =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(x));
-}
+export { haversineMeters } from './geo';
 
 /** 직선 거리 * 도로 보정 계수 (실제 도로는 직선의 1.3배 정도) */
 const ROAD_FACTOR = 1.3;
@@ -91,6 +82,11 @@ export function optimizeOrderByNearestNeighbor(
 ): PinnedPlace[] {
   if (places.length <= 1) return places.map((p, i) => ({ ...p, order: i + 1 }));
 
+  // 도착 시각이 고정된 장소가 있으면 거리보다 시각 순서가 우선한다
+  if (places.some(hasFixedArrival)) {
+    return orderWithFixedArrivals(origin, places, preferences);
+  }
+
   const required = places
     .filter((p) => p.required)
     .sort((a, b) => (b.priority ?? 3) - (a.priority ?? 3));
@@ -108,21 +104,6 @@ export function optimizeOrderByNearestNeighbor(
 }
 
 // =============================================
-// 시간 유틸 ("HH:MM" 양방향 변환)
-// =============================================
-
-function parseHHMM(s: string): number {
-  const [h, m] = s.split(':').map((n) => parseInt(n, 10));
-  return h * 60 + m;
-}
-function formatHHMM(totalMin: number): string {
-  const m = ((totalMin % (24 * 60)) + 24 * 60) % (24 * 60);
-  const h = Math.floor(m / 60);
-  const min = m % 60;
-  return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
-}
-
-// =============================================
 // 식사 시간 반영: 점심(12:00~13:30) 시간대에
 // 맛집 카테고리가 있으면 그 시간대에 도착하도록 보정
 // =============================================
@@ -135,7 +116,10 @@ function adjustForMealTime(
   // 가장 먼저 등장하는 food를 점심 시간대로 슬라이드
   const lunchStart = 11 * 60 + 30; // 11:30
   const lunchEnd = 13 * 60 + 30;   // 13:30
-  const foodIdx = schedule.findIndex((s) => s.place.category === 'food');
+  // 도착 시각이 고정된 식사는 옮기면 안 된다
+  const foodIdx = schedule.findIndex(
+    (s) => s.place.category === 'food' && !hasFixedArrival(s.place)
+  );
   if (foodIdx === -1) return schedule;
 
   const food = schedule[foodIdx];
@@ -147,6 +131,27 @@ function adjustForMealTime(
     return schedule.map((s, i) => (i >= foodIdx ? { ...s, arrive: s.arrive + shift, leave: s.leave + shift } : s));
   }
   return schedule;
+}
+
+// =============================================
+// 영업시간 검증: 예정 도착·출발 시각에 문을 여는지
+// =============================================
+
+function annotateOpeningHours(stops: RouteStop[], date?: string): RouteStop[] {
+  const weekday = weekdayFromDate(date);
+  return stops.map((stop) => {
+    const hours = parseOpeningHours(stop.openingHours, stop.closedDays);
+    if (!hours) return stop;
+    const arrive = parseHHMM(stop.arriveAt);
+    const leave = parseHHMM(stop.leaveAt);
+    const check = checkVisitWindow(hours, weekday, arrive, leave < arrive ? undefined : leave);
+    return {
+      ...stop,
+      hoursStatus: check.status,
+      hoursOpensAt: check.opensAt != null ? formatHHMM(check.opensAt) : undefined,
+      hoursClosesAt: check.closesAt != null ? formatHHMM(check.closesAt) : undefined,
+    };
+  });
 }
 
 // =============================================
@@ -180,7 +185,7 @@ export function generateRoute(
   const departMin = parseHHMM(options.departTime);
   let cursor = departMin;
 
-  const stops: GeneratedRoute['stops'] = [];
+  let stops: RouteStop[] = [];
 
   let prevPoint: { lat: number; lng: number } | undefined = originPoint;
   let prevId = 'origin';
@@ -228,6 +233,14 @@ export function generateRoute(
     });
     cursor = adjusted.length > 0 ? adjusted[adjusted.length - 1].leave : cursor;
   }
+
+  // 5. 시각 앵커 반영 (일찍 도착하면 대기, 늦으면 충돌 표시 / 예약은 블록 고정)
+  const anchored = applyTimeAnchors(stops);
+  stops = anchored.stops;
+  if (anchored.finishMinutes !== null) cursor = anchored.finishMinutes;
+
+  // 6. 확정된 시각으로 영업 여부 판정
+  stops = annotateOpeningHours(stops, options.date);
 
   const totalDistanceM = legs.reduce((s, l) => s + l.distanceMeters, 0);
   const totalTravelMin = legs.reduce((s, l) => s + l.durationMinutes, 0);
@@ -283,16 +296,24 @@ export async function refineRouteWithRealLegs(
     return h * 60 + m;
   })();
   let cursor = departMin;
-  const stops = route.stops.map((s, i) => {
+  const rescheduled: RouteStop[] = route.stops.map((s, i) => {
     cursor += newLegs[i]?.durationMinutes ?? 0;
     const arrive = cursor;
     const stay = s.stayMinutes ?? 0;
     const leave = arrive + stay;
     cursor = leave;
-    const arriveStr = formatMinutes(arrive);
-    const leaveStr = formatMinutes(leave);
-    return { ...s, arriveAt: arriveStr, leaveAt: leaveStr };
+    return {
+      ...s,
+      arriveAt: formatHHMM(arrive),
+      leaveAt: formatHHMM(leave),
+      waitMinutes: undefined,
+      timingConflict: undefined,
+    };
   });
+
+  const anchored = applyTimeAnchors(rescheduled);
+  const stops = annotateOpeningHours(anchored.stops, route.options.date);
+  if (anchored.finishMinutes !== null) cursor = anchored.finishMinutes;
 
   const legs = newLegs.map((nl, i) => ({
     fromId: i === 0 ? 'origin' : route.stops[i - 1].id,
@@ -328,16 +349,9 @@ export async function refineRouteWithRealLegs(
     stops,
     totalDistanceKm: Math.round(totalDistanceM / 100) / 10,
     totalTravelMinutes: totalTravelMin,
-    finishAt: formatMinutes(cursor),
+    finishAt: formatHHMM(cursor),
     routePath: routePath.length > 0 ? routePath : undefined,
   };
   const fatigue = computeFatigue(refined);
   return { ...refined, fatigueScore: fatigue.score, fatigueLevel: fatigue.level };
-}
-
-function formatMinutes(totalMin: number): string {
-  const m = ((totalMin % (24 * 60)) + 24 * 60) % (24 * 60);
-  const h = Math.floor(m / 60);
-  const min = m % 60;
-  return `${String(h).padStart(2, '0')}:${String(min).padStart(2, '0')}`;
 }

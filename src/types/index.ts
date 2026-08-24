@@ -2,6 +2,8 @@
 // WayMeld 공통 타입 정의
 // =============================================
 
+import type { VisitHoursStatus } from '../lib/openingHours';
+
 /** 카카오 카테고리 그룹 코드 매핑 */
 export type CategoryCode =
   | 'AT4'   // 관광명소
@@ -99,9 +101,9 @@ export interface Place {
   nameKo?: string;
   /** 로마자 표기 */
   romanizedName?: string;
-  /** 영업시간 텍스트 (수동 입력) */
+  /** 영업시간 원문 (수동 입력 또는 상세 조회로 채워짐) */
   openingHours?: string;
-  /** 휴무일 텍스트 (수동 입력) */
+  /** 휴무일 원문 (수동 입력 또는 상세 조회로 채워짐) */
   closedDays?: string;
 }
 
@@ -116,6 +118,16 @@ export interface PinnedPlace extends Place {
   priority?: number;
   /** 필수 방문 — 일정 생성 시 우선 */
   required?: boolean;
+  /**
+   * 도착 시각 고정 "HH:MM" — required("빠뜨리지 마라")와 달리 "이 시각을 지켜라".
+   * itemKind가 'reserved'이면 하드 앵커(내가 늦어도 그 시각에 시작)로 다뤄진다.
+   */
+  fixedArrival?: string;
+  /**
+   * 'reserved' = 이미 예약한 일정. stayMinutes는 예약 소요시간을 뜻하고,
+   * fixedArrival 시각의 블록은 일정 재계산에도 움직이지 않는다.
+   */
+  itemKind?: 'place' | 'reserved';
 }
 
 /** 정렬 기준 */
@@ -152,6 +164,8 @@ export interface Origin {
 export interface RouteOptions {
   origin: Origin;
   departTime: string;             // "09:00"
+  /** 실제 방문 날짜 "YYYY-MM-DD" — 영업시간 요일 판정에 쓰인다 (선택) */
+  date?: string;
   travelMode: TravelMode;
   optimizeBy: OptimizeBy;
   autoOrder: boolean;             // true=자동 최적화, false=핀업 순서
@@ -195,10 +209,25 @@ export interface TripMaterial {
   updatedAt: number;
 }
 
+/** 일정에 배치된 한 정거장 */
+export interface RouteStop extends PinnedPlace {
+  arriveAt: string;
+  leaveAt: string;
+  /** 고정 도착 시각까지 기다리는 시간(분) */
+  waitMinutes?: number;
+  /** 고정 도착 시각보다 늦어지는 시간(분) — 지킬 수 없는 일정 표시용 */
+  timingConflict?: number;
+  /** 예정 방문 시각의 영업 여부 (영업시간 원문을 읽어낸 경우에만) */
+  hoursStatus?: VisitHoursStatus;
+  /** 그날 영업 시작·종료 "HH:MM" */
+  hoursOpensAt?: string;
+  hoursClosesAt?: string;
+}
+
 /** 생성된 전체 경로 */
 export interface GeneratedRoute {
   origin: Origin;
-  stops: Array<PinnedPlace & { arriveAt: string; leaveAt: string }>;
+  stops: RouteStop[];
   legs: RouteLeg[];
   totalDistanceKm: number;
   totalTravelMinutes: number;

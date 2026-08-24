@@ -6,6 +6,9 @@ import { getCategoryMeta } from '../lib/categories';
 import { useTravelModeMeta } from '../lib/i18nCategories';
 import { buildKakaoMapDirectionsUrl, buildLegMapLinks } from '../lib/mapLinks';
 import { formatFullItinerary } from '../lib/itineraryExport';
+import { BookingLinkCards } from './BookingLinkCards';
+import { isHoursProblem } from '../lib/openingHours';
+import { listAnchorConflicts } from '../lib/scheduleAnchors';
 import { SortableContainer, SortableItem } from './Sortable';
 
 interface Props {
@@ -50,6 +53,7 @@ export function RouteSummary({
         : t('route.mapDrive');
   const stopIds = route.stops.map((s) => s.id);
   const fatigueLevel = route.fatigueLevel ?? 'medium';
+  const anchorConflicts = listAnchorConflicts(route.stops);
 
   const handleCopyItinerary = async () => {
     const text = formatFullItinerary(route, tripTitle);
@@ -105,6 +109,27 @@ export function RouteSummary({
           <span className="stat-value">{route.finishAt}</span>
         </div>
       </div>
+
+      {anchorConflicts.length > 0 && (
+        <div className="route-anchor-warning" role="status">
+          <Icon name="bell" size={13} />
+          <div>
+            <strong>{t('route.anchorConflictTitle', { n: anchorConflicts.length })}</strong>
+            <ul>
+              {anchorConflicts.map((c) => (
+                <li key={c.placeId}>
+                  {t(c.hard ? 'route.reservedLate' : 'route.fixedArrivalLate', {
+                    time: c.fixedArrival,
+                    minutes: c.lateMinutes,
+                  })}
+                  {' — '}
+                  {c.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       <SortableContainer
         ids={stopIds}
@@ -171,12 +196,59 @@ export function RouteSummary({
                         <div className="leg-name">
                           {stop.required && <Icon name="flag" className="leg-required-icon" />}
                           {stop.name}
+                          {stop.fixedArrival && (
+                            <span
+                              className={`leg-fixed-arrival ${stop.timingConflict ? 'is-conflict' : ''} ${stop.itemKind === 'reserved' ? 'reserved' : ''}`}
+                              title={
+                                stop.timingConflict
+                                  ? t(
+                                      stop.itemKind === 'reserved'
+                                        ? 'route.reservedLate'
+                                        : 'route.fixedArrivalLate',
+                                      {
+                                        time: stop.fixedArrival,
+                                        minutes: stop.timingConflict,
+                                      },
+                                    )
+                                  : t(
+                                      stop.itemKind === 'reserved'
+                                        ? 'route.reservedAt'
+                                        : 'route.fixedArrivalAt',
+                                      { time: stop.fixedArrival },
+                                    )
+                              }
+                            >
+                              <Icon
+                                name={
+                                  stop.itemKind === 'reserved' ? 'facilityReservation' : 'clock'
+                                }
+                                size={11}
+                              />
+                              {stop.fixedArrival}
+                            </span>
+                          )}
                         </div>
                         <div className="leg-meta">
                           {stop.arriveAt}–{stop.leaveAt} · {stop.categoryLabel} ·{' '}
                           {stop.stayMinutes ?? 0}
                           {t('route.minutes')}
+                          {stop.waitMinutes ? (
+                            <span className="leg-wait">
+                              {' '}
+                              · {t('route.waitMinutes', { minutes: stop.waitMinutes })}
+                            </span>
+                          ) : null}
                         </div>
+                        {isHoursProblem(stop.hoursStatus) && (
+                          <div className="leg-hours-warning">
+                            <Icon name="clock" size={11} />{' '}
+                            {t(`route.hours.${stop.hoursStatus}`, {
+                              opens: stop.hoursOpensAt ?? '',
+                              closes: stop.hoursClosesAt ?? '',
+                            })}
+                          </div>
+                        )}
+                        <BookingLinkCards note={stop.note} placeId={stop.id} />
                       </div>
                       {!readOnly && (
                         <button

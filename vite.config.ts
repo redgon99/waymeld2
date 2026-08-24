@@ -421,6 +421,12 @@ export default defineConfig(({ mode }) => {
         scope: '/',
         start_url: '/',
         lang: 'ko',
+        // 공유 시트에서 받은 링크를 /share 라우트가 받아 장소를 추출한다
+        share_target: {
+          action: '/share',
+          method: 'GET',
+          params: { title: 'title', text: 'text', url: 'url' },
+        },
         icons: [
           {
             src: '/pwa-192.png',

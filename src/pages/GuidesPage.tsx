@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthBar } from '../components/AuthBar';
 import { LocaleSwitcher } from '../components/LocaleSwitcher';
+import { useSeoMeta } from '../hooks/useSeoMeta';
 import { GUIDE_KINDS, type GuideKind } from '../lib/guideKinds';
 import { normalizeLocale, pathWithLocale } from '../lib/locale';
 import { plannerPath } from '../lib/routes';
@@ -19,9 +20,7 @@ export default function GuidesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    document.title = t('list.metaTitle');
-  }, [t]);
+  useSeoMeta({ title: t('list.metaTitle'), description: t('list.subtitle'), path: '/guides' });
 
   useEffect(() => {
     if (!isGuidesConfigured()) {

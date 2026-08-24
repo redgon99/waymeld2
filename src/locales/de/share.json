@@ -1,4 +1,24 @@
 {
+  "meta": {
+    "tripTitle": "{{title}} · WayMeld",
+    "tripFallback": "Geteilte Reise",
+    "tripDescription": "Sieh dir den Tagesplan mit echten Fahrzeiten und Aufenthaltsdauern an und übernimm ihn in deine eigene Reise.",
+    "plazaTitle": "Reise-Plaza · WayMeld",
+    "plazaDescription": "Entdecke mehrtägige Reisepläne anderer Reisender und übernimm sie direkt in deine eigene Reise."
+  },
+  "target": {
+    "metaTitle": "Orte aus einem geteilten Link sammeln · WayMeld",
+    "title": "Orte aus dem geteilten Link",
+    "backToPlan": "Zum Planer",
+    "extracting": "Suche nach Orten in diesem Link…",
+    "foundPlaces": "{{count}} Orte gefunden",
+    "noPlaces": "In diesem Link wurden keine Orte gefunden.",
+    "noLink": "In den geteilten Inhalten war kein Link.",
+    "notConfigured": "Die Ortsextraktion aus Links ist nicht konfiguriert.",
+    "extractFailed": "Orte konnten nicht extrahiert werden.",
+    "openInPlanner": "Im Planer fortfahren",
+    "goPlanner": "Planer öffnen"
+  },
   "trip": {
     "readOnly": "Geteilte Reise (nur Lesen)",
     "notFound": "Reise nicht gefunden.",

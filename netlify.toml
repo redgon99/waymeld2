@@ -6,6 +6,7 @@
   NODE_VERSION = "20"
 
 # 카카오맵 장소 API — netlify/edge-functions/kakao-place-proxy.ts (필수 헤더 주입)
+# 소셜 미리보기 메타 — netlify/edge-functions/og-meta.ts (봇 요청에만 개입)
 # 이미지 프록시 (CORS·hotlink 우회)
 [[redirects]]
   from = "/api/kakao-img-t1/*"

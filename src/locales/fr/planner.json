@@ -1,4 +1,26 @@
 {
+  "booking": {
+    "open": "Ouvrir",
+    "notePlaceholder": "Note · collez un lien de réservation",
+    "noteAria": "Note pour {{name}}"
+  },
+  "reactions": {
+    "tooltip": "{{mentions}} mentions de voyageurs · {{positive}} positives / {{negative}} négatives",
+    "tone": {
+      "positive": "Apprécié des voyageurs",
+      "mixed": "Avis partagés",
+      "negative": "Quelques réserves"
+    },
+    "aspect": {
+      "crowd": "Affluence évoquée",
+      "price": "Prix évoqué",
+      "access": "Accès évoqué",
+      "food": "Goût évoqué",
+      "view": "Panorama évoqué",
+      "service": "Service évoqué",
+      "facility": "Équipements évoqués"
+    }
+  },
   "search": {
     "placeholder": "Rechercher des lieux",
     "placeholderWithYoutube": "Nom du lieu ou lien YouTube",
@@ -106,6 +128,8 @@
     "empty": "Pas encore d’itinéraire. Épinglez des lieux ou générez un parcours."
   },
   "pinup": {
+    "reservedAt": "Réservé à {{time}}",
+    "fixedArrivalAt": "Arrivée fixée à {{time}}",
     "title": "Lieux épinglés",
     "titleShort": "Épingles",
     "clearAll": "Tout effacer",
@@ -130,6 +154,9 @@
     "unmarkRequired": "Retirer l’incontournable"
   },
   "route": {
+    "fixedArrivalAt": "Arrivée fixée à {{time}}",
+    "fixedArrivalLate": "{{minutes}} min plus tard que l'heure fixée ({{time}})",
+    "waitMinutes": "{{minutes}} min d'attente",
     "title": "Créer l’itinéraire",
     "generate": "Générer l’itinéraire",
     "refining": "Application des routes réelles…",
@@ -161,6 +188,9 @@
       "high": "Fatigue élevée"
     },
     "options": {
+      "fixedArrivalAria": "Heure d'arrivée fixe pour {{name}}",
+      "fixedArrivalHint": "Fixez l'heure d'arrivée pour tout ce qui est déjà réservé",
+      "fixedArrivalClear": "Supprimer l'heure d'arrivée fixe",
       "panelAria": "Réglages de l’itinéraire",
       "title": "Réglages de l’itinéraire",
       "subtitle": "Jour {{day}} · {{count}} lieux",
@@ -205,7 +235,21 @@
         "transport": "Correspondance ~15 min",
         "road": "Balade suggérée ~40 min",
         "other": "Pause suggérée ~30 min"
-      }
+      },
+      "reserved": "Réservation",
+      "reservedHint": "L'heure d'une réservation ne bouge pas ; le reste de la journée s'organise autour.",
+      "date": "Date de visite",
+      "dateHint": "Ajoutez la date pour vérifier les horaires selon le jour",
+      "hoursFilter": "Horaires à vérifier {{n}}"
+    },
+    "reservedAt": "Réservé à {{time}} · heure fixe",
+    "reservedLate": "{{minutes}} min de retard sur la réservation de {{time}}",
+    "anchorConflictTitle": "{{n}} étape(s) ne tiennent pas dans le planning",
+    "hours": {
+      "closed": "Arrivée après la fermeture ({{opens}}–{{closes}})",
+      "before-open": "Arrivée avant l’ouverture (ouvre à {{opens}})",
+      "closes-early": "Ferme à {{closes}} pendant votre visite",
+      "offday": "Fermé ce jour-là"
     }
   },
   "dock": {
@@ -700,5 +744,32 @@
     "removeDay": "Supprimer le jour {{day}} ?",
     "shareWithoutLogin": "Sans connexion, le lien peut ne pas s’ouvrir sur d’autres appareils.\nPartager quand même ?",
     "shareLocalMode": "Mode local. Le lien peut ne s’ouvrir que dans ce navigateur.\nContinuer ?"
+  },
+  "presence": {
+    "guest": "Voyageur",
+    "viewing": "{{n}} personnes en train de regarder",
+    "you": "{{name}} (vous)"
+  },
+  "report": {
+    "action": "Signaler",
+    "title": "Signaler ce contenu",
+    "reasonLegend": "Motif",
+    "reasons": {
+      "spam": "Spam ou publicité",
+      "inappropriate": "Contenu inapproprié",
+      "wrong_info": "Information erronée",
+      "copyright": "Violation de droits d’auteur",
+      "other": "Autre"
+    },
+    "detailLabel": "Précisions (facultatif)",
+    "detailPlaceholder": "Dites-nous ce qui pose problème",
+    "submit": "Envoyer le signalement",
+    "submitting": "Envoi…",
+    "cancel": "Annuler",
+    "close": "Fermer",
+    "done": "Votre signalement a bien été reçu.",
+    "doneHint": "Un administrateur va l’examiner.",
+    "duplicate": "Vous avez déjà signalé ce contenu.",
+    "failed": "Impossible d’envoyer le signalement. Réessayez plus tard."
   }
 }

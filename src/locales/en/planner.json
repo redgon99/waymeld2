@@ -1,4 +1,26 @@
 {
+  "booking": {
+    "open": "Open",
+    "notePlaceholder": "Note · paste a booking link",
+    "noteAria": "Note for {{name}}"
+  },
+  "reactions": {
+    "tooltip": "{{mentions}} traveler mentions · {{positive}} positive / {{negative}} negative",
+    "tone": {
+      "positive": "Travelers liked it",
+      "mixed": "Mixed opinions",
+      "negative": "Some warnings"
+    },
+    "aspect": {
+      "crowd": "Crowds mentioned",
+      "price": "Price mentioned",
+      "access": "Access mentioned",
+      "food": "Taste mentioned",
+      "view": "Views mentioned",
+      "service": "Service mentioned",
+      "facility": "Facilities mentioned"
+    }
+  },
   "search": {
     "placeholder": "Search places",
     "placeholderWithYoutube": "Place name or YouTube link",
@@ -106,6 +128,8 @@
     "empty": "No itinerary yet. Pin places or generate a route."
   },
   "pinup": {
+    "reservedAt": "Reserved for {{time}}",
+    "fixedArrivalAt": "Arrival fixed at {{time}}",
     "title": "Pinned places",
     "titleShort": "Pins",
     "clearAll": "Clear all",
@@ -130,6 +154,9 @@
     "unmarkRequired": "Remove must visit"
   },
   "route": {
+    "fixedArrivalAt": "Arrival fixed at {{time}}",
+    "fixedArrivalLate": "{{minutes}} min later than the fixed {{time}}",
+    "waitMinutes": "{{minutes}} min wait",
     "title": "Build route",
     "generate": "Generate route",
     "refining": "Applying real roads…",
@@ -161,6 +188,9 @@
       "high": "High fatigue"
     },
     "options": {
+      "fixedArrivalAria": "Fixed arrival time for {{name}}",
+      "fixedArrivalHint": "Pin the arrival time for anything already booked",
+      "fixedArrivalClear": "Clear fixed arrival time",
       "panelAria": "Route settings",
       "title": "Route settings",
       "subtitle": "Day {{day}} · {{count}} places",
@@ -205,7 +235,21 @@
         "transport": "Transfer ~15 min",
         "road": "Suggested walk ~40 min",
         "other": "Suggested stay ~30 min"
-      }
+      },
+      "reserved": "Reserved",
+      "reservedHint": "A reservation never moves. The rest of the day is planned around it.",
+      "date": "Visit date",
+      "dateHint": "Add a date to check day-of-week opening hours",
+      "hoursFilter": "Hours to check {{n}}"
+    },
+    "reservedAt": "Reserved at {{time}} · fixed",
+    "reservedLate": "{{minutes}} min late for the {{time}} reservation",
+    "anchorConflictTitle": "{{n}} item(s) don't fit the schedule",
+    "hours": {
+      "closed": "Arrives after closing time ({{opens}}–{{closes}})",
+      "before-open": "Arrives before it opens (opens {{opens}})",
+      "closes-early": "Closes at {{closes}} during your stay",
+      "offday": "Closed on this day"
     }
   },
   "dock": {
@@ -700,5 +744,32 @@
     "removeDay": "Delete day {{day}}?",
     "shareWithoutLogin": "Without signing in, the share link may not open on other devices or browsers.\nShare anyway?",
     "shareLocalMode": "Local save mode. The share link may only open in this browser.\nContinue?"
+  },
+  "presence": {
+    "guest": "Traveler",
+    "viewing": "{{n}} people viewing",
+    "you": "{{name}} (you)"
+  },
+  "report": {
+    "action": "Report",
+    "title": "Report this content",
+    "reasonLegend": "Reason",
+    "reasons": {
+      "spam": "Spam or ads",
+      "inappropriate": "Inappropriate content",
+      "wrong_info": "Incorrect information",
+      "copyright": "Copyright violation",
+      "other": "Something else"
+    },
+    "detailLabel": "Details (optional)",
+    "detailPlaceholder": "Tell us what the problem is",
+    "submit": "Send report",
+    "submitting": "Sending…",
+    "cancel": "Cancel",
+    "close": "Close",
+    "done": "Your report has been received.",
+    "doneHint": "An administrator will review it.",
+    "duplicate": "You have already reported this.",
+    "failed": "Could not send the report. Please try again."
   }
 }

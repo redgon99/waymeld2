@@ -20,8 +20,14 @@ import {
   extractPlacesFromLink,
   isLinkPlacesExtractConfigured,
   type LinkPlaceCandidate,
+  type LinkPlacesExtractResult,
 } from '../lib/linkPlaces';
 import { detectLinkInput, type DetectedLink } from '../lib/linkPlatform';
+import {
+  getPlaceReaction,
+  isPlaceReactionsConfigured,
+  loadPlaceReactions,
+} from '../lib/placeReactions';
 import { looksLikePastedPlaceList, splitSearchQueries } from '../lib/searchQueries';
 import {
   getSearchSubFilterGroup,
@@ -29,6 +35,7 @@ import {
 } from '../lib/searchSubFilters';
 import { PlaceThumb } from './PlaceThumb';
 import { OpenStatusBadge } from './OpenStatusBadge';
+import { PlaceReactionBadge } from './PlaceReactionBadge';
 import { MapProviderPicker } from './MapProviderPicker';
 import { LinkExtractResults } from './LinkExtractResults';
 import type { MapProvider } from '../lib/mapProvider';
@@ -81,6 +88,8 @@ interface Props {
   onCategorySubFiltersChange?: (next: SearchSubFilterId[]) => void;
   /** 선택한 여행 테마 (K-food, K-pop 등) — 일치하는 카테고리를 우선 노출 */
   preferences?: TripTheme[];
+  /** PWA 공유 시트에서 넘어온 링크 추출 결과 (없으면 평소대로 빈 상태) */
+  initialExtract?: LinkPlacesExtractResult | null;
   variant?: 'default' | 'compact';
 }
 
@@ -92,7 +101,8 @@ function matchedThemes(place: Place, preferences: TripTheme[]) {
   );
 }
 
-function insightBadge(
+/** 플랫폼 평점·리뷰수만으로 만드는 요약 배지 (수집·분석 인사이트와는 별개) */
+function ratingBadge(
   place: Place,
   labels: { top: string; positive: string; wait: string }
 ): { kind: 'y' | 'g' | 'n'; label: string } | null {
@@ -147,6 +157,7 @@ export function SearchPanel({
   categorySubFilters = [],
   onCategorySubFiltersChange,
   preferences = [],
+  initialExtract = null,
   variant = 'default',
 }: Props) {
   const { t } = useTranslation('planner');
@@ -172,7 +183,20 @@ export function SearchPanel({
   >(null);
   const [linkPreviewHref, setLinkPreviewHref] = useState<string | null>(null);
   const [pasteHint, setPasteHint] = useState<string | null>(null);
+  // 조회가 끝났을 때만 배지를 그리기 위한 리렌더 트리거
+  const [reactionsLoaded, setReactionsLoaded] = useState(0);
   const resultListRef = useRef<HTMLUListElement>(null);
+
+  useEffect(() => {
+    if (!isPlaceReactionsConfigured() || results.length === 0) return;
+    let alive = true;
+    void loadPlaceReactions(results).then(() => {
+      if (alive) setReactionsLoaded((v) => v + 1);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [results]);
 
   const linkEnabled = isLinkPlacesExtractConfigured() && Boolean(onSearchCandidate);
   const detectedLink = useMemo(
@@ -236,6 +260,27 @@ export function SearchPanel({
       setPasteHint(null);
     }
   }, [detectedLink, linkPreviewKey, query, t]);
+
+  // 공유 시트(/share)에서 넘어온 추출 결과를 붙여넣기 흐름과 동일하게 되살린다.
+  // 검색어를 원본 링크로 채워야 위 정리 effect가 미리보기를 지우지 않는다.
+  const seededExtractUrl = useRef<string | null>(null);
+  useEffect(() => {
+    const url = initialExtract?.sourceUrl;
+    if (!url || seededExtractUrl.current === url) return;
+    seededExtractUrl.current = url;
+
+    const detected = detectLinkInput(url);
+    setLinkPlaces(initialExtract?.places ?? []);
+    setLinkTitle(initialExtract?.title ?? null);
+    setLinkDescription(initialExtract?.description ?? null);
+    setLinkImageUrl(initialExtract?.imageUrl ?? null);
+    setLinkError(null);
+    setLinkSnsMessage(null);
+    setLinkPreviewKey(detected?.sourceKey ?? url);
+    setLinkPreviewPlatform(detected?.platform ?? 'web');
+    setLinkPreviewHref(detected?.href ?? url);
+    onQueryChange(url);
+  }, [initialExtract, onQueryChange]);
 
   useEffect(() => {
     if (!selectedId || !resultListRef.current) return;
@@ -611,11 +656,12 @@ export function SearchPanel({
         <ul className="search-result-list" ref={resultListRef}>
           {sorted.map((place) => {
             const isPinned = pinnedIds.has(place.id);
-            const badge = insightBadge(place, {
+            const badge = ratingBadge(place, {
               top: t('search.insightTop'),
               positive: t('search.insightPositive'),
               wait: t('search.insightWait'),
             });
+            const reaction = reactionsLoaded ? getPlaceReaction(place) : null;
             const enHint = place.categoryDetail || place.categoryLabel || '';
             const themeMatches = matchedThemes(place, preferences);
             return (
@@ -665,8 +711,9 @@ export function SearchPanel({
                     </span>
                   )}
                   {badge && (
-                    <span className={`insight-badge ${badge.kind}`}>{badge.label}</span>
+                    <span className={`rating-badge ${badge.kind}`}>{badge.label}</span>
                   )}
+                  <PlaceReactionBadge reaction={reaction} />
                 </div>
                 <button
                   type="button"

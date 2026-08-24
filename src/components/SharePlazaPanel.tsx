@@ -6,6 +6,8 @@ import { formatDate } from '../lib/format';
 import { normalizeLocale } from '../lib/locale';
 import i18n from '../lib/i18n';
 import { MapView } from './MapView';
+import { ReportButton } from './ReportButton';
+import { trackEvent } from '../lib/analytics';
 import { useAuth } from '../contexts/AuthContext';
 import { loadKakaoSdk } from '../lib/kakao';
 import { isSupabaseConfigured } from '../lib/supabase';
@@ -90,6 +92,7 @@ export function SharePlazaPanel() {
         await tripsRepo.save(cloned);
         await recordPlazaImport(listing.id, cloned.id, user?.id);
         setImportedIds((prev) => new Set([...prev, listing.id]));
+        trackEvent('plaza_import', { sourceTripId: listing.id });
         setToast(t('plaza.importedToast', { title: listing.title }));
         setTimeout(() => setToast(null), 3500);
       } catch (e) {
@@ -206,6 +209,15 @@ export function SharePlazaPanel() {
                         {isPulling ? t('plaza.importing') : t('plaza.import')}
                       </button>
                     )}
+                    <ReportButton
+                      target={{
+                        type: 'plaza_listing',
+                        id: entry.id,
+                        label: entry.title,
+                        url: `${window.location.origin}/trip/${entry.slug}`,
+                      }}
+                      compact
+                    />
                   </div>
                 </article>
               );

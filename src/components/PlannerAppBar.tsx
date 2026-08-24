@@ -10,6 +10,8 @@ import { AppSheetModal } from './AppSheetModal';
 import { HelpContent } from './HelpContent';
 import { KoreaSetupContent } from './KoreaSetupContent';
 import { SharePlazaPanel } from './SharePlazaPanel';
+import { PresenceStack } from './PresenceStack';
+import { useTripPresence } from '../hooks/useTripPresence';
 import type { Trip, TripSummary } from '../lib/trips';
 
 type AppSheet = 'plaza' | 'setup' | 'help';
@@ -64,6 +66,8 @@ export function PlannerAppBar({
   const [sheet, setSheet] = useState<AppSheet | null>(null);
   const [helpAirportFocus, setHelpAirportFocus] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
+  // 공유 중인 여행에서만 채널을 연다 (혼자 편집할 때는 열 이유가 없다)
+  const viewers = useTripPresence(trip.id, Boolean(trip.isPublic));
 
   useEffect(() => {
     if (!moreOpen) return;
@@ -189,6 +193,8 @@ export function PlannerAppBar({
       <div className="planner-app-bar-divider" aria-hidden />
 
       {/* 4. 액션 */}
+      <PresenceStack viewers={viewers} />
+
       <SaveStatusBadge
         status={saveStatus}
         lastSavedAt={lastSavedAt}

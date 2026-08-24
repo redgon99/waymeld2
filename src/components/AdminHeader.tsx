@@ -8,7 +8,8 @@ export type AdminPageKey =
   | 'guides'
   | 'distribution'
   | 'scenarios'
-  | 'landing';
+  | 'landing'
+  | 'reports';
 
 interface Props {
   /** 페이지별 설명. 화면 제목은 항상 「관리자 페이지」로 고정. */
@@ -28,6 +29,7 @@ const NAV_ITEMS: Array<{ key: AdminPageKey; label: string; to: string }> = [
   { key: 'distribution', label: '배포관리', to: '/admin/distribution' },
   { key: 'scenarios', label: '시나리오 카탈로그', to: '/admin/scenarios' },
   { key: 'landing', label: '랜딩페이지 관리', to: '/admin/landing' },
+  { key: 'reports', label: '신고 검수', to: '/admin/reports' },
 ];
 
 export function AdminHeader({

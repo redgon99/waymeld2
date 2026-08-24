@@ -1,4 +1,24 @@
 {
+  "meta": {
+    "tripTitle": "{{title}} · 여로담",
+    "tripFallback": "공유된 여행",
+    "tripDescription": "이동시간·체류시간까지 반영한 여행 일정을 확인하고 내 여행으로 끌어오세요.",
+    "plazaTitle": "공유마당 · 여로담",
+    "plazaDescription": "다른 여행자가 공유한 다일차 일정을 둘러보고 그대로 내 여행으로 끌어오세요."
+  },
+  "target": {
+    "metaTitle": "공유한 링크에서 장소 담기 · 여로담",
+    "title": "공유한 링크에서 장소 찾기",
+    "backToPlan": "플래너로",
+    "extracting": "링크에서 장소를 찾는 중…",
+    "foundPlaces": "장소 {{count}}곳을 찾았습니다",
+    "noPlaces": "이 링크에서는 장소를 찾지 못했습니다.",
+    "noLink": "공유된 내용에서 링크를 찾지 못했습니다.",
+    "notConfigured": "링크 장소 추출이 설정되지 않았습니다.",
+    "extractFailed": "장소 추출에 실패했습니다.",
+    "openInPlanner": "플래너에서 이어서 담기",
+    "goPlanner": "플래너 열기"
+  },
   "trip": {
     "readOnly": "읽기 전용 공유",
     "notFound": "여행을 찾을 수 없습니다.",

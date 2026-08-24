@@ -12,6 +12,7 @@ import {
   setInsightKeywordActive,
   triggerInsightAnalysis,
   triggerInsightCollection,
+  triggerInsightPlaceMatch,
   type InsightCollector,
 } from '../lib/adminInsights';
 import {
@@ -74,7 +75,10 @@ export default function AdminInsightsPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [runningCollector, setRunningCollector] = useState<InsightCollector | 'analyze' | null>(null);
+  const [runningCollector, setRunningCollector] = useState<
+    InsightCollector | 'analyze' | 'place_match' | null
+  >(null);
+  const [placeMatchResult, setPlaceMatchResult] = useState<string | null>(null);
   const [draftingGuides, setDraftingGuides] = useState(false);
   const [draftingAnalysisId, setDraftingAnalysisId] = useState<string | null>(null);
   const [selectedAnalysisIds, setSelectedAnalysisIds] = useState<Set<string>>(new Set());
@@ -370,6 +374,23 @@ export default function AdminInsightsPage() {
     }
   };
 
+  const handlePlaceMatch = async () => {
+    setRunningCollector('place_match');
+    setError(null);
+    setPlaceMatchResult(null);
+    try {
+      const result = await triggerInsightPlaceMatch();
+      setPlaceMatchResult(
+        `게시물 ${result.itemsProcessed}건에서 장소 언급 ${result.mentionsAdded}건 추출 · 장소 ${result.placesTouched}곳 집계 갱신`
+      );
+      await loadAll();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '장소 매칭 실행 실패');
+    } finally {
+      setRunningCollector(null);
+    }
+  };
+
   const handleDraftGuides = async (analysisIds?: string[]) => {
     setDraftingGuides(true);
     setError(null);
@@ -528,7 +549,17 @@ export default function AdminInsightsPage() {
             >
               {runningCollector === 'analyze' ? '분석 중...' : 'AI 분석 실행'}
             </button>
+            <button
+              type="button"
+              className="admin-create-btn"
+              disabled={runningCollector !== null}
+              onClick={() => void handlePlaceMatch()}
+              title="분석된 게시물에서 장소 언급을 뽑아 장소 카드 배지에 반영합니다"
+            >
+              {runningCollector === 'place_match' ? '매칭 중...' : '장소 매칭 실행'}
+            </button>
           </div>
+          {placeMatchResult && <p className="admin-cell-sub">{placeMatchResult}</p>}
 
           <div className="admin-table-wrap" style={{ marginTop: 12 }}>
             <table className="admin-table">
@@ -542,11 +573,17 @@ export default function AdminInsightsPage() {
                 </tr>
               </thead>
               <tbody>
-                {['youtube', 'naver_blog', 'reddit', 'analyze'].map((source) => {
+                {['youtube', 'naver_blog', 'reddit', 'analyze', 'place_match'].map((source) => {
                   const run = latestRunBySource.get(source);
+                  const label =
+                    source === 'analyze'
+                      ? 'AI 분석'
+                      : source === 'place_match'
+                        ? '장소 매칭'
+                        : (SOURCE_LABEL[source as InsightSource] ?? source);
                   return (
                     <tr key={source}>
-                      <td>{source === 'analyze' ? 'AI 분석' : SOURCE_LABEL[source as InsightSource] ?? source}</td>
+                      <td>{label}</td>
                       <td>{run ? formatDateTime(run.startedAt) : '실행 이력 없음'}</td>
                       <td>
                         {run && (

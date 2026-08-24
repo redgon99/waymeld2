@@ -47,6 +47,11 @@ import {
 import { UpgradeModal } from '../components/UpgradeModal';
 import { enrichPlacesWithStats } from '../lib/placeStats';
 import { generateRoute, refineRouteWithRealLegs, haversineMeters } from '../lib/planner';
+import { trackEvent } from '../lib/analytics';
+import { isHoursProblem } from '../lib/openingHours';
+import type { LinkPlacesExtractResult } from '../lib/linkPlaces';
+import { consumeShareHandoff } from '../lib/shareTarget';
+import { isValidHHMM } from '../lib/timeOfDay';
 import { fetchLegs } from '../lib/mobility';
 import { resolveOriginForRoute } from '../lib/resolveOrigin';
 import { suggestStayMinutes } from '../lib/categories';
@@ -167,6 +172,20 @@ function makeEmptyTrip(): Trip {
   });
 }
 
+/** 착수 게이트용 — 만들어진 일정이 시간 제약을 지키는지 남긴다 */
+function reportRouteMetrics(route: GeneratedRoute) {
+  const anchorConflicts = route.stops.filter((s) => s.timingConflict).length;
+  const hoursConflicts = route.stops.filter((s) => isHoursProblem(s.hoursStatus)).length;
+  trackEvent('route_generated', {
+    stops: route.stops.length,
+    travelMode: route.options.travelMode,
+    autoOrder: route.options.autoOrder,
+  });
+  if (anchorConflicts + hoursConflicts > 0) {
+    trackEvent('route_conflict', { anchorConflicts, hoursConflicts });
+  }
+}
+
 export default function PlannerPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -224,6 +243,12 @@ export default function PlannerPage() {
   const [photosTarget, setPhotosTarget] = useState<Place | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const toastTimerRef = useRef<number | null>(null);
+  // /share 에서 넘어온 링크 추출 결과 — 검색 패널이 붙여넣기 흐름처럼 이어받는다
+  const [sharedExtract, setSharedExtract] = useState<LinkPlacesExtractResult | null>(null);
+
+  useEffect(() => {
+    setSharedExtract(consumeShareHandoff());
+  }, []);
 
   function showToast(msg: string) {
     setToast(msg);
@@ -1311,6 +1336,82 @@ export default function PlannerPage() {
     [currentDay]
   );
 
+  const handleUpdateFixedArrival = useCallback(
+    (placeId: string, time: string | null) => {
+      const next = isValidHHMM(time) ? time : undefined;
+      if (next) trackEvent('fixed_arrival_set', { day: currentDay });
+      setTrip((prev) => {
+        const list = prev.pinnedByDay[currentDay] ?? [];
+        const nextPinned = list.map((p) =>
+          p.id === placeId ? { ...p, fixedArrival: next } : p
+        );
+        return {
+          ...prev,
+          pinnedByDay: { ...prev.pinnedByDay, [currentDay]: nextPinned },
+          updatedAt: Date.now(),
+        };
+      });
+    },
+    [currentDay]
+  );
+
+  /** 상세를 열어 확인한 영업시간을 핀에 저장 — 일정 검증에 쓰인다 */
+  const handleHoursResolved = useCallback(
+    (placeId: string, hours: { hours?: string; restDate?: string }) => {
+      setTrip((prev) => {
+        let changed = false;
+        const nextByDay: typeof prev.pinnedByDay = {};
+        for (const [dayKey, list] of Object.entries(prev.pinnedByDay)) {
+          nextByDay[Number(dayKey)] = list.map((p) => {
+            if (p.id !== placeId) return p;
+            const openingHours = hours.hours ?? p.openingHours;
+            const closedDays = hours.restDate ?? p.closedDays;
+            if (openingHours === p.openingHours && closedDays === p.closedDays) return p;
+            changed = true;
+            return { ...p, openingHours, closedDays };
+          });
+        }
+        if (!changed) return prev;
+        return { ...prev, pinnedByDay: nextByDay, updatedAt: Date.now() };
+      });
+    },
+    []
+  );
+
+  const handleUpdateItemKind = useCallback(
+    (placeId: string, kind: PinnedPlace['itemKind']) => {
+      setTrip((prev) => {
+        const list = prev.pinnedByDay[currentDay] ?? [];
+        const nextPinned = list.map((p) =>
+          p.id === placeId ? { ...p, itemKind: kind === 'reserved' ? kind : undefined } : p
+        );
+        return {
+          ...prev,
+          pinnedByDay: { ...prev.pinnedByDay, [currentDay]: nextPinned },
+          updatedAt: Date.now(),
+        };
+      });
+    },
+    [currentDay]
+  );
+
+  const handleUpdateNote = useCallback(
+    (placeId: string, note: string) => {
+      setTrip((prev) => {
+        const list = prev.pinnedByDay[currentDay] ?? [];
+        const nextPinned = list.map((p) =>
+          p.id === placeId ? { ...p, note: note.trim() ? note : undefined } : p
+        );
+        return {
+          ...prev,
+          pinnedByDay: { ...prev.pinnedByDay, [currentDay]: nextPinned },
+          updatedAt: Date.now(),
+        };
+      });
+    },
+    [currentDay]
+  );
+
   const handleTogglePresentation = useCallback(() => {
     setPresentationMode((prev) => !prev);
   }, []);
@@ -1400,6 +1501,7 @@ export default function PlannerPage() {
         preferences: trip.preferences,
       };
       const base = generateRoute(routePins, opts);
+      reportRouteMetrics(base);
       setRouteForDay(currentDay, base);
       setRouteOptionsOpen(false);
       setPanelOpen(false);
@@ -1661,6 +1763,7 @@ export default function PlannerPage() {
       setPlazaNavVisible(true);
       setShareModalOpen(false);
       setShareSaving(false);
+      trackEvent('trip_share_created', { listInPlaza: opts.listInPlaza });
 
       const url = `${window.location.origin}/trip/${trip.slug}`;
       const copied = () => {
@@ -1869,6 +1972,7 @@ export default function PlannerPage() {
                 mapProvider={mapProvider}
                 onMapProviderChange={handleMapProviderChange}
                 onSearchCandidate={handleSearchCandidate}
+                initialExtract={sharedExtract}
                 foodRestrictions={trip.foodRestrictions ?? []}
                 onFoodRestrictionsChange={handleFoodRestrictionsChange}
                 categorySubFilters={categorySubFilters}
@@ -1925,6 +2029,9 @@ export default function PlannerPage() {
                 hasExistingRoute={!!generatedRoute}
                 onChange={setRouteOptions}
                 onUpdateStayMinutes={handleUpdateStayMinutes}
+                onUpdateFixedArrival={handleUpdateFixedArrival}
+                onUpdateItemKind={handleUpdateItemKind}
+                onUpdateNote={handleUpdateNote}
                 onCopyFromPreviousDay={() => {
                   setTrip((prev) => copyRouteOptionsFromDay(prev, currentDay - 1, currentDay));
                   showToast(tp('toast.copiedDepart', { day: currentDay - 1 }));
@@ -2192,6 +2299,9 @@ export default function PlannerPage() {
                   hasExistingRoute={!!generatedRoute}
                   onChange={setRouteOptions}
                   onUpdateStayMinutes={handleUpdateStayMinutes}
+                  onUpdateFixedArrival={handleUpdateFixedArrival}
+                  onUpdateItemKind={handleUpdateItemKind}
+                  onUpdateNote={handleUpdateNote}
                   onClose={() => setMobileSheetLevel('peek')}
                   onGenerate={() => void handleGenerate()}
                   onPickOriginFromMap={handlePickOriginFromMap}
@@ -2237,6 +2347,7 @@ export default function PlannerPage() {
                 mapProvider={mapProvider}
                 onMapProviderChange={handleMapProviderChange}
                 onSearchCandidate={handleSearchCandidate}
+                initialExtract={sharedExtract}
                 foodRestrictions={trip.foodRestrictions ?? []}
                 onFoodRestrictionsChange={handleFoodRestrictionsChange}
                 categorySubFilters={categorySubFilters}
@@ -2308,6 +2419,7 @@ export default function PlannerPage() {
         place={photosTarget}
         onClose={() => setPhotosTarget(null)}
         onShowTaxiCard={(p) => setTaxiCardPlace(p)}
+        onHoursResolved={handleHoursResolved}
       />
 
       <TaxiDriverCardModal

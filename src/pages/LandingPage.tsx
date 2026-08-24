@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../components/Icon';
 import { LocaleSwitcher } from '../components/LocaleSwitcher';
+import { useSeoMeta } from '../hooks/useSeoMeta';
 import { normalizeLocale, pathWithLocale } from '../lib/locale';
 import { plannerPath } from '../lib/routes';
 import i18n from '../lib/i18n';
@@ -48,11 +49,7 @@ export default function LandingPage() {
   const [tipGuides, setTipGuides] = useState<GuideArticle[]>([]);
   const [promo, setPromo] = useState<LandingPromo | null>(null);
 
-  useEffect(() => {
-    document.title = t('meta.title');
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute('content', t('meta.description'));
-  }, [t]);
+  useSeoMeta({ title: t('meta.title'), description: t('meta.description'), path: '/' });
 
   useEffect(() => {
     if (!isGuidesConfigured()) return;

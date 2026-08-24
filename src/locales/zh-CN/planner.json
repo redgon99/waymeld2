@@ -1,4 +1,26 @@
 {
+  "booking": {
+    "open": "打开",
+    "notePlaceholder": "备注 · 粘贴预订链接",
+    "noteAria": "{{name}} 的备注"
+  },
+  "reactions": {
+    "tooltip": "旅行者提及 {{mentions}} 次 · 好评 {{positive}} / 差评 {{negative}}",
+    "tone": {
+      "positive": "旅行者好评",
+      "mixed": "评价不一",
+      "negative": "有提醒意见"
+    },
+    "aspect": {
+      "crowd": "提及拥挤",
+      "price": "提及价格",
+      "access": "提及交通",
+      "food": "提及口味",
+      "view": "提及景观",
+      "service": "提及服务",
+      "facility": "提及设施"
+    }
+  },
   "search": {
     "placeholder": "搜索地点",
     "placeholderDesign": "地点、YouTube 或博客链接",
@@ -96,6 +118,8 @@
     "empty": "暂无行程。请先标记地点或生成路线。"
   },
   "pinup": {
+    "reservedAt": "预约 {{time}}",
+    "fixedArrivalAt": "到达时间固定为 {{time}}",
     "title": "已标记地点",
     "titleShort": "标记",
     "clearAll": "全部清除",
@@ -117,6 +141,9 @@
     "pinCount": "{{count}} 个标记"
   },
   "route": {
+    "fixedArrivalAt": "到达时间固定为 {{time}}",
+    "fixedArrivalLate": "比固定的 {{time}} 晚 {{minutes}} 分钟",
+    "waitMinutes": "等待 {{minutes}} 分钟",
     "title": "创建路线",
     "generate": "生成路线",
     "refining": "正在应用实际道路…",
@@ -148,6 +175,9 @@
       "high": "疲劳度高"
     },
     "options": {
+      "fixedArrivalAria": "固定 {{name}} 的到达时间",
+      "fixedArrivalHint": "已预约等时间已定的行程，请固定到达时间",
+      "fixedArrivalClear": "取消固定到达时间",
       "panelAria": "路线设置",
       "title": "路线设置",
       "subtitle": "第{{day}}天 · {{count}} 处",
@@ -192,7 +222,21 @@
         "transport": "换乘约 15 分钟",
         "road": "建议散步约 40 分钟",
         "other": "建议停留约 30 分钟"
-      }
+      },
+      "reserved": "预约",
+      "reservedHint": "已预约的行程时间不会变动，其他行程会避开这个时间安排。",
+      "date": "到访日期",
+      "dateHint": "填入日期后可按星期核对营业时间",
+      "hoursFilter": "需核对营业时间 {{n}}"
+    },
+    "reservedAt": "预约 {{time}}·时间固定",
+    "reservedLate": "比预约时间 {{time}} 晚 {{minutes}} 分钟",
+    "anchorConflictTitle": "{{n}} 项日程时间不匹配",
+    "hours": {
+      "closed": "到达时已过营业时间（{{opens}}~{{closes}}）",
+      "before-open": "在开门前到达（{{opens}} 开门）",
+      "closes-early": "停留期间 {{closes}} 就会打烊",
+      "offday": "当天休息"
     }
   },
   "dock": {
@@ -496,5 +540,32 @@
     "removeDay": "删除第 {{day}} 天行程？",
     "shareWithoutLogin": "未登录时，分享链接可能无法在其他设备或浏览器打开。\n仍要分享吗？",
     "shareLocalMode": "本地保存模式。分享链接可能只在此浏览器打开。\n继续吗？"
+  },
+  "presence": {
+    "guest": "旅行者",
+    "viewing": "{{n}} 人正在查看",
+    "you": "{{name}}（我）"
+  },
+  "report": {
+    "action": "举报",
+    "title": "举报该内容",
+    "reasonLegend": "举报理由",
+    "reasons": {
+      "spam": "垃圾信息·广告",
+      "inappropriate": "不当内容",
+      "wrong_info": "信息有误",
+      "copyright": "侵犯版权",
+      "other": "其他"
+    },
+    "detailLabel": "补充说明（可选）",
+    "detailPlaceholder": "请说明具体问题",
+    "submit": "提交举报",
+    "submitting": "提交中…",
+    "cancel": "取消",
+    "close": "关闭",
+    "done": "举报已提交。",
+    "doneHint": "管理员核实后会进行处理。",
+    "duplicate": "你已举报过该内容。",
+    "failed": "举报提交失败，请稍后再试。"
   }
 }

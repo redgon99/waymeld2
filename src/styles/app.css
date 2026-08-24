@@ -11745,7 +11745,451 @@ button {
   display: none;
 }
 
-.insight-badge {
+/* PWA 공유 시트 수신 화면 (/share) */
+.share-target-source {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.share-target-status {
+  padding: 16px 20px;
+  color: var(--color-text-muted, #64748b);
+}
+
+.share-target-error p {
+  color: #b91c1c;
+  margin-bottom: 12px;
+}
+
+.share-target-result {
+  padding: 8px 20px 24px;
+}
+
+.share-target-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.share-target-count {
+  color: var(--color-text-muted, #64748b);
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.share-target-places {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+}
+
+.share-target-places li {
+  padding: 4px 10px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+}
+
+.share-target-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: var(--radius-md, 10px);
+  background: var(--color-primary, #2563eb);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+/* 메모에 붙여 넣은 예약 링크 */
+.booking-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.booking-link-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-pill);
+  background: #fff;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--color-text, #0f172a);
+  text-decoration: none;
+}
+
+.booking-link-card:hover {
+  border-color: var(--color-primary, #2563eb);
+  color: var(--color-primary, #2563eb);
+}
+
+.booking-link-card.provider-web .booking-link-brand {
+  font-weight: 500;
+  color: var(--color-text-muted, #64748b);
+}
+
+.booking-link-action {
+  color: var(--color-text-muted, #64748b);
+  font-weight: 500;
+}
+
+.route-stay-note,
+.route-stay-note-text {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.route-stay-note {
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-sm, 6px);
+  padding: 3px 6px;
+  color: var(--color-text, #0f172a);
+}
+
+.route-stay-note-text {
+  color: var(--color-text-muted, #64748b);
+}
+
+/* 도착 시각 고정 — 핀 칩 / 일정 요약 / 옵션 패널 */
+.chip-fixed-arrival,
+.leg-fixed-arrival {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+  padding: 1px 5px;
+  border-radius: var(--radius-pill);
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.leg-fixed-arrival.is-conflict {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.leg-wait {
+  color: var(--color-text-muted, #64748b);
+}
+
+.route-fixed-arrival {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 6px;
+  padding: 2px 4px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-sm, 6px);
+  color: var(--color-text-muted, #64748b);
+}
+
+.route-fixed-arrival input {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  color: inherit;
+  width: 62px;
+  padding: 0;
+}
+
+.route-fixed-arrival-clear {
+  display: inline-flex;
+  align-items: center;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+}
+
+/* 예약(하드 앵커) — 시각이 움직이지 않는 일정 */
+.chip-fixed-arrival.reserved,
+.leg-fixed-arrival.reserved {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.leg-fixed-arrival.reserved.is-conflict {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.route-reserved-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 6px;
+  padding: 3px 7px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text-muted, #64748b);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.route-reserved-toggle.active {
+  border-color: #10b981;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.route-anchor-warning {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+  padding: 8px 10px;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-md, 10px);
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 12px;
+}
+
+.route-anchor-warning ul {
+  margin: 4px 0 0;
+  padding-left: 14px;
+}
+
+/* 같은 여행을 보고 있는 사람 (Realtime presence) */
+.presence-stack {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 4px;
+}
+
+.presence-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-left: -6px;
+  border: 2px solid var(--color-surface, #fff);
+  border-radius: 50%;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.presence-avatar.is-self {
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.15);
+}
+
+.presence-avatar.presence-more {
+  background: var(--color-text-muted, #64748b);
+  font-size: 10px;
+}
+
+/* 신고 접수 */
+.report-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--color-text-muted, #64748b);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.report-trigger:hover {
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.report-trigger.compact {
+  padding: 4px;
+  border-radius: 50%;
+}
+
+.report-panel {
+  width: min(420px, calc(100vw - 32px));
+  border-radius: var(--radius-lg, 14px);
+  background: var(--color-surface, #fff);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.22);
+  overflow: hidden;
+}
+
+.report-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+}
+
+.report-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+
+.report-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+}
+
+.report-target {
+  margin: 0;
+  color: var(--color-text-muted, #64748b);
+  font-size: 12px;
+}
+
+.report-reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.report-reasons legend {
+  padding: 0 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.report-reason {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.report-detail-label {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.report-detail {
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-sm, 6px);
+  padding: 8px;
+  font: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+
+.report-error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 12px;
+}
+
+.report-done {
+  margin: 0;
+  font-weight: 700;
+}
+
+.report-hint {
+  margin: 0;
+  color: var(--color-text-muted, #64748b);
+  font-size: 12px;
+}
+
+.report-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--color-border, #e2e8f0);
+}
+
+.admin-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.admin-cell-detail {
+  max-width: 280px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* 예정 방문 시각 영업 검증 */
+.route-stay-hours-warning,
+.leg-hours-warning {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 2px;
+  color: #b45309;
+  font-size: 11px;
+}
+
+.route-hours-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border: 1px solid #fed7aa;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: #b45309;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.route-hours-filter.active {
+  background: #fff7ed;
+}
+
+/* Tier 3 착수 게이트 */
+.admin-section-lead {
+  margin: -4px 0 10px;
+  color: var(--color-text-muted, #64748b);
+  font-size: 13px;
+}
+
+.admin-gate-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-gate-badge.met {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.admin-gate-badge.waiting {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+/* 플랫폼 평점(★·리뷰수) 기반 요약 배지 */
+.rating-badge {
   display: inline-flex;
   align-items: center;
   border-radius: var(--radius-pill);
@@ -11754,19 +12198,59 @@ button {
   font-weight: 700;
 }
 
-.insight-badge.y {
+.rating-badge.y {
   background: #fef9c3;
   color: #a16207;
 }
 
-.insight-badge.g {
+.rating-badge.g {
   background: #f0fdf4;
   color: #15803d;
 }
 
-.insight-badge.n {
+.rating-badge.n {
   background: #f1f5f9;
   color: #475569;
+}
+
+/* 수집·분석된 여행자 언급(Reddit·YouTube·블로그) 요약 배지 */
+.place-reaction-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: var(--radius-pill);
+  padding: 3px 8px;
+  font-size: 10.5px;
+  font-weight: 700;
+  border: 1px solid transparent;
+}
+
+.place-reaction-badge.is-positive {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+  color: #4338ca;
+}
+
+.place-reaction-badge.is-mixed {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #b45309;
+}
+
+.place-reaction-badge.is-negative {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.place-reaction-badge-count {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.7;
+}
+
+.place-detail-header .place-reaction-badge {
+  margin-left: 8px;
+  vertical-align: middle;
 }
 
 .theme-match-badge {

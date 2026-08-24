@@ -1,4 +1,26 @@
 {
+  "booking": {
+    "open": "開啟",
+    "notePlaceholder": "備註 · 貼上預訂連結",
+    "noteAria": "{{name}} 的備註"
+  },
+  "reactions": {
+    "tooltip": "旅客提及 {{mentions}} 次 · 好評 {{positive}} / 負評 {{negative}}",
+    "tone": {
+      "positive": "旅客好評",
+      "mixed": "評價分歧",
+      "negative": "有提醒意見"
+    },
+    "aspect": {
+      "crowd": "提及擁擠",
+      "price": "提及價格",
+      "access": "提及交通",
+      "food": "提及口味",
+      "view": "提及景觀",
+      "service": "提及服務",
+      "facility": "提及設施"
+    }
+  },
   "search": {
     "placeholder": "搜索地點",
     "placeholderDesign": "地點、YouTube 或博客鏈接",
@@ -96,6 +118,8 @@
     "empty": "暫無行程。請先標記地點或生成路線。"
   },
   "pinup": {
+    "reservedAt": "預約 {{time}}",
+    "fixedArrivalAt": "抵達時間固定為 {{time}}",
     "title": "已標記地點",
     "titleShort": "標記",
     "clearAll": "全部清除",
@@ -117,6 +141,9 @@
     "pinCount": "{{count}} 個標記"
   },
   "route": {
+    "fixedArrivalAt": "抵達時間固定為 {{time}}",
+    "fixedArrivalLate": "比固定的 {{time}} 晚 {{minutes}} 分鐘",
+    "waitMinutes": "等待 {{minutes}} 分鐘",
     "title": "創建路線",
     "generate": "生成路線",
     "refining": "正在應用實際道路…",
@@ -148,6 +175,9 @@
       "high": "疲勞度高"
     },
     "options": {
+      "fixedArrivalAria": "固定 {{name}} 的抵達時間",
+      "fixedArrivalHint": "已預約等時間已定的行程，請固定抵達時間",
+      "fixedArrivalClear": "取消固定抵達時間",
       "panelAria": "路線設置",
       "title": "路線設置",
       "subtitle": "第{{day}}天 · {{count}} 處",
@@ -192,7 +222,21 @@
         "transport": "換乘約 15 分鐘",
         "road": "建議散步約 40 分鐘",
         "other": "建議停留約 30 分鐘"
-      }
+      },
+      "reserved": "預約",
+      "reservedHint": "已預約的行程時間不會變動，其他行程會避開這個時間安排。",
+      "date": "造訪日期",
+      "dateHint": "填入日期後可依星期核對營業時間",
+      "hoursFilter": "需核對營業時間 {{n}}"
+    },
+    "reservedAt": "預約 {{time}}·時間固定",
+    "reservedLate": "比預約時間 {{time}} 晚 {{minutes}} 分鐘",
+    "anchorConflictTitle": "{{n}} 項行程時間不符",
+    "hours": {
+      "closed": "抵達時已過營業時間（{{opens}}~{{closes}}）",
+      "before-open": "在開門前抵達（{{opens}} 開門）",
+      "closes-early": "停留期間 {{closes}} 就會打烊",
+      "offday": "當天公休"
     }
   },
   "dock": {
@@ -496,5 +540,32 @@
     "removeDay": "刪除第 {{day}} 天行程？",
     "shareWithoutLogin": "未登錄時，分享鏈接可能無法在其他設備或瀏覽器打開。\n仍要分享嗎？",
     "shareLocalMode": "本地保存模式。分享鏈接可能只在此瀏覽器打開。\n繼續嗎？"
+  },
+  "presence": {
+    "guest": "旅行者",
+    "viewing": "{{n}} 人正在檢視",
+    "you": "{{name}}（我）"
+  },
+  "report": {
+    "action": "檢舉",
+    "title": "檢舉此內容",
+    "reasonLegend": "檢舉原因",
+    "reasons": {
+      "spam": "垃圾訊息·廣告",
+      "inappropriate": "不當內容",
+      "wrong_info": "資訊有誤",
+      "copyright": "侵犯著作權",
+      "other": "其他"
+    },
+    "detailLabel": "補充說明（選填）",
+    "detailPlaceholder": "請說明具體問題",
+    "submit": "送出檢舉",
+    "submitting": "送出中…",
+    "cancel": "取消",
+    "close": "關閉",
+    "done": "檢舉已送出。",
+    "doneHint": "管理員確認後會進行處理。",
+    "duplicate": "你已檢舉過此內容。",
+    "failed": "檢舉送出失敗，請稍後再試。"
   }
 }

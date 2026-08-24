@@ -183,3 +183,19 @@ export async function triggerInsightAnalysis(): Promise<{ itemsAnalyzed: number 
   if (error) throw error;
   return { itemsAnalyzed: (data?.itemsAnalyzed as number) ?? 0 };
 }
+
+/** 분석된 게시물에서 장소 언급을 뽑아 place_reactions 집계를 갱신 */
+export async function triggerInsightPlaceMatch(): Promise<{
+  itemsProcessed: number;
+  mentionsAdded: number;
+  placesTouched: number;
+}> {
+  const sb = requireSupabase();
+  const { data, error } = await sb.functions.invoke('insight-place-match', { body: {} });
+  if (error) throw error;
+  return {
+    itemsProcessed: (data?.itemsProcessed as number) ?? 0,
+    mentionsAdded: (data?.mentionsAdded as number) ?? 0,
+    placesTouched: (data?.placesTouched as number) ?? 0,
+  };
+}

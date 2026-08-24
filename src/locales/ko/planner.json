@@ -1,4 +1,26 @@
 {
+  "booking": {
+    "open": "열기",
+    "notePlaceholder": "메모 · 예약 링크 붙여넣기",
+    "noteAria": "{{name}} 메모"
+  },
+  "reactions": {
+    "tooltip": "여행자 언급 {{mentions}}건 · 긍정 {{positive}} / 부정 {{negative}}",
+    "tone": {
+      "positive": "여행자 호평",
+      "mixed": "의견 갈림",
+      "negative": "주의 의견"
+    },
+    "aspect": {
+      "crowd": "혼잡 언급",
+      "price": "가격 언급",
+      "access": "교통 언급",
+      "food": "맛 언급",
+      "view": "경관 언급",
+      "service": "응대 언급",
+      "facility": "시설 언급"
+    }
+  },
   "search": {
     "placeholder": "장소를 검색하세요",
     "placeholderWithYoutube": "장소명 또는 YouTube 링크",
@@ -106,6 +128,8 @@
     "empty": "표시할 일정이 없습니다. 장소를 핀업하거나 동선을 만들어 주세요."
   },
   "pinup": {
+    "reservedAt": "예약 {{time}}",
+    "fixedArrivalAt": "도착 시각 고정 {{time}}",
     "title": "핀업한 장소",
     "titleShort": "핀",
     "clearAll": "전체 해제",
@@ -130,6 +154,9 @@
     "unmarkRequired": "필수 방문 해제"
   },
   "route": {
+    "fixedArrivalAt": "도착 시각 고정 {{time}}",
+    "fixedArrivalLate": "고정 시각 {{time}}보다 {{minutes}}분 늦습니다",
+    "waitMinutes": "{{minutes}}분 대기",
     "title": "동선 만들기",
     "generate": "경로 생성",
     "refining": "실제 도로 반영 중…",
@@ -161,6 +188,9 @@
       "high": "피로도 높음"
     },
     "options": {
+      "fixedArrivalAria": "{{name}} 도착 시각 고정",
+      "fixedArrivalHint": "예약처럼 시각이 정해진 일정이면 도착 시각을 고정하세요",
+      "fixedArrivalClear": "도착 시각 고정 해제",
       "panelAria": "경로 설정",
       "title": "경로 설정",
       "subtitle": "{{day}}일차 · {{count}}개 장소",
@@ -205,7 +235,21 @@
         "transport": "이동·환승 15분",
         "road": "거리 산책 40분 추천",
         "other": "체류 30분"
-      }
+      },
+      "reserved": "예약",
+      "reservedHint": "예약한 일정은 시각이 움직이지 않습니다. 나머지 일정이 이 시각을 피해 배치됩니다.",
+      "date": "방문 날짜",
+      "dateHint": "날짜를 넣으면 요일별 영업시간까지 확인합니다",
+      "hoursFilter": "영업시간 확인 {{n}}"
+    },
+    "reservedAt": "예약 {{time}} · 시각 고정",
+    "reservedLate": "예약 {{time}}보다 {{minutes}}분 늦습니다",
+    "anchorConflictTitle": "시간이 맞지 않는 일정 {{n}}건",
+    "hours": {
+      "closed": "도착 시각에 영업이 끝난 뒤입니다 ({{opens}}~{{closes}})",
+      "before-open": "영업 시작 전에 도착합니다 ({{opens}} 오픈)",
+      "closes-early": "머무는 동안 {{closes}}에 영업이 끝납니다",
+      "offday": "이 날은 휴무일입니다"
     }
   },
   "dock": {
@@ -700,5 +744,32 @@
     "removeDay": "{{day}}일차 일정을 삭제하시겠어요?",
     "shareWithoutLogin": "로그인하지 않으면 다른 기기·브라우저에서 공유 링크가 열리지 않을 수 있습니다.\n그래도 공유할까요?",
     "shareLocalMode": "로컬 저장 모드입니다. 공유 링크는 이 브라우저에 저장된 경우에만 열릴 수 있습니다.\n계속할까요?"
+  },
+  "presence": {
+    "guest": "여행자",
+    "viewing": "{{n}}명이 함께 보는 중",
+    "you": "{{name}} (나)"
+  },
+  "report": {
+    "action": "신고",
+    "title": "내용 신고하기",
+    "reasonLegend": "신고 사유",
+    "reasons": {
+      "spam": "스팸·광고",
+      "inappropriate": "부적절한 내용",
+      "wrong_info": "잘못된 정보",
+      "copyright": "저작권 침해",
+      "other": "기타"
+    },
+    "detailLabel": "자세한 설명 (선택)",
+    "detailPlaceholder": "어떤 점이 문제인지 알려주세요",
+    "submit": "신고 접수",
+    "submitting": "접수 중…",
+    "cancel": "취소",
+    "close": "닫기",
+    "done": "신고가 접수되었습니다.",
+    "doneHint": "관리자가 확인한 뒤 조치합니다.",
+    "duplicate": "이미 접수된 신고입니다.",
+    "failed": "신고 접수에 실패했습니다. 잠시 후 다시 시도해 주세요."
   }
 }

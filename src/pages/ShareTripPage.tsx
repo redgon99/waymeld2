@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Icon } from '../components/Icon';
+import { useSeoMeta } from '../hooks/useSeoMeta';
 import { useAuth } from '../contexts/AuthContext';
 import { loadKakaoSdk } from '../lib/kakao';
 import { loadGoogleMapsSdk } from '../lib/googleMaps';
@@ -11,6 +13,9 @@ import { MapView } from '../components/MapView';
 import { DayTabs } from '../components/DayTabs';
 import { RouteSummary } from '../components/RouteSummary';
 import { ShareOnboardingCoach } from '../components/ShareOnboardingCoach';
+import { PresenceStack } from '../components/PresenceStack';
+import { ReportButton } from '../components/ReportButton';
+import { useTripPresence } from '../hooks/useTripPresence';
 import { shouldShowShareOnboarding } from '../lib/onboarding';
 import { normalizeLocale } from '../lib/locale';
 import i18n from '../lib/i18n';
@@ -20,6 +25,7 @@ import '../styles/app.css';
 const DEFAULT_CENTER = { lat: 37.8813, lng: 127.7298 };
 
 export default function ShareTripPage() {
+  const { t } = useTranslation('share');
   const locale = normalizeLocale(i18n.language);
   const planPath = plannerPath(locale);
   const { slug } = useParams<{ slug: string }>();
@@ -112,6 +118,15 @@ export default function ShareTripPage() {
   const generatedRoute = trip?.generatedRouteByDay[currentDay] ?? null;
   const routeOptions = trip ? getRouteOptionsForDay(trip, currentDay) : null;
 
+  useSeoMeta({
+    title: t('meta.tripTitle', { title: trip?.title?.trim() || t('meta.tripFallback') }),
+    description: t('meta.tripDescription'),
+    type: 'article',
+    path: slug ? `/trip/${slug}` : undefined,
+  });
+
+  const viewers = useTripPresence(trip?.id, Boolean(trip));
+
   const countsByDay = useMemo(() => {
     if (!trip) return {};
     const counts: Record<number, number> = {};
@@ -169,6 +184,7 @@ export default function ShareTripPage() {
           <h1 className="share-title">{trip.title}</h1>
         </div>
         <div className="share-header-actions">
+          <PresenceStack viewers={viewers} />
           <button
             type="button"
             className="share-action-btn share-action-btn--add"
@@ -181,6 +197,15 @@ export default function ShareTripPage() {
           <Link to={planPath} className="share-action-btn share-action-btn--edit">
             내 여행 편집하기
           </Link>
+          <ReportButton
+            target={{
+              type: 'trip',
+              id: trip.id,
+              label: trip.title,
+              url: window.location.href,
+            }}
+            compact
+          />
           {addMessage && <p className="share-add-error">{addMessage}</p>}
         </div>
       </header>

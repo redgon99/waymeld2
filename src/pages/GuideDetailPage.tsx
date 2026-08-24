@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthBar } from '../components/AuthBar';
 import { LocaleSwitcher } from '../components/LocaleSwitcher';
+import { ReportButton } from '../components/ReportButton';
+import { useSeoMeta } from '../hooks/useSeoMeta';
 import { GUIDE_KIND_META } from '../lib/guideKinds';
 import { normalizeLocale, pathWithLocale } from '../lib/locale';
 import { plannerPath } from '../lib/routes';
@@ -38,7 +40,6 @@ export default function GuideDetailPage() {
           setError(t('detail.notFound'));
         } else {
           setGuide(row);
-          document.title = `${row.title} · ${t('brand')}`;
         }
       } catch (e) {
         if (alive) setError(e instanceof Error ? e.message : t('errors.loadFailed'));
@@ -53,6 +54,17 @@ export default function GuideDetailPage() {
 
   const summaryText =
     locale === 'en' && guide?.summaryEn ? guide.summaryEn : guide?.summary;
+
+  useSeoMeta(
+    guide
+      ? {
+          title: `${guide.title} · ${t('brand')}`,
+          description: summaryText || undefined,
+          type: 'article',
+          path: `/guides/${slug}`,
+        }
+      : null,
+  );
 
   const primaryCta = (() => {
     if (!guide) return null;
@@ -139,6 +151,14 @@ export default function GuideDetailPage() {
                   {t('cta.planner')}
                 </Link>
               )}
+              <ReportButton
+                target={{
+                  type: 'guide',
+                  id: guide.id,
+                  label: guide.title,
+                  url: window.location.href,
+                }}
+              />
             </div>
           </>
         )}

@@ -49,7 +49,7 @@ export interface InsightItemWithAnalysis extends InsightRawItem {
 
 export interface InsightCollectionRun {
   id: string;
-  source: InsightSource | 'analyze';
+  source: InsightSource | 'analyze' | 'place_match';
   startedAt: string;
   finishedAt: string | null;
   status: InsightRunStatus;
@@ -60,4 +60,26 @@ export interface InsightCollectionRun {
 export interface InsightCategoryCount {
   category: InsightCategory;
   count: number;
+}
+
+export type PlaceReactionAspect =
+  | 'crowd'
+  | 'price'
+  | 'access'
+  | 'food'
+  | 'view'
+  | 'service'
+  | 'facility';
+
+/** place_reactions — 게시물에서 추출한 장소 언급의 공개 집계 */
+export interface PlaceReaction {
+  placeKey: string;
+  placeName: string;
+  placeContentId: string | null;
+  mentionCount: number;
+  positiveCount: number;
+  neutralCount: number;
+  negativeCount: number;
+  topAspects: PlaceReactionAspect[];
+  updatedAt: string;
 }

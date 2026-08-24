@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /login
+# 로케일 프리픽스 경로(/en/admin 등)도 함께 차단
+Disallow: /*/admin
+Disallow: /*/login
+
+Sitemap: https://waymeld.netlify.app/sitemap.xml

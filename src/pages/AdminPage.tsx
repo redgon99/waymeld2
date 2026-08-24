@@ -15,6 +15,7 @@ import {
   type AdminShareStats,
   type AdminUserRow,
 } from '../lib/admin';
+import { evaluateTier3Gates, type GateStatus } from '../lib/tierGates';
 import '../styles/app.css';
 
 function formatDateTime(iso: string | null): string {
@@ -34,6 +35,7 @@ export default function AdminPage() {
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [stats, setStats] = useState<AdminShareStats | null>(null);
   const [notices, setNotices] = useState<AdminNotice[]>([]);
+  const [gates, setGates] = useState<GateStatus[]>([]);
 
   const [noticeTitle, setNoticeTitle] = useState('');
   const [noticeBody, setNoticeBody] = useState('');
@@ -44,14 +46,16 @@ export default function AdminPage() {
     setRefreshing(true);
     setError(null);
     try {
-      const [userRows, shareStats, noticeRows] = await Promise.all([
+      const [userRows, shareStats, noticeRows, gateRows] = await Promise.all([
         listAdminUserRows(),
         fetchAdminShareStats(),
         listAdminNotices(),
+        evaluateTier3Gates(),
       ]);
       setUsers(userRows);
       setStats(shareStats);
       setNotices(noticeRows);
+      setGates(gateRows);
     } catch (e) {
       const msg = e instanceof Error ? e.message : '관리자 데이터를 불러오지 못했습니다.';
       setError(msg);
@@ -333,6 +337,54 @@ export default function AdminPage() {
                     <td colSpan={5}>공유마당 등록 데이터가 없습니다.</td>
                   </tr>
                 )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section className="admin-section">
+          <h2>Tier 3 착수 게이트</h2>
+          <p className="admin-section-lead">
+            아래 항목은 수치가 기준을 넘으면 착수를 검토한다. 최근 30일 계측 기준.
+            {gates.some((g) => g.source === 'local') && ' (원격 집계 불가 — 이 브라우저 로컬 값)'}
+          </p>
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>항목</th>
+                  <th>지표</th>
+                  <th>현재</th>
+                  <th>기준</th>
+                  <th>상태</th>
+                  <th>판단 근거</th>
+                </tr>
+              </thead>
+              <tbody>
+                {gates.map((g) => (
+                  <tr key={g.id}>
+                    <td>
+                      <div>{g.id}</div>
+                      <div className="admin-cell-sub">{g.item}</div>
+                    </td>
+                    <td className="mono">{g.event}</td>
+                    <td>
+                      {g.count}
+                      {g.sessions != null && (
+                        <div className="admin-cell-sub">세션 {g.sessions}</div>
+                      )}
+                    </td>
+                    <td>
+                      {g.threshold} / {g.windowDays}일
+                    </td>
+                    <td>
+                      <span className={`admin-gate-badge ${g.met ? 'met' : 'waiting'}`}>
+                        {g.met ? '착수 검토' : '관찰 중'}
+                      </span>
+                    </td>
+                    <td className="admin-cell-detail">{g.rationale}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

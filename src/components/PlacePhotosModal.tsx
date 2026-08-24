@@ -1,5 +1,5 @@
 import { Icon } from './Icon';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Place } from '../types';
 import { buildKakaoPhotosUrl } from '../lib/kakaoPlaceUrls';
@@ -13,7 +13,10 @@ import {
 import { googlePlaceDetailModalPayload } from '../lib/googlePlaceDetail';
 import { fetchGooglePlaceDetail } from '../lib/googleMaps';
 import { fetchTourPlaceDetail } from '../lib/tourPlaceDetail';
+import { getPlaceReaction } from '../lib/placeReactions';
+import { readPanelHours, type PlaceHoursText } from '../lib/placeHours';
 import { PlaceDetailTabPanel } from './PlaceDetailTabPanels';
+import { PlaceReactionBadge } from './PlaceReactionBadge';
 import { PlaceActionBar } from './PlaceActionBar';
 
 interface Props {
@@ -21,6 +24,8 @@ interface Props {
   place: Place | null;
   onClose: () => void;
   onShowTaxiCard?: (place: Place) => void;
+  /** 상세에서 읽어낸 영업시간 원문 — 핀에 저장해 일정 검증에 쓴다 */
+  onHoursResolved?: (placeId: string, hours: PlaceHoursText) => void;
 }
 
 const DEFAULT_TABS: PlacePanelTab[] = [
@@ -28,7 +33,13 @@ const DEFAULT_TABS: PlacePanelTab[] = [
   { id: 'SUMMARY', label: 'SUMMARY' },
 ];
 
-export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props) {
+export function PlacePhotosModal({
+  open,
+  place,
+  onClose,
+  onShowTaxiCard,
+  onHoursResolved,
+}: Props) {
   const { t } = useTranslation('planner');
   const [tabs, setTabs] = useState<PlacePanelTab[]>(DEFAULT_TABS);
   const [activeTab, setActiveTab] = useState<PlacePanelTabId>('PHOTO');
@@ -40,6 +51,9 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const isGooglePlace = Boolean(place?.id?.startsWith('g:'));
   const isTourPlace = Boolean(place?.id?.startsWith('tour:'));
+  // 상세 로딩 effect가 콜백 변경으로 다시 돌지 않도록 ref로 붙든다
+  const onHoursResolvedRef = useRef(onHoursResolved);
+  onHoursResolvedRef.current = onHoursResolved;
 
   useEffect(() => {
     if (!open || !place) {
@@ -86,6 +100,8 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
         setPanel(placeUrl ? { ...(p ?? {}), place_url: placeUrl } : p);
         setTabs(nextTabs.length > 0 ? nextTabs : DEFAULT_TABS);
         setLoading(false);
+        const hours = readPanelHours(p);
+        if (hours) onHoursResolvedRef.current?.(place.id, hours);
         if (urls.length > 0) {
           setPhotos(urls);
           setActiveIndex(0);
@@ -154,6 +170,7 @@ export function PlacePhotosModal({ open, place, onClose, onShowTaxiCard }: Props
       <div className="photos-panel place-detail-panel" onClick={(e) => e.stopPropagation()}>
         <header className="photos-header place-detail-header">
           <span className="photos-title">{place.name}</span>
+          <PlaceReactionBadge reaction={getPlaceReaction(place)} />
           <button
             type="button"
             className="icon-btn"

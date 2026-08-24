@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { setAppLocale } from '../lib/i18n';
+import { applyRobotsPolicy } from '../lib/seo';
 import {
   DEFAULT_LOCALE,
   SUPPORTED_LOCALES,
@@ -64,6 +65,8 @@ export function LocaleLayout() {
     xDefault.hreflang = 'x-default';
     xDefault.href = `${SITE_ORIGIN}${pathWithLocale(basePath, DEFAULT_LOCALE)}`;
     document.head.appendChild(xDefault);
+
+    applyRobotsPolicy(location.pathname);
   }, [lang, location.pathname]);
 
   return <Outlet />;

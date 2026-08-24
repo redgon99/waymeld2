@@ -1,4 +1,24 @@
 {
+  "meta": {
+    "tripTitle": "{{title}} · WayMeld",
+    "tripFallback": "Shared trip",
+    "tripDescription": "See a day-by-day itinerary with real travel times and stay durations, then import it into your own trip.",
+    "plazaTitle": "Share plaza · WayMeld",
+    "plazaDescription": "Browse multi-day itineraries shared by other travelers and import them into your own trip."
+  },
+  "target": {
+    "metaTitle": "Collect places from a shared link · WayMeld",
+    "title": "Places from your shared link",
+    "backToPlan": "To planner",
+    "extracting": "Looking for places in this link…",
+    "foundPlaces": "Found {{count}} places",
+    "noPlaces": "No places were found in this link.",
+    "noLink": "No link was found in what you shared.",
+    "notConfigured": "Link place extraction is not configured.",
+    "extractFailed": "Could not extract places.",
+    "openInPlanner": "Continue in the planner",
+    "goPlanner": "Open the planner"
+  },
   "trip": {
     "readOnly": "Shared trip (read-only)",
     "notFound": "Trip not found.",

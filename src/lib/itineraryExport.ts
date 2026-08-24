@@ -34,8 +34,9 @@ export function formatFullItinerary(
         `→ ${(leg.distanceMeters / 1000).toFixed(1)}km · ${leg.durationMinutes}min`
       );
     }
+    const reserved = stop.itemKind === 'reserved' && stop.fixedArrival;
     lines.push(
-      `${stop.order}. ${stop.name}`,
+      `${stop.order}. ${stop.name}${reserved ? ` [reserved ${stop.fixedArrival}]` : ''}`,
       `   ${stop.arriveAt}–${stop.leaveAt} · ${stop.categoryLabel} · ${stop.stayMinutes ?? 0}min`,
       `   ${stop.roadAddress || stop.address}`,
       `   Taxi: ${formatTaxiPhrase(stop)}`,

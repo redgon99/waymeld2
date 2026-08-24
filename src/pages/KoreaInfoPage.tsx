@@ -5,6 +5,7 @@ import { AuthBar } from '../components/AuthBar';
 import { LocaleSwitcher } from '../components/LocaleSwitcher';
 import { TrailRouteModal } from '../components/TrailRouteModal';
 import { OdiiStoriesModal } from '../components/OdiiStoriesModal';
+import { useSeoMeta } from '../hooks/useSeoMeta';
 import { normalizeLocale, pathWithLocale } from '../lib/locale';
 import { plannerPath } from '../lib/routes';
 import i18n from '../lib/i18n';
@@ -233,9 +234,7 @@ export default function KoreaInfoPage() {
   const [statsLoading, setStatsLoading] = useState(true);
   const [statsError, setStatsError] = useState<string | null>(null);
 
-  useEffect(() => {
-    document.title = t('metaTitle');
-  }, [t]);
+  useSeoMeta({ title: t('metaTitle'), description: t('subtitle'), path: '/info' });
 
   useEffect(() => {
     if (!isTourInfoConfigured()) {

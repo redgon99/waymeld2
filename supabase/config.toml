@@ -14,6 +14,9 @@ verify_jwt = false
 [functions.insight-guide-draft]
 verify_jwt = false
 
+[functions.insight-place-match]
+verify_jwt = false
+
 [functions.tour-scenario]
 verify_jwt = false
 

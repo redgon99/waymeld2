@@ -4,6 +4,7 @@ import { LocaleLayout } from './components/LocaleLayout';
 import LandingPage from './pages/LandingPage';
 import PlannerPage from './pages/PlannerPage';
 import ShareTripPage from './pages/ShareTripPage';
+import ShareTargetPage from './pages/ShareTargetPage';
 import SharePlazaPage from './pages/SharePlazaPage';
 import LoginPage from './pages/LoginPage';
 import AdminPage from './pages/AdminPage';
@@ -12,6 +13,7 @@ import AdminGuidesPage from './pages/AdminGuidesPage';
 import AdminDistributionPage from './pages/AdminDistributionPage';
 import AdminScenariosPage from './pages/AdminScenariosPage';
 import AdminLandingPage from './pages/AdminLandingPage';
+import AdminReportsPage from './pages/AdminReportsPage';
 import GuidesPage from './pages/GuidesPage';
 import GuideDetailPage from './pages/GuideDetailPage';
 import KoreaInfoPage from './pages/KoreaInfoPage';
@@ -26,6 +28,8 @@ const PAGE_ROUTES = (
     <Route index element={<LandingPage />} />
     <Route path="plan" element={<PlannerPage />} />
     <Route path="trip/:slug" element={<ShareTripPage />} />
+    {/* PWA share_target 수신 — manifest의 action과 경로가 같아야 한다 */}
+    <Route path="share" element={<ShareTargetPage />} />
     <Route path="plaza" element={<SharePlazaPage />} />
     <Route path="guides" element={<GuidesPage />} />
     <Route path="guides/:slug" element={<GuideDetailPage />} />
@@ -36,6 +40,7 @@ const PAGE_ROUTES = (
     <Route path="admin/distribution" element={<AdminDistributionPage />} />
     <Route path="admin/scenarios" element={<AdminScenariosPage />} />
     <Route path="admin/landing" element={<AdminLandingPage />} />
+    <Route path="admin/reports" element={<AdminReportsPage />} />
     <Route path="setup" element={<KoreaSetupPage />} />
     <Route path="help" element={<HelpPage />} />
     <Route path="themes" element={<ThemesPage />} />

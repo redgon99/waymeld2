@@ -1,4 +1,26 @@
 {
+  "booking": {
+    "open": "開く",
+    "notePlaceholder": "メモ · 予約リンクを貼り付け",
+    "noteAria": "{{name}} のメモ"
+  },
+  "reactions": {
+    "tooltip": "旅行者の言及 {{mentions}}件 · 好意的 {{positive}} / 否定的 {{negative}}",
+    "tone": {
+      "positive": "旅行者に好評",
+      "mixed": "評価が分かれる",
+      "negative": "注意の声あり"
+    },
+    "aspect": {
+      "crowd": "混雑の言及",
+      "price": "価格の言及",
+      "access": "アクセスの言及",
+      "food": "味の言及",
+      "view": "景観の言及",
+      "service": "接客の言及",
+      "facility": "施設の言及"
+    }
+  },
   "search": {
     "placeholder": "場所を検索",
     "placeholderDesign": "場所・YouTube・ブログリンク",
@@ -96,6 +118,8 @@
     "empty": "表示する日程がありません。場所をピンするか動線を作成してください。"
   },
   "pinup": {
+    "reservedAt": "予約 {{time}}",
+    "fixedArrivalAt": "到着時刻を {{time}} に固定",
     "title": "ピンした場所",
     "titleShort": "ピン",
     "clearAll": "すべて削除",
@@ -117,6 +141,9 @@
     "pinCount": "ピン {{count}}"
   },
   "route": {
+    "fixedArrivalAt": "到着時刻を {{time}} に固定",
+    "fixedArrivalLate": "固定した {{time}} より {{minutes}} 分遅れます",
+    "waitMinutes": "{{minutes}} 分待ち",
     "title": "ルート作成",
     "generate": "ルート生成",
     "refining": "実道路を反映中…",
@@ -148,6 +175,9 @@
       "high": "疲労度 高"
     },
     "options": {
+      "fixedArrivalAria": "{{name}} の到着時刻を固定",
+      "fixedArrivalHint": "予約済みなど時刻が決まっている予定は到着時刻を固定します",
+      "fixedArrivalClear": "到着時刻の固定を解除",
       "panelAria": "ルート設定",
       "title": "ルート設定",
       "subtitle": "{{day}}日目 · {{count}}か所",
@@ -192,7 +222,21 @@
         "transport": "移動・乗換 約15分",
         "road": "街歩き 約40分推奨",
         "other": "滞在 約30分"
-      }
+      },
+      "reserved": "予約",
+      "reservedHint": "予約した予定は時刻が動きません。ほかの予定がこの時刻を避けて配置されます。",
+      "date": "訪問日",
+      "dateHint": "日付を入れると曜日別の営業時間まで確認します",
+      "hoursFilter": "営業時間の確認 {{n}}"
+    },
+    "reservedAt": "予約 {{time}}・時刻固定",
+    "reservedLate": "予約 {{time}} に {{minutes}}分 遅れます",
+    "anchorConflictTitle": "時間が合わない予定 {{n}}件",
+    "hours": {
+      "closed": "到着時刻は営業終了後です（{{opens}}~{{closes}}）",
+      "before-open": "開店前に到着します（{{opens}} 開店）",
+      "closes-early": "滞在中の {{closes}} に営業が終わります",
+      "offday": "この日は休みです"
     }
   },
   "dock": {
@@ -496,5 +540,32 @@
     "removeDay": "{{day}}日目の日程を削除しますか？",
     "shareWithoutLogin": "ログインしないと、他の端末・ブラウザで共有リンクが開かないことがあります。\n共有しますか？",
     "shareLocalMode": "ローカル保存モードです。共有リンクはこのブラウザでのみ開く場合があります。\n続けますか？"
+  },
+  "presence": {
+    "guest": "旅行者",
+    "viewing": "{{n}}人が閲覧中",
+    "you": "{{name}}（自分）"
+  },
+  "report": {
+    "action": "報告",
+    "title": "この内容を報告",
+    "reasonLegend": "報告理由",
+    "reasons": {
+      "spam": "スパム・広告",
+      "inappropriate": "不適切な内容",
+      "wrong_info": "誤った情報",
+      "copyright": "著作権侵害",
+      "other": "その他"
+    },
+    "detailLabel": "詳細（任意）",
+    "detailPlaceholder": "何が問題かお知らせください",
+    "submit": "報告する",
+    "submitting": "送信中…",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "done": "報告を受け付けました。",
+    "doneHint": "管理者が確認のうえ対応します。",
+    "duplicate": "すでに報告済みです。",
+    "failed": "報告を送信できませんでした。時間をおいて再度お試しください。"
   }
 }

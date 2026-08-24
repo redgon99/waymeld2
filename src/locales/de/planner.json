@@ -1,4 +1,26 @@
 {
+  "booking": {
+    "open": "Öffnen",
+    "notePlaceholder": "Notiz · Buchungslink einfügen",
+    "noteAria": "Notiz für {{name}}"
+  },
+  "reactions": {
+    "tooltip": "{{mentions}} Erwähnungen von Reisenden · {{positive}} positiv / {{negative}} negativ",
+    "tone": {
+      "positive": "Bei Reisenden beliebt",
+      "mixed": "Geteilte Meinungen",
+      "negative": "Einige Warnungen"
+    },
+    "aspect": {
+      "crowd": "Andrang erwähnt",
+      "price": "Preis erwähnt",
+      "access": "Anfahrt erwähnt",
+      "food": "Geschmack erwähnt",
+      "view": "Aussicht erwähnt",
+      "service": "Service erwähnt",
+      "facility": "Ausstattung erwähnt"
+    }
+  },
   "search": {
     "placeholder": "Orte suchen",
     "placeholderWithYoutube": "Ortsname oder YouTube-Link",
@@ -106,6 +128,8 @@
     "empty": "Noch kein Reiseplan. Pinnen Sie Orte oder erstellen Sie eine Route."
   },
   "pinup": {
+    "reservedAt": "Reserviert für {{time}}",
+    "fixedArrivalAt": "Ankunft auf {{time}} festgelegt",
     "title": "Angepinnte Orte",
     "titleShort": "Pins",
     "clearAll": "Alle löschen",
@@ -130,6 +154,9 @@
     "unmarkRequired": "Pflichtbesuch entfernen"
   },
   "route": {
+    "fixedArrivalAt": "Ankunft auf {{time}} festgelegt",
+    "fixedArrivalLate": "{{minutes}} Min. später als die festgelegte Zeit {{time}}",
+    "waitMinutes": "{{minutes}} Min. Wartezeit",
     "title": "Route erstellen",
     "generate": "Route erzeugen",
     "refining": "Echte Straßen werden angewendet…",
@@ -161,6 +188,9 @@
       "high": "Hohe Ermüdung"
     },
     "options": {
+      "fixedArrivalAria": "Feste Ankunftszeit für {{name}}",
+      "fixedArrivalHint": "Lege die Ankunftszeit für bereits Gebuchtes fest",
+      "fixedArrivalClear": "Feste Ankunftszeit entfernen",
       "panelAria": "Routeneinstellungen",
       "title": "Routeneinstellungen",
       "subtitle": "Tag {{day}} · {{count}} Orte",
@@ -205,7 +235,21 @@
         "transport": "Umstieg ~15 Min.",
         "road": "Vorgeschlagener Spaziergang ~40 Min.",
         "other": "Vorgeschlagener Aufenthalt ~30 Min."
-      }
+      },
+      "reserved": "Reserviert",
+      "reservedHint": "Eine Reservierung verschiebt sich nicht; der übrige Tag richtet sich danach.",
+      "date": "Besuchsdatum",
+      "dateHint": "Mit Datum werden die Öffnungszeiten je Wochentag geprüft",
+      "hoursFilter": "Zeiten prüfen {{n}}"
+    },
+    "reservedAt": "Reserviert um {{time}} · feste Zeit",
+    "reservedLate": "{{minutes}} Min. zu spät zur Reservierung um {{time}}",
+    "anchorConflictTitle": "{{n}} Termin(e) passen zeitlich nicht",
+    "hours": {
+      "closed": "Ankunft nach Ladenschluss ({{opens}}–{{closes}})",
+      "before-open": "Ankunft vor der Öffnung (öffnet {{opens}})",
+      "closes-early": "Schließt während des Besuchs um {{closes}}",
+      "offday": "An diesem Tag geschlossen"
     }
   },
   "dock": {
@@ -700,5 +744,32 @@
     "removeDay": "Tag {{day}} löschen?",
     "shareWithoutLogin": "Ohne Anmeldung öffnet der Link auf anderen Geräten vielleicht nicht.\nTrotzdem teilen?",
     "shareLocalMode": "Lokaler Modus. Der Link öffnet sich evtl. nur in diesem Browser.\nWeiter?"
+  },
+  "presence": {
+    "guest": "Reisender",
+    "viewing": "{{n}} Personen sehen zu",
+    "you": "{{name}} (du)"
+  },
+  "report": {
+    "action": "Melden",
+    "title": "Diesen Inhalt melden",
+    "reasonLegend": "Grund",
+    "reasons": {
+      "spam": "Spam oder Werbung",
+      "inappropriate": "Unangemessener Inhalt",
+      "wrong_info": "Falsche Information",
+      "copyright": "Urheberrechtsverletzung",
+      "other": "Sonstiges"
+    },
+    "detailLabel": "Details (optional)",
+    "detailPlaceholder": "Beschreibe kurz das Problem",
+    "submit": "Meldung senden",
+    "submitting": "Wird gesendet…",
+    "cancel": "Abbrechen",
+    "close": "Schließen",
+    "done": "Deine Meldung ist eingegangen.",
+    "doneHint": "Ein Administrator prüft sie.",
+    "duplicate": "Du hast diesen Inhalt bereits gemeldet.",
+    "failed": "Meldung konnte nicht gesendet werden. Bitte später erneut versuchen."
   }
 }
