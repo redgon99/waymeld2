@@ -44,7 +44,9 @@
     "empty": "No results.",
     "copyAddress": "Copy address",
     "copied": "Copied",
-    "copyAria": "Copy the original Korean address (show it to a taxi driver or map app)"
+    "copyAria": "Copy the original Korean address (show it to a taxi driver or map app)",
+    "checkedToday": "Checked today",
+    "checkedDaysAgo": "Last checked {{days}}d ago"
   },
   "photos": {
     "searchPlaceholder": "Search by place or keyword (e.g. Gyeongbokgung, night view)",

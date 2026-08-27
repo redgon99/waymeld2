@@ -97,6 +97,8 @@ export interface TourFilteredPlace {
   thumbnailUrl?: string;
   /** 매칭 성공시 공식 현지어 주소(EngService2 등). 매칭 실패/ko 로케일이면 undefined — address(원문)로 폴백 */
   officialAddress?: string;
+  /** officialAddress를 마지막으로 확인(캐시 갱신)한 시각 (ISO) */
+  officialAddressFetchedAt?: string;
 }
 
 export async function fetchFilteredPlaces(
@@ -130,6 +132,8 @@ export interface OdiiSite {
   imageUrl?: string;
   /** 매칭 성공시 공식 현지어 주소. 매칭 실패/ko 로케일이면 undefined — region(원문)으로 폴백 */
   officialAddress?: string;
+  /** officialAddress를 마지막으로 확인(캐시 갱신)한 시각 (ISO) */
+  officialAddressFetchedAt?: string;
 }
 
 export interface OdiiStory {

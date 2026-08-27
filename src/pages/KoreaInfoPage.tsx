@@ -53,6 +53,12 @@ function formatNumber(n: number): string {
   return Math.round(n).toLocaleString('ko-KR');
 }
 
+/** 다국어 주소 오버레이를 마지막으로 확인(캐시 갱신)한 시점을 "N일 전 확인"으로 표시 */
+function checkedLabel(t: (key: string, options?: Record<string, unknown>) => string, fetchedAt: string): string {
+  const days = Math.max(0, Math.floor((Date.now() - new Date(fetchedAt).getTime()) / (24 * 60 * 60 * 1000)));
+  return days === 0 ? t('list.checkedToday') : t('list.checkedDaysAgo', { days });
+}
+
 const LEVEL_LABEL_KEY: Record<'1' | '2' | '3', string> = {
   '1': 'trails.levelLow',
   '2': 'trails.levelMid',
@@ -188,6 +194,11 @@ function FilteredPlaceSection({
                 <span className="info-address-row">
                   <span>{p.officialAddress ?? p.address}</span>
                   <CopyAddressButton text={p.address} />
+                </span>
+              )}
+              {p.officialAddress && p.officialAddressFetchedAt && (
+                <span className="info-checked-badge">
+                  {checkedLabel(t, p.officialAddressFetchedAt)}
                 </span>
               )}
             </figcaption>
@@ -651,6 +662,11 @@ export default function KoreaInfoPage() {
                       <span>{[s.officialAddress ?? s.region, s.themeCategory].filter(Boolean).join(' · ')}</span>
                       {s.region && <CopyAddressButton text={s.region} />}
                     </span>
+                    {s.officialAddress && s.officialAddressFetchedAt && (
+                      <span className="info-checked-badge">
+                        {checkedLabel(t, s.officialAddressFetchedAt)}
+                      </span>
+                    )}
                   </figcaption>
                 </figure>
               ))}

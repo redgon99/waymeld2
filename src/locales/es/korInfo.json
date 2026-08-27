@@ -44,7 +44,9 @@
     "empty": "Sin resultados.",
     "copyAddress": "Copiar dirección",
     "copied": "Copiado",
-    "copyAria": "Copiar la dirección original en coreano (muéstrala al taxista o a la app de mapas)"
+    "copyAria": "Copiar la dirección original en coreano (muéstrala al taxista o a la app de mapas)",
+    "checkedToday": "Verificado hoy",
+    "checkedDaysAgo": "Última verificación: hace {{days}} días"
   },
   "photos": {
     "searchPlaceholder": "Buscar por lugar o palabra (p. ej. Gyeongbokgung, vista nocturna)",

@@ -72,10 +72,9 @@
   },
   "steps": {
     "title": "So starten Sie",
-    "step1": { "title": "Im Browser öffnen", "body": "Ohne Installation — Planer im Browser öffnen." },
-    "step2": { "title": "Suchen & pinnen", "body": "Suchen oder auf die Karte tippen, um Orte hinzuzufügen." },
-    "step3": { "title": "Umsortieren & Route bauen", "body": "Chips ziehen, dann Route erstellen für Zeiten und Teilstrecken." },
-    "step4": { "title": "Teilen", "body": "Link teilen oder auf dem Platz veröffentlichen." }
+    "step1": { "title": "Pinnen", "body": "Ohne Installation — suchen oder auf die Karte tippen, um Orte hinzuzufügen." },
+    "step2": { "title": "Zeitplan erstellen", "body": "Chips ziehen zum Umsortieren, dann in eine Route mit Uhrzeiten verwandeln.", "cta": "Jetzt ausprobieren" },
+    "step3": { "title": "Teilen", "body": "Link teilen oder auf dem Platz veröffentlichen." }
   },
   "gallery": {
     "title": "Screenshots"

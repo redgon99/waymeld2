@@ -2,7 +2,10 @@
   "booking": {
     "open": "開啟",
     "notePlaceholder": "備註 · 貼上預訂連結",
-    "noteAria": "{{name}} 的備註"
+    "noteAria": "{{name}} 的備註",
+    "reserve": "預訂",
+    "findOn": "在{{brand}}上查找",
+    "findAria": "在{{brand}}上搜尋{{name}}"
   },
   "reactions": {
     "tooltip": "旅客提及 {{mentions}} 次 · 好評 {{positive}} / 負評 {{negative}}",
@@ -273,6 +276,7 @@
       "close": "關閉",
       "loading": "加載中…",
       "noPhotos": "暫無照片",
+      "loadFailed": "無法載入地點詳情。",
       "openOnKakao": "在 Kakao Map 查看",
       "openOnGoogle": "在 Google 地圖查看",
       "openOnTour": "在 Visit Korea 查看",

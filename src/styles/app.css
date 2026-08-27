@@ -7975,6 +7975,16 @@ button {
   opacity: 1;
   color: #d97706;
 }
+.chip-required-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  color: #d97706;
+}
+.chip-required-badge .wm-icon {
+  width: 11px;
+  height: 11px;
+}
 .summary-badge.fatigue-low { background: #dcfce7; color: #166534; }
 .summary-badge.fatigue-medium { background: #fef9c3; color: #854d0e; }
 .summary-badge.fatigue-high { background: #fee2e2; color: #991b1b; }
@@ -9139,6 +9149,13 @@ button {
 
 .info-copy-btn {
   flex-shrink: 0;
+}
+
+.info-checked-badge {
+  display: block;
+  margin-top: 2px;
+  font-size: 10.5px;
+  color: var(--color-text-tertiary, #94a3b8);
 }
 
 .admin-insight-rollup-actions {
@@ -11827,6 +11844,8 @@ button {
   font-weight: 600;
   color: var(--color-text, #0f172a);
   text-decoration: none;
+  white-space: nowrap;
+  word-break: keep-all;
 }
 
 .booking-link-card:hover {
@@ -11842,6 +11861,69 @@ button {
 .booking-link-action {
   color: var(--color-text-muted, #64748b);
   font-weight: 500;
+}
+
+/* 아직 예약 전인 장소에 보여주는 "예약" 버튼 — 클릭하면 제공처 목록이 펼쳐진다 */
+.booking-search {
+  position: relative;
+  display: inline-block;
+  margin-top: 4px;
+}
+
+.booking-search-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border: 1px dashed var(--color-border, #e2e8f0);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--color-text-muted, #64748b);
+  cursor: pointer;
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+.booking-search-trigger:hover,
+.booking-search-trigger.active {
+  border-color: var(--color-primary, #2563eb);
+  border-style: solid;
+  color: var(--color-primary, #2563eb);
+}
+
+.booking-search-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 140px;
+  background: #fff;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.16);
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 60;
+}
+
+.booking-search-menu-item {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 7px;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--color-text, #0f172a);
+  text-decoration: none;
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+.booking-search-menu-item:hover {
+  background: var(--color-bg-secondary, #f1f5f9);
 }
 
 .route-stay-note,

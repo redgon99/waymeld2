@@ -2,7 +2,10 @@
   "booking": {
     "open": "열기",
     "notePlaceholder": "메모 · 예약 링크 붙여넣기",
-    "noteAria": "{{name}} 메모"
+    "noteAria": "{{name}} 메모",
+    "reserve": "예약",
+    "findOn": "{{brand}}에서 찾아보기",
+    "findAria": "{{brand}}에서 {{name}} 검색"
   },
   "reactions": {
     "tooltip": "여행자 언급 {{mentions}}건 · 긍정 {{positive}} / 부정 {{negative}}",
@@ -151,7 +154,8 @@
     "pinCount": "핀 {{count}}",
     "mustVisitOnly": "필수만",
     "markRequired": "필수 방문으로 표시",
-    "unmarkRequired": "필수 방문 해제"
+    "unmarkRequired": "필수 방문 해제",
+    "requiredBadge": "필수 방문 장소"
   },
   "route": {
     "fixedArrivalAt": "도착 시각 고정 {{time}}",
@@ -299,6 +303,7 @@
       "close": "닫기",
       "loading": "불러오는 중…",
       "noPhotos": "표시할 사진이 없습니다.",
+      "loadFailed": "장소 정보를 불러오지 못했습니다.",
       "openOnKakao": "카카오맵에서 확인",
       "openOnGoogle": "Google 지도에서 확인",
       "openOnTour": "대한민국 구석구석에서 확인",

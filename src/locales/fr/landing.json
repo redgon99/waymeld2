@@ -72,10 +72,9 @@
   },
   "steps": {
     "title": "Comment commencer",
-    "step1": { "title": "Ouvrir dans le navigateur", "body": "Sans installer — ouvrez le planificateur dans le navigateur." },
-    "step2": { "title": "Chercher et épingler", "body": "Recherchez ou touchez la carte pour ajouter des lieux." },
-    "step3": { "title": "Réordonner et créer la route", "body": "Glissez les pastilles, puis appuyez sur Créer l’itinéraire pour horaires et étapes." },
-    "step4": { "title": "Partager", "body": "Partagez un lien ou publiez sur la place." }
+    "step1": { "title": "Épinglez", "body": "Sans installer — recherchez ou touchez la carte pour ajouter les lieux voulus." },
+    "step2": { "title": "Créez l’itinéraire", "body": "Glissez pour réordonner, puis obtenez un parcours avec horaires précis.", "cta": "Essayer maintenant" },
+    "step3": { "title": "Partager", "body": "Partagez un lien ou publiez sur la place." }
   },
   "gallery": {
     "title": "Captures"

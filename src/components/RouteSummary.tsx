@@ -7,6 +7,7 @@ import { useTravelModeMeta } from '../lib/i18nCategories';
 import { buildKakaoMapDirectionsUrl, buildLegMapLinks } from '../lib/mapLinks';
 import { formatFullItinerary } from '../lib/itineraryExport';
 import { BookingLinkCards } from './BookingLinkCards';
+import { BookingSearchSuggestions } from './BookingSearchSuggestions';
 import { isHoursProblem } from '../lib/openingHours';
 import { listAnchorConflicts } from '../lib/scheduleAnchors';
 import { SortableContainer, SortableItem } from './Sortable';
@@ -194,7 +195,13 @@ export function RouteSummary({
                       </span>
                       <div className="leg-body">
                         <div className="leg-name">
-                          {stop.required && <Icon name="flag" className="leg-required-icon" />}
+                          {stop.required && (
+                            <Icon
+                              name="lock"
+                              className="leg-required-icon"
+                              title={t('pinup.requiredBadge')}
+                            />
+                          )}
                           {stop.name}
                           {stop.fixedArrival && (
                             <span
@@ -249,6 +256,12 @@ export function RouteSummary({
                           </div>
                         )}
                         <BookingLinkCards note={stop.note} placeId={stop.id} />
+                        <BookingSearchSuggestions
+                          category={stop.category}
+                          placeName={stop.name}
+                          placeId={stop.id}
+                          note={stop.note}
+                        />
                       </div>
                       {!readOnly && (
                         <button

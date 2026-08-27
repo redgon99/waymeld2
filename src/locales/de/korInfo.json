@@ -44,7 +44,9 @@
     "empty": "Keine Treffer.",
     "copyAddress": "Adresse kopieren",
     "copied": "Kopiert",
-    "copyAria": "Die koreanische Originaladresse kopieren (Taxi oder Karten-App zeigen)"
+    "copyAria": "Die koreanische Originaladresse kopieren (Taxi oder Karten-App zeigen)",
+    "checkedToday": "Heute geprüft",
+    "checkedDaysAgo": "Zuletzt geprüft vor {{days}} Tagen"
   },
   "photos": {
     "searchPlaceholder": "Suche nach Ort oder Stichwort (z. B. Gyeongbokgung, Nachtansicht)",

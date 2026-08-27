@@ -7,6 +7,7 @@
 
 export type AnalyticsEvent =
   | 'booking_link_click'
+  | 'booking_search_click'
   | 'share_target_receive'
   | 'share_target_extract'
   | 'fixed_arrival_set'

@@ -44,7 +44,9 @@
     "empty": "暂无结果。",
     "copyAddress": "复制地址",
     "copied": "已复制",
-    "copyAria": "复制韩语原文地址（出示给出租车司机或地图应用）"
+    "copyAria": "复制韩语原文地址（出示给出租车司机或地图应用）",
+    "checkedToday": "今天已确认",
+    "checkedDaysAgo": "最近确认：{{days}}天前"
   },
   "photos": {
     "searchPlaceholder": "按地点或关键词搜索 (如: 景福宫, 夜景)",

@@ -2,7 +2,10 @@
   "booking": {
     "open": "Open",
     "notePlaceholder": "Note · paste a booking link",
-    "noteAria": "Note for {{name}}"
+    "noteAria": "Note for {{name}}",
+    "reserve": "Reserve",
+    "findOn": "Find on {{brand}}",
+    "findAria": "Search {{name}} on {{brand}}"
   },
   "reactions": {
     "tooltip": "{{mentions}} traveler mentions · {{positive}} positive / {{negative}} negative",
@@ -151,7 +154,8 @@
     "pinCount": "{{count}} pins",
     "mustVisitOnly": "Must visit",
     "markRequired": "Mark as must visit",
-    "unmarkRequired": "Remove must visit"
+    "unmarkRequired": "Remove must visit",
+    "requiredBadge": "Must-visit place"
   },
   "route": {
     "fixedArrivalAt": "Arrival fixed at {{time}}",
@@ -299,6 +303,7 @@
       "close": "Close",
       "loading": "Loading…",
       "noPhotos": "No photos to show",
+      "loadFailed": "Could not load place details.",
       "openOnKakao": "Open in Kakao Map",
       "openOnGoogle": "Open in Google Maps",
       "openOnTour": "Open in Visit Korea",

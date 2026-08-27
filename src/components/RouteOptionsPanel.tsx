@@ -18,6 +18,7 @@ import { generateRoute } from '../lib/planner';
 import { normalizeLocale } from '../lib/locale';
 import { fetchAiStaySuggestions } from '../lib/routeStaySuggest';
 import { BookingLinkCards } from './BookingLinkCards';
+import { BookingSearchSuggestions } from './BookingSearchSuggestions';
 
 interface Props {
   open: boolean;
@@ -435,6 +436,12 @@ export function RouteOptionsPanel({
                       p.note && <div className="route-stay-note-text">{p.note}</div>
                     )}
                     <BookingLinkCards note={p.note} placeId={p.id} />
+                    <BookingSearchSuggestions
+                      category={p.category}
+                      placeName={p.name}
+                      placeId={p.id}
+                      note={p.note}
+                    />
                   </div>
                   {options.autoStayTime || !onUpdateStayMinutes ? (
                     <span className="route-stay-badge">{minutes} min</span>

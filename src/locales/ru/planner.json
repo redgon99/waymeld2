@@ -2,7 +2,10 @@
   "booking": {
     "open": "Открыть",
     "notePlaceholder": "Заметка · вставьте ссылку на бронь",
-    "noteAria": "Заметка для {{name}}"
+    "noteAria": "Заметка для {{name}}",
+    "reserve": "Бронь",
+    "findOn": "Искать на {{brand}}",
+    "findAria": "Искать {{name}} на {{brand}}"
   },
   "reactions": {
     "tooltip": "Упоминаний путешественников: {{mentions}} · положительных {{positive}} / отрицательных {{negative}}",
@@ -151,7 +154,8 @@
     "pinCount": "Пинов: {{count}}",
     "mustVisitOnly": "Обязательно",
     "markRequired": "Отметить как обязательное",
-    "unmarkRequired": "Снять отметку «обязательно»"
+    "unmarkRequired": "Снять отметку «обязательно»",
+    "requiredBadge": "Обязательное место"
   },
   "route": {
     "fixedArrivalAt": "Прибытие зафиксировано на {{time}}",
@@ -299,6 +303,7 @@
       "close": "Закрыть",
       "loading": "Загрузка…",
       "noPhotos": "Нет фотографий",
+      "loadFailed": "Не удалось загрузить сведения о месте.",
       "openOnKakao": "Открыть в Kakao Map",
       "openOnGoogle": "Открыть в Google Maps",
       "openOnTour": "Открыть в Visit Korea",

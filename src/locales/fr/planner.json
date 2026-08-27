@@ -2,7 +2,10 @@
   "booking": {
     "open": "Ouvrir",
     "notePlaceholder": "Note · collez un lien de réservation",
-    "noteAria": "Note pour {{name}}"
+    "noteAria": "Note pour {{name}}",
+    "reserve": "Réserver",
+    "findOn": "Chercher sur {{brand}}",
+    "findAria": "Chercher {{name}} sur {{brand}}"
   },
   "reactions": {
     "tooltip": "{{mentions}} mentions de voyageurs · {{positive}} positives / {{negative}} négatives",
@@ -151,7 +154,8 @@
     "pinCount": "{{count}} épingles",
     "mustVisitOnly": "Incontournable",
     "markRequired": "Marquer comme incontournable",
-    "unmarkRequired": "Retirer l’incontournable"
+    "unmarkRequired": "Retirer l’incontournable",
+    "requiredBadge": "Lieu incontournable"
   },
   "route": {
     "fixedArrivalAt": "Arrivée fixée à {{time}}",
@@ -299,6 +303,7 @@
       "close": "Fermer",
       "loading": "Chargement…",
       "noPhotos": "Aucune photo à afficher",
+      "loadFailed": "Impossible de charger les détails du lieu.",
       "openOnKakao": "Ouvrir dans Kakao Map",
       "openOnGoogle": "Ouvrir dans Google Maps",
       "openOnTour": "Ouvrir dans Visit Korea",

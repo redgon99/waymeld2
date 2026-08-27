@@ -74,6 +74,8 @@ export interface OfficialAddressMatch {
   title: string;
   address: string;
   distanceM: number;
+  /** 이 매칭 결과를 언제 확인했는지 (ISO) — 캐시 히트면 캐시 시각, 새로 조회했으면 지금 */
+  fetchedAt: string;
 }
 
 export async function fetchOfficialAddress(
@@ -126,6 +128,7 @@ export async function fetchOfficialAddress(
       title: best.it.title.replace(/<[^>]+>/g, ''),
       address,
       distanceM: Math.round(best.dist),
+      fetchedAt: new Date().toISOString(),
     };
   } catch {
     return null;
@@ -167,10 +170,12 @@ export async function fetchOfficialAddressCached(
       title: (cached.matched_title as string) ?? '',
       address: cached.official_address as string,
       distanceM: (cached.distance_m as number) ?? 0,
+      fetchedAt: cached.fetched_at as string,
     };
   }
 
   const fresh = await fetchOfficialAddress(locale, serviceKey, titleKo, lat, lng);
+  const fetchedAt = fresh?.fetchedAt ?? new Date().toISOString();
   await sb.from(CACHE_TABLE).upsert(
     {
       content_id: contentId,
@@ -180,7 +185,7 @@ export async function fetchOfficialAddressCached(
       matched_content_id: fresh?.contentId ?? null,
       matched_title: fresh?.title ?? null,
       distance_m: fresh?.distanceM ?? null,
-      fetched_at: new Date().toISOString(),
+      fetched_at: fetchedAt,
     },
     { onConflict: 'content_id,kind,locale' }
   );
@@ -195,12 +200,12 @@ export async function overlayAddressesOnList<T extends { contentId: string; titl
   locale: MultilingualLocale | null,
   serviceKey: string,
   items: T[]
-): Promise<Array<T & { officialAddress?: string }>> {
+): Promise<Array<T & { officialAddress?: string; officialAddressFetchedAt?: string }>> {
   if (!locale) return items;
   return Promise.all(
     items.map(async (it) => {
       const match = await fetchOfficialAddressCached(sb, kind, it.contentId, locale, serviceKey, it.title, it.lat, it.lng);
-      return { ...it, officialAddress: match?.address };
+      return { ...it, officialAddress: match?.address, officialAddressFetchedAt: match?.fetchedAt };
     })
   );
 }

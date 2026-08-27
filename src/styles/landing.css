@@ -492,6 +492,20 @@
   font-size: 0.9375rem;
 }
 
+.landing-step-highlight {
+  padding: 16px 20px;
+  margin: -16px -20px;
+  border-radius: var(--radius-lg);
+  background: var(--landing-surface);
+  border: 1px solid var(--landing-border);
+}
+
+.landing-step-cta {
+  margin-top: 14px;
+  padding: 8px 16px;
+  font-size: 0.875rem;
+}
+
 /* Gallery */
 .landing-gallery {
   display: grid;

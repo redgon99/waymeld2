@@ -72,10 +72,9 @@
   },
   "steps": {
     "title": "Cómo empezar",
-    "step1": { "title": "Abre en el navegador", "body": "Sin instalar: abre el planificador en el navegador." },
-    "step2": { "title": "Busca y fija", "body": "Busca o toca el mapa para añadir lugares." },
-    "step3": { "title": "Reordena y crea la ruta", "body": "Arrastra las fichas y pulsa Crear ruta para horarios y tramos." },
-    "step4": { "title": "Comparte", "body": "Comparte un enlace o publícalo en la plaza." }
+    "step1": { "title": "Fija lugares", "body": "Sin instalar: busca o toca el mapa para añadir los lugares que quieres visitar." },
+    "step2": { "title": "Crea el itinerario", "body": "Arrastra para reordenar y conviértelo en una ruta con horarios.", "cta": "Probar ahora" },
+    "step3": { "title": "Comparte", "body": "Comparte un enlace o publícalo en la plaza." }
   },
   "gallery": {
     "title": "Capturas"

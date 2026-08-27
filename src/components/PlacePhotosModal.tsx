@@ -48,6 +48,7 @@ export function PlacePhotosModal({
   const [activeIndex, setActiveIndex] = useState(0);
   const [loading, setLoading] = useState(false);
   const [photoError, setPhotoError] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const isGooglePlace = Boolean(place?.id?.startsWith('g:'));
   const isTourPlace = Boolean(place?.id?.startsWith('tour:'));
@@ -64,12 +65,14 @@ export function PlacePhotosModal({
       setActiveIndex(0);
       setLoading(false);
       setPhotoError(false);
+      setLoadError(false);
       setLightboxOpen(false);
       return;
     }
 
-    const fallback = place.thumbnailUrl
-      ? [proxiedThumbnailUrl(place.thumbnailUrl) ?? place.thumbnailUrl]
+    const current = place;
+    const fallback = current.thumbnailUrl
+      ? [proxiedThumbnailUrl(current.thumbnailUrl) ?? current.thumbnailUrl]
       : [];
 
     setTabs(DEFAULT_TABS);
@@ -77,48 +80,53 @@ export function PlacePhotosModal({
     setPhotos(fallback);
     setActiveIndex(0);
     setPhotoError(false);
+    setLoadError(false);
     setLoading(true);
 
     let cancelled = false;
     const load = isGooglePlace
-      ? fetchGooglePlaceDetail(place).then((detail) =>
-          googlePlaceDetailModalPayload(detail, place.placeUrl)
+      ? fetchGooglePlaceDetail(current).then((detail) =>
+          googlePlaceDetailModalPayload(detail, current.placeUrl)
         )
       : isTourPlace
-        ? fetchTourPlaceDetail(place.id).then((detail) => ({
+        ? fetchTourPlaceDetail(current.id).then((detail) => ({
             ...detail,
-            placeUrl: place.placeUrl,
+            placeUrl: current.placeUrl,
           }))
-        : fetchPlacePanelDetail(place.id).then((detail) => ({
+        : fetchPlacePanelDetail(current.id).then((detail) => ({
             ...detail,
-            placeUrl: place.placeUrl,
+            placeUrl: current.placeUrl,
           }));
 
     load
       .then(({ panel: p, tabs: nextTabs, photos: urls, placeUrl }) => {
         if (cancelled) return;
+        const hasPanel = p != null && Object.keys(p).length > 0;
         setPanel(placeUrl ? { ...(p ?? {}), place_url: placeUrl } : p);
         setTabs(nextTabs.length > 0 ? nextTabs : DEFAULT_TABS);
-        setLoading(false);
         const hours = readPanelHours(p);
-        if (hours) onHoursResolvedRef.current?.(place.id, hours);
+        if (hours) onHoursResolvedRef.current?.(current.id, hours);
         if (urls.length > 0) {
           setPhotos(urls);
           setActiveIndex(0);
         } else if (fallback.length === 0) {
           setPhotoError(true);
+          if (!hasPanel) setLoadError(true);
         }
       })
       .catch(() => {
         if (cancelled) return;
-        setLoading(false);
+        setLoadError(true);
         if (fallback.length === 0) setPhotoError(true);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
       });
 
     return () => {
       cancelled = true;
     };
-  }, [open, place?.id, place?.thumbnailUrl, isGooglePlace, isTourPlace]);
+  }, [open, place?.id, isGooglePlace, isTourPlace]);
 
   useEffect(() => {
     if (!open) return;
@@ -208,7 +216,11 @@ export function PlacePhotosModal({
             <>
               {photoError && !loading && (
                 <div className="photos-empty">
-                  <p>{t('place.detail.noPhotos')}</p>
+                  <p>
+                    {loadError
+                      ? t('place.detail.loadFailed')
+                      : t('place.detail.noPhotos')}
+                  </p>
                   <a href={placeExternalUrl} target="_blank" rel="noopener noreferrer">
                     {isGooglePlace
                       ? t('place.detail.openOnGoogle')

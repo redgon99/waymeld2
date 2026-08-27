@@ -36,6 +36,7 @@ export type IconName =
   | 'plus'
   | 'grip'
   | 'flag'
+  | 'lock'
   | 'target'
   | 'crosshair'
   | 'cloud'
@@ -220,6 +221,11 @@ export const WAYMELD_ICONS: Record<IconName, IconPath[]> = {
   flag: [
     { d: 'M6 4v16' },
     { d: 'M6 4h10l-2 3 2 3H6' },
+  ],
+  lock: [
+    { d: 'M5 13a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-6z' },
+    { d: 'M8 11V7a4 4 0 1 1 8 0v4' },
+    { d: 'M12 16a1 1 0 1 0 0-2 1 1 0 0 0 0 2z', fill: true },
   ],
   target: [
     { d: 'M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z' },

@@ -44,7 +44,9 @@
     "empty": "結果がありません。",
     "copyAddress": "住所をコピー",
     "copied": "コピーしました",
-    "copyAria": "韓国語の原文住所をコピー（タクシーや地図アプリに見せてください）"
+    "copyAria": "韓国語の原文住所をコピー（タクシーや地図アプリに見せてください）",
+    "checkedToday": "本日確認",
+    "checkedDaysAgo": "最終確認: {{days}}日前"
   },
   "photos": {
     "searchPlaceholder": "場所・キーワードで検索 (例: 景福宮, 夜景)",

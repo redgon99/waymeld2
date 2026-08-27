@@ -63,7 +63,9 @@ Deno.serve(async (req) => {
     const { items, totalCount } = await fetchOdiiSites(url);
 
     const locale = isMultilingualLocale(body.locale) ? body.locale : null;
-    let overlaid: Array<(typeof items)[number] & { officialAddress?: string }> = items;
+    let overlaid: Array<
+      (typeof items)[number] & { officialAddress?: string; officialAddressFetchedAt?: string }
+    > = items;
     if (locale) {
       const sb = getServiceClient();
       overlaid = await Promise.all(
@@ -78,7 +80,7 @@ Deno.serve(async (req) => {
             site.lat,
             site.lng
           );
-          return { ...site, officialAddress: match?.address };
+          return { ...site, officialAddress: match?.address, officialAddressFetchedAt: match?.fetchedAt };
         })
       );
     }

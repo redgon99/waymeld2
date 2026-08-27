@@ -86,7 +86,7 @@ export default function LandingPage() {
     t('compare.row3', { returnObjects: true }) as string[],
   ];
 
-  const steps = ['step1', 'step2', 'step3', 'step4'] as const;
+  const steps = ['step1', 'step2', 'step3'] as const;
   const menu = promo?.menu ?? [];
   const heroCopy = findFirstEnabledOfType(menu, 'copy');
   const noticeTexts = menu.length > 0 ? collectNoticeTexts(menu) : [t('notice.trial')];
@@ -249,11 +249,19 @@ export default function LandingPage() {
         </div>
         <div className="landing-steps">
           {steps.map((key, i) => (
-            <div key={key} className="landing-step">
+            <div
+              key={key}
+              className={`landing-step ${key === 'step2' ? 'landing-step-highlight' : ''}`}
+            >
               <span className="landing-step-num">{i + 1}</span>
               <div>
                 <h3>{t(`steps.${key}.title`)}</h3>
                 <p>{t(`steps.${key}.body`)}</p>
+                {key === 'step2' && (
+                  <Link to={planPath} className="landing-btn landing-btn-primary landing-step-cta">
+                    {t('steps.step2.cta')}
+                  </Link>
+                )}
               </div>
             </div>
           ))}

@@ -44,7 +44,9 @@
     "empty": "결과가 없습니다.",
     "copyAddress": "주소 복사",
     "copied": "복사됨",
-    "copyAria": "한국어 원문 주소 복사 (택시·지도앱에 보여주세요)"
+    "copyAria": "한국어 원문 주소 복사 (택시·지도앱에 보여주세요)",
+    "checkedToday": "오늘 확인",
+    "checkedDaysAgo": "최근 확인: {{days}}일 전"
   },
   "photos": {
     "searchPlaceholder": "장소·키워드로 검색 (예: 경복궁, 야경)",

@@ -2,7 +2,10 @@
   "booking": {
     "open": "開く",
     "notePlaceholder": "メモ · 予約リンクを貼り付け",
-    "noteAria": "{{name}} のメモ"
+    "noteAria": "{{name}} のメモ",
+    "reserve": "予約",
+    "findOn": "{{brand}}で探す",
+    "findAria": "{{brand}}で{{name}}を検索"
   },
   "reactions": {
     "tooltip": "旅行者の言及 {{mentions}}件 · 好意的 {{positive}} / 否定的 {{negative}}",
@@ -273,6 +276,7 @@
       "close": "閉じる",
       "loading": "読み込み中…",
       "noPhotos": "表示する写真がありません",
+      "loadFailed": "場所情報を読み込めませんでした。",
       "openOnKakao": "カカオマップで確認",
       "openOnGoogle": "Googleマップで確認",
       "openOnTour": "Visit Koreaで確認",

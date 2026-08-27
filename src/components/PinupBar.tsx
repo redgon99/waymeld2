@@ -283,6 +283,11 @@ export function PinupBar({
                             onDoubleClick={() => onSelectPin?.(p)}
                           >
                             <span className="chip-name">{truncatePinTitle(p.name)}</span>
+                            {p.required && (
+                              <span className="chip-required-badge" title={t('pinup.requiredBadge')}>
+                                <Icon name="lock" size={11} />
+                              </span>
+                            )}
                             {p.fixedArrival && (
                               <span
                                 className={`chip-fixed-arrival ${p.itemKind === 'reserved' ? 'reserved' : ''}`}

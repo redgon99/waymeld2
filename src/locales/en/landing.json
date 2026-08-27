@@ -72,10 +72,9 @@
   },
   "steps": {
     "title": "How to start",
-    "step1": { "title": "Open in browser", "body": "No install—open the planner in your browser." },
-    "step2": { "title": "Search & pin", "body": "Search or tap the map to add places." },
-    "step3": { "title": "Reorder & build route", "body": "Drag chips, then tap Build route for times and legs." },
-    "step4": { "title": "Share", "body": "Share a link or publish to the plaza for others." }
+    "step1": { "title": "Pin it", "body": "No install — search or tap the map in your browser to add places." },
+    "step2": { "title": "Build the schedule", "body": "Drag to reorder, then turn it into a timed, hour-by-hour route.", "cta": "Try it now" },
+    "step3": { "title": "Share", "body": "Share a link or publish to the plaza for others." }
   },
   "gallery": {
     "title": "Screenshots"

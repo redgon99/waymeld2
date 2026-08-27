@@ -1,6 +1,8 @@
 /** Vite dev / Netlify Edge 프록시 경유 (브라우저 CORS 우회) */
 export const KAKAO_PLACE_API_BASE = '/api/kakao-place';
 
+const FETCH_TIMEOUT_MS = 12_000;
+
 export async function fetchKakaoPlaceJson<T = unknown>(
   path: string
 ): Promise<T | null> {
@@ -8,6 +10,7 @@ export async function fetchKakaoPlaceJson<T = unknown>(
     // Origin·Referer·User-Agent·Pf는 프록시가 주입 (브라우저 fetch로는 설정 불가)
     const res = await fetch(`${KAKAO_PLACE_API_BASE}${path}`, {
       headers: { Accept: 'application/json, text/plain, */*' },
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
     if (!res.ok) return null;
     return (await res.json()) as T;
