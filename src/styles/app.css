@@ -8659,11 +8659,16 @@ button {
   padding: 24px 20px 48px;
 }
 
-.guides-kind-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+.guides-page-title {
   margin-bottom: 20px;
+}
+
+.guides-page-title h1 {
+  margin: 0 0 8px;
+}
+
+.info-trail-level {
+  margin-bottom: 16px;
 }
 
 .info-tab-desc {
@@ -8681,21 +8686,91 @@ button {
   margin: 0 0 20px;
 }
 
-.guides-kind-chip {
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  background: #fff;
-  border-radius: 999px;
-  padding: 6px 12px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #475569;
-  cursor: pointer;
+/* 대분류/소분류 세그먼트 탭 — 플래너의 .planner-view-segment와 같은 컴포넌트를
+   한국여행정보·가이드 페이지에서도 재사용해 탭 위계를 명확히 한다 */
+.segmented-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.segmented-tabs::-webkit-scrollbar {
+  display: none;
 }
 
-.guides-kind-chip.is-active {
-  background: #0f172a;
-  border-color: #0f172a;
+.segmented-tabs-md {
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-secondary);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  margin-bottom: 20px;
+}
+
+.segmented-tabs-sm {
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  border: 1px solid var(--color-border);
+}
+
+.segmented-tabs-btn {
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.segmented-tabs-md .segmented-tabs-btn {
+  padding: 9px 16px;
+  font-size: 13.5px;
+}
+
+.segmented-tabs-md .segmented-tabs-btn.active {
+  background: var(--color-primary);
   color: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+}
+
+.segmented-tabs-sm .segmented-tabs-btn {
+  padding: 5px 12px;
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+}
+
+.segmented-tabs-sm .segmented-tabs-btn.active {
+  background: var(--color-primary-soft);
+  color: #a16207;
+}
+
+.segmented-tabs-nested {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.segmented-tabs-nested-connector {
+  width: 14px;
+  height: 1px;
+  flex-shrink: 0;
+  background: var(--color-border-strong);
+  position: relative;
+}
+
+.segmented-tabs-nested-connector::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 1px;
+  height: 14px;
+  background: var(--color-border-strong);
 }
 
 .guides-tag-kind {

@@ -100,7 +100,7 @@ export default function GuideDetailPage() {
           </div>
           <div className="guides-header-actions">
             <LocaleSwitcher />
-            <AuthBar />
+            <AuthBar hideLocale />
           </div>
         </div>
       </header>

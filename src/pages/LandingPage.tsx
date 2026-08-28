@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../components/Icon';
-import { LocaleSwitcher } from '../components/LocaleSwitcher';
+import { SiteHeader } from '../components/SiteHeader';
 import { useSeoMeta } from '../hooks/useSeoMeta';
 import { normalizeLocale, pathWithLocale } from '../lib/locale';
 import { plannerPath } from '../lib/routes';
@@ -104,31 +104,7 @@ export default function LandingPage() {
             {text}
           </p>
         ))}
-      <header className="landing-nav">
-        <Link to={pathWithLocale('/', locale)} className="landing-brand">
-          <span className="landing-brand-mark" aria-hidden>
-            <Icon name="pin" size={20} />
-          </span>
-          <LandingBrand />
-        </Link>
-        <nav className="landing-nav-links" aria-label="Main">
-          <LandingCmsNav items={cmsNav} />
-          <a href="#features">{t('nav.features')}</a>
-          <a href="#how">{t('nav.howItWorks')}</a>
-          <Link to={plazaPath}>{t('nav.plaza')}</Link>
-          <Link to={guidesPath}>{t('nav.tips')}</Link>
-          <Link to={infoPath}>{t('nav.info')}</Link>
-        </nav>
-        <div className="landing-nav-actions">
-          <LocaleSwitcher compact />
-          <Link to={loginPath} className="landing-btn landing-btn-secondary">
-            {t('nav.login')}
-          </Link>
-          <Link to={planPath} className="landing-btn landing-btn-primary">
-            {t('nav.start')}
-          </Link>
-        </div>
-      </header>
+      <SiteHeader active="home" beforeLinks={<LandingCmsNav items={cmsNav} />} />
       </div>
 
       <section

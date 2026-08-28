@@ -1,13 +1,11 @@
 import { useEffect, useState, type MouseEvent } from 'react';
-import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { AuthBar } from '../components/AuthBar';
-import { LocaleSwitcher } from '../components/LocaleSwitcher';
+import { SiteHeader } from '../components/SiteHeader';
+import { SegmentedTabs } from '../components/SegmentedTabs';
 import { TrailRouteModal } from '../components/TrailRouteModal';
 import { OdiiStoriesModal } from '../components/OdiiStoriesModal';
 import { useSeoMeta } from '../hooks/useSeoMeta';
-import { normalizeLocale, pathWithLocale } from '../lib/locale';
-import { plannerPath } from '../lib/routes';
+import { normalizeLocale } from '../lib/locale';
 import i18n from '../lib/i18n';
 import {
   fetchDataLabRegions,
@@ -213,7 +211,6 @@ export default function KoreaInfoPage() {
   const { t } = useTranslation('korInfo');
   const locale = normalizeLocale(i18n.language);
   const multilingualLocale = toMultilingualLocale(locale);
-  const planPath = plannerPath(locale);
 
   const [tab, setTab] = useState<InfoTab>('photos');
   const [placeTypeId, setPlaceTypeId] = useState<TourContentTypeId | ''>('');
@@ -370,170 +367,80 @@ export default function KoreaInfoPage() {
 
   return (
     <main className="guides-page">
-      <header className="guides-header">
-        <div className="guides-header-inner">
-          <div>
-            <Link to={pathWithLocale('/', locale)} className="guides-brand">
-              {t('brand')}
-            </Link>
-            <h1>{t('title')}</h1>
-            <p className="guides-lead">{t('subtitle')}</p>
-          </div>
-          <div className="guides-header-actions">
-            <LocaleSwitcher />
-            <AuthBar />
-            <Link to={planPath} className="guides-btn">
-              {t('cta.planner')}
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteHeader active="info" />
+      <div className="guides-page-title guides-shell">
+        <h1>{t('title')}</h1>
+        <p className="guides-lead">{t('subtitle')}</p>
+      </div>
 
       <div className="guides-shell">
-        <div className="guides-kind-filters" role="tablist" aria-label={t('tabs.label')}>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === 'photos'}
-            className={`guides-kind-chip${tab === 'photos' ? ' is-active' : ''}`}
-            onClick={() => {
-              setTab('photos');
-              setPlaceTypeId('');
-            }}
-          >
-            {t('tabs.photos')}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === 'trails'}
-            className={`guides-kind-chip${tab === 'trails' ? ' is-active' : ''}`}
-            onClick={() => {
-              setTab('trails');
-              setPlaceTypeId('');
-            }}
-          >
-            {t('tabs.trails')}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === 'audio'}
-            className={`guides-kind-chip${tab === 'audio' ? ' is-active' : ''}`}
-            onClick={() => {
-              setTab('audio');
-              setPlaceTypeId('');
-            }}
-          >
-            {t('tabs.audio')}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === 'stats'}
-            className={`guides-kind-chip${tab === 'stats' ? ' is-active' : ''}`}
-            onClick={() => {
-              setTab('stats');
-              setPlaceTypeId('');
-            }}
-          >
-            {t('tabs.stats')}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === 'pet'}
-            className={`guides-kind-chip${tab === 'pet' ? ' is-active' : ''}`}
-            onClick={() => setTab('pet')}
-          >
-            {t('tabs.pet')}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={tab === 'with'}
-            className={`guides-kind-chip${tab === 'with' ? ' is-active' : ''}`}
-            onClick={() => setTab('with')}
-          >
-            {t('tabs.with')}
-          </button>
-        </div>
+        <SegmentedTabs
+          ariaLabel={t('tabs.label')}
+          items={[
+            { id: 'photos', label: t('tabs.photos') },
+            { id: 'trails', label: t('tabs.trails') },
+            { id: 'audio', label: t('tabs.audio') },
+            { id: 'stats', label: t('tabs.stats') },
+            { id: 'pet', label: t('tabs.pet') },
+            { id: 'with', label: t('tabs.with') },
+          ]}
+          value={tab}
+          onChange={(id) => {
+            setTab(id as InfoTab);
+            setPlaceTypeId('');
+          }}
+        />
         <p className="info-tab-desc">{t(`tabs.desc.${tab}`)}</p>
-        <div className="info-subcats" role="group" aria-label={t('subcats.label')}>
-          {tab === 'photos' && (
-            <>
-              <button
-                type="button"
-                className={`guides-kind-chip${photoKeyword === '' ? ' is-active' : ''}`}
-                onClick={() => setPhotoKeyword('')}
-              >
-                {t('kinds.all')}
-              </button>
-              {PHOTO_GALLERY_THEMES.map((theme) => (
-                <button
-                  key={theme.id}
-                  type="button"
-                  className={`guides-kind-chip${photoKeyword === theme.keyword ? ' is-active' : ''}`}
-                  onClick={() =>
-                    setPhotoKeyword((cur) => (cur === theme.keyword ? '' : theme.keyword))
-                  }
-                >
-                  {t(`photos.themes.${theme.id}`)}
-                </button>
-              ))}
-            </>
-          )}
-          {tab === 'trails' &&
-            [{ id: '', label: t('kinds.all') }, ...TRAIL_BRANDS.map((b) => ({ id: b, label: t(`trails.brand.${b}`) }))].map(
-              (chip) => (
-                <button
-                  key={chip.id || 'all'}
-                  type="button"
-                  className={`guides-kind-chip${trailBrand === chip.id ? ' is-active' : ''}`}
-                  onClick={() => setTrailBrand(chip.id)}
-                >
-                  {chip.label}
-                </button>
-              )
-            )}
-          {tab === 'stats' &&
-            (
-              [
-                { id: 'metco' as const, label: t('stats.level.metco') },
-                { id: 'locgo' as const, label: t('stats.level.locgo') },
-              ]
-            ).map((chip) => (
-              <button
-                key={chip.id}
-                type="button"
-                className={`guides-kind-chip${statsLevel === chip.id ? ' is-active' : ''}`}
-                onClick={() => setStatsLevel(chip.id)}
-              >
-                {chip.label}
-              </button>
-            ))}
-          {(tab === 'pet' || tab === 'with') && (
-            <>
-              <button
-                type="button"
-                className={`guides-kind-chip${placeTypeId === '' ? ' is-active' : ''}`}
-                onClick={() => setPlaceTypeId('')}
-              >
-                {t('kinds.all')}
-              </button>
-              {TOUR_CONTENT_TYPE_IDS.map((id) => (
-                <button
-                  key={id}
-                  type="button"
-                  className={`guides-kind-chip${placeTypeId === id ? ' is-active' : ''}`}
-                  onClick={() => setPlaceTypeId((cur) => (cur === id ? '' : id))}
-                >
-                  {t(`contentTypes.${id}`)}
-                </button>
-              ))}
-            </>
-          )}
-        </div>
+
+        {tab === 'photos' && (
+          <SegmentedTabs
+            nested
+            size="sm"
+            ariaLabel={t('subcats.label')}
+            items={[
+              { id: '', label: t('kinds.all') },
+              ...PHOTO_GALLERY_THEMES.map((theme) => ({ id: theme.keyword, label: t(`photos.themes.${theme.id}`) })),
+            ]}
+            value={photoKeyword}
+            onChange={(id) => setPhotoKeyword(id)}
+          />
+        )}
+        {tab === 'trails' && (
+          <SegmentedTabs
+            nested
+            size="sm"
+            ariaLabel={t('subcats.label')}
+            items={[{ id: '', label: t('kinds.all') }, ...TRAIL_BRANDS.map((b) => ({ id: b, label: t(`trails.brand.${b}`) }))]}
+            value={trailBrand}
+            onChange={(id) => setTrailBrand(id)}
+          />
+        )}
+        {tab === 'stats' && (
+          <SegmentedTabs
+            nested
+            size="sm"
+            ariaLabel={t('subcats.label')}
+            items={[
+              { id: 'metco', label: t('stats.level.metco') },
+              { id: 'locgo', label: t('stats.level.locgo') },
+            ]}
+            value={statsLevel}
+            onChange={(id) => setStatsLevel(id as DataLabLevel)}
+          />
+        )}
+        {(tab === 'pet' || tab === 'with') && (
+          <SegmentedTabs
+            nested
+            size="sm"
+            ariaLabel={t('subcats.label')}
+            items={[
+              { id: '', label: t('kinds.all') },
+              ...TOUR_CONTENT_TYPE_IDS.map((id) => ({ id, label: t(`contentTypes.${id}`) })),
+            ]}
+            value={placeTypeId}
+            onChange={(id) => setPlaceTypeId(id as TourContentTypeId | '')}
+          />
+        )}
 
         {tab === 'photos' && (
           <section>
@@ -574,25 +481,19 @@ export default function KoreaInfoPage() {
               value={trailKeyword}
               onChange={(e) => setTrailKeyword(e.currentTarget.value)}
             />
-            <div className="guides-kind-filters" role="group" aria-label={t('trails.levelFilterLabel')}>
-              {(
-                [
-                  { id: '', label: t('kinds.all') },
-                  { id: '1', label: t('trails.levelLow') },
-                  { id: '2', label: t('trails.levelMid') },
-                  { id: '3', label: t('trails.levelHigh') },
-                ] as const
-              ).map((chip) => (
-                <button
-                  key={`level-${chip.id || 'all'}`}
-                  type="button"
-                  className={`guides-kind-chip${trailLevel === chip.id ? ' is-active' : ''}`}
-                  onClick={() => setTrailLevel(chip.id)}
-                >
-                  {chip.label}
-                </button>
-              ))}
-            </div>
+            <SegmentedTabs
+              size="sm"
+              ariaLabel={t('trails.levelFilterLabel')}
+              items={[
+                { id: '', label: t('kinds.all') },
+                { id: '1', label: t('trails.levelLow') },
+                { id: '2', label: t('trails.levelMid') },
+                { id: '3', label: t('trails.levelHigh') },
+              ]}
+              value={trailLevel}
+              onChange={(id) => setTrailLevel(id as '1' | '2' | '3' | '')}
+              className="info-trail-level"
+            />
             {trailsLoading && <p className="guides-muted">{t('list.loading')}</p>}
             {trailsError && <p className="guides-error">{trailsError}</p>}
             {!trailsLoading && !trailsError && visibleTrails.length === 0 && (

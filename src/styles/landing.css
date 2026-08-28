@@ -37,7 +37,8 @@
   line-height: 1.5;
 }
 
-.landing-page a {
+.landing-page a,
+.landing-nav a {
   color: inherit;
   text-decoration: none;
 }
@@ -102,6 +103,13 @@
 
 .landing-nav-links a:hover {
   color: var(--landing-ink);
+}
+
+.landing-nav-links a.nav-active {
+  color: var(--landing-ink);
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--landing-accent);
+  padding-bottom: 2px;
 }
 
 .landing-nav-drop {

@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { AuthBar } from '../components/AuthBar';
-import { LocaleSwitcher } from '../components/LocaleSwitcher';
+import { SiteHeader } from '../components/SiteHeader';
+import { SegmentedTabs } from '../components/SegmentedTabs';
 import { useSeoMeta } from '../hooks/useSeoMeta';
 import { GUIDE_KINDS, type GuideKind } from '../lib/guideKinds';
 import { normalizeLocale, pathWithLocale } from '../lib/locale';
-import { plannerPath } from '../lib/routes';
 import i18n from '../lib/i18n';
 import { isGuidesConfigured, listPublishedGuides } from '../lib/guides';
 import type { GuideArticle } from '../types/guides';
@@ -52,40 +51,20 @@ export default function GuidesPage() {
 
   return (
     <main className="guides-page">
-      <header className="guides-header">
-        <div className="guides-header-inner">
-          <div>
-            <Link to={pathWithLocale('/', locale)} className="guides-brand">
-              {t('brand')}
-            </Link>
-            <h1>{t('list.title')}</h1>
-            <p className="guides-lead">{t('list.subtitle')}</p>
-          </div>
-          <div className="guides-header-actions">
-            <LocaleSwitcher />
-            <AuthBar />
-            <Link to={plannerPath(locale)} className="guides-btn">
-              {t('cta.planner')}
-            </Link>
-          </div>
-        </div>
-      </header>
+      <SiteHeader active="guides" />
 
       <div className="guides-shell">
-        <div className="guides-kind-filters" role="tablist" aria-label={t('list.kindFilter')}>
-          {kindChips.map((chip) => (
-            <button
-              key={chip.id || 'all'}
-              type="button"
-              role="tab"
-              aria-selected={kindFilter === chip.id}
-              className={`guides-kind-chip${kindFilter === chip.id ? ' is-active' : ''}`}
-              onClick={() => setKindFilter(chip.id)}
-            >
-              {chip.label}
-            </button>
-          ))}
+        <div className="guides-page-title">
+          <h1>{t('list.title')}</h1>
+          <p className="guides-lead">{t('list.subtitle')}</p>
         </div>
+
+        <SegmentedTabs
+          ariaLabel={t('list.kindFilter')}
+          items={kindChips.map((c) => ({ id: c.id || 'all', label: c.label }))}
+          value={kindFilter || 'all'}
+          onChange={(id) => setKindFilter(id === 'all' ? '' : (id as GuideKind))}
+        />
 
         {loading && <p className="guides-muted">{t('list.loading')}</p>}
         {error && <p className="guides-error">{error}</p>}
