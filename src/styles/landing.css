@@ -424,6 +424,23 @@
   color: var(--landing-muted);
 }
 
+.landing-feature-card-cta {
+  display: block;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.landing-feature-card-cta:hover {
+  border-color: rgba(15, 23, 42, 0.18);
+  transform: translateY(-1px);
+}
+
+.landing-feature-card-arrow {
+  display: inline-block;
+  margin-top: 10px;
+  font-weight: 700;
+  color: var(--landing-ink);
+}
+
 /* Compare table */
 .landing-compare {
   overflow: hidden;

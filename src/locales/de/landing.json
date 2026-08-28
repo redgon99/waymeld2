@@ -60,6 +60,10 @@
     "presentation": {
       "title": "Präsentationsmodus",
       "body": "Zeigen Sie Ihre Route klar in Meetings, Unterricht oder Führungen."
+    },
+    "scenario": {
+      "title": "KI-Szenarien",
+      "body": "Thema wählen und einen Tagesplan mit echten Orten erhalten, den du direkt zu deiner Reise hinzufügen kannst."
     }
   },
   "compare": {

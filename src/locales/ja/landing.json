@@ -39,7 +39,11 @@
     "multiDay": { "title": "複数日タブ", "body": "1日目・2日目でピンとルートを管理。" },
     "category": { "title": "カテゴリピンバー", "body": "ドラッグで順序・グループ変更。地図フィルター連動。" },
     "maps": { "title": "カカオ + Google", "body": "韓国はカカオ、海外はGoogle Places。UIは韓・英・日・中・西・仏・独・露。" },
-    "presentation": { "title": "発表モード", "body": "ミーティングやガイドツアー向け表示。" }
+    "presentation": { "title": "発表モード", "body": "ミーティングやガイドツアー向け表示。" },
+    "scenario": {
+      "title": "AIシナリオ",
+      "body": "テーマを選ぶと、実際のスポットデータを基にした1日プランをそのまま旅程に追加できます。"
+    }
   },
   "compare": {
     "title": "ポジション",

@@ -60,6 +60,10 @@
     "presentation": {
       "title": "Modo presentación",
       "body": "Muestra tu ruta con claridad en reuniones, clases o visitas guiadas."
+    },
+    "scenario": {
+      "title": "Escenarios con IA",
+      "body": "Elige un tema y obtén un plan de un día con lugares reales, listo para añadir a tu viaje."
     }
   },
   "compare": {

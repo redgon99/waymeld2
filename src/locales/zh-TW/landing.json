@@ -60,6 +60,10 @@
     "presentation": {
       "title": "演示模式",
       "body": "適合會議、課堂或導遊講解。"
+    },
+    "scenario": {
+      "title": "AI 情境行程",
+      "body": "選擇主題，AI 會用真實地點資料生成一日行程，一鍵加入你的行程。"
     }
   },
   "compare": {

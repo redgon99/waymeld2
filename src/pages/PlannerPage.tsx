@@ -453,6 +453,15 @@ export default function PlannerPage() {
     );
   }, [location.search]);
 
+  // 랜딩페이지「AI 시나리오」소개 → 시나리오 탭 자동 오픈
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('openScenario') !== '1') return;
+    setMobileSheet(null);
+    setPanelTab('scenario');
+    setPanelOpen(true);
+  }, [location.search]);
+
   const refreshTripList = useCallback(async (userId: string | null) => {
     const list = await tripsRepo.list(userId);
     setTripSummaries(list);

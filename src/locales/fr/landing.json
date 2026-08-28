@@ -60,6 +60,10 @@
     "presentation": {
       "title": "Mode présentation",
       "body": "Montrez clairement votre itinéraire en réunion, en cours ou en visite guidée."
+    },
+    "scenario": {
+      "title": "Scénarios IA",
+      "body": "Choisissez un thème et obtenez un programme d'une journée basé sur de vrais lieux, prêt à ajouter à votre voyage."
     }
   },
   "compare": {

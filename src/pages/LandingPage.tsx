@@ -188,6 +188,16 @@ export default function LandingPage() {
             <h3>{t('features.presentation.title')}</h3>
             <p>{t('features.presentation.body')}</p>
           </article>
+          <Link
+            to={`${planPath}?openScenario=1`}
+            className="landing-feature-card landing-feature-card-cta"
+          >
+            <h3>{t('features.scenario.title')}</h3>
+            <p>{t('features.scenario.body')}</p>
+            <span className="landing-feature-card-arrow" aria-hidden>
+              →
+            </span>
+          </Link>
         </div>
       </section>
 

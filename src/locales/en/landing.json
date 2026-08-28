@@ -60,6 +60,10 @@
     "presentation": {
       "title": "Presentation mode",
       "body": "Show your route clearly in meetings, classes, or guided tours."
+    },
+    "scenario": {
+      "title": "AI Scenarios",
+      "body": "Pick a theme and get a real, place-backed day plan you can drop straight into your trip."
     }
   },
   "compare": {
