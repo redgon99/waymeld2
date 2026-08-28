@@ -26,7 +26,6 @@ export function AuthBar({ hideLocale = false }: { hideLocale?: boolean }) {
   if (user) {
     return (
       <div className="auth-bar signed-in" title={user.email ?? undefined}>
-        <Icon name="cloudOk" />
         {!hideLocale && <LocaleSwitcher compact />}
         {isAdmin && (
           <Link to={adminPath} className="auth-link">

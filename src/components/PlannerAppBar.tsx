@@ -254,6 +254,8 @@ export function PlannerAppBar({
         )}
       </div>
 
+      <div className="planner-app-bar-divider" aria-hidden />
+
       <AuthBar />
     </header>
 
