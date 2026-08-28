@@ -201,6 +201,12 @@ export function ThemeScenarioPanel({
                             )}
                           </span>
                         )}
+                        {stop.reason && (
+                          <span className="theme-scenario-stop-reason">
+                            <Icon name="sparkles" size={12} />
+                            {stop.reason}
+                          </span>
+                        )}
                         <span className="theme-scenario-stop-note">{stop.note}</span>
                       </span>
                     </button>

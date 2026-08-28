@@ -39,6 +39,8 @@ export interface ScenarioStop {
   lng: number;
   thumbnailUrl?: string;
   note: string;
+  /** 이 장소를 이 시나리오에 넣은 이유를 요약한 짧은 한 줄(카탈로그 탐색 화면 전용 표시, 핀에는 반영되지 않음) */
+  reason?: string;
   /** 'gocamping'이면 contentId가 GoCamping 자체 ID 공간이라 visitkorea가 아닌 gocamping.or.kr로 링크해야 함 */
   sourceApi?: 'gocamping';
   /** KorPetTourService2/KorWithService2에 등록된 스팟인지 (반려동물 동반가능/무장애 시설) */

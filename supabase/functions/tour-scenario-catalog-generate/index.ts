@@ -64,6 +64,7 @@ interface LocaleContent {
       sourceApi?: 'gocamping';
       petFriendly?: boolean;
       accessible?: boolean;
+      reason: string;
       note: string;
     }>;
   }>;
@@ -188,10 +189,14 @@ Deno.serve(async (req) => {
     }
 
     function localeContentFromDraft(draft: ScenarioDraft): LocaleContent {
-      const noteById = new Map<string, { title: string; note: string }>();
+      const noteById = new Map<string, { title: string; note: string; reason: string }>();
       for (const d of draft.days) {
         for (const s of d.stops ?? []) {
-          noteById.set(s.contentId, { title: String(s.title ?? '').trim(), note: String(s.note ?? '').trim() });
+          noteById.set(s.contentId, {
+            title: String(s.title ?? '').trim(),
+            note: String(s.note ?? '').trim(),
+            reason: String(s.reason ?? '').trim(),
+          });
         }
       }
       const dayTitleById = new Map(draft.days.map((d) => [d.day, String(d.dayTitle ?? '').trim()]));
@@ -217,6 +222,7 @@ Deno.serve(async (req) => {
               sourceApi: s.sourceApi,
               petFriendly: s.petFriendly,
               accessible: s.accessible,
+              reason: narrated?.reason || '',
               note: narrated?.note || '',
             };
           }),

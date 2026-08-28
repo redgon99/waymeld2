@@ -146,6 +146,7 @@ export function normalizeRequestLocale(raw: string): string {
 export interface StopDraft {
   contentId: string;
   note: string;
+  reason?: string;
   title?: string;
 }
 export interface DayDraft {
@@ -240,14 +241,15 @@ export function buildSelectPrompt(
 - 각 날의 stops에는 반드시 목록에 있는 contentId만 사용하세요. 목록에 없는 장소를 새로 지어내면 안 됩니다.
 - 하루에 2~4곳을 배치하고, 하루 흐름(오전→오후→저녁)이 자연스럽게 이어지도록 순서를 정하세요.
 - 같은 contentId를 여러 날에 중복 배치하지 마세요.
-- title, intro, dayTitle, regionLabel, 각 stop의 title·note는 모두 한국어로 작성하세요.
+- title, intro, dayTitle, regionLabel, 각 stop의 title·reason·note는 모두 한국어로 작성하세요.
 - stop.title은 여행자가 읽기 쉬운 장소명(공식 한글명 가능)입니다.
+- stop.reason은 note와 별개로, 이 장소를 이 일정에 넣은 핵심 이유를 8~20자 내외의 짧은 한 줄로 씁니다(완전한 문장 아니어도 됨. 예: "테마를 대표하는 장소", "전날 숙소에서 도보 이동").
 
 지역별 후보:
 ${regionListing}
 
 반드시 JSON만 응답하세요:
-{"region":"선택한 지역명(목록에 있는 이름 그대로)","regionLabel":"표시용 지역명","title":"여행 시나리오 제목","intro":"3~5문장 도입부","days":[{"day":1,"dayTitle":"1일차 소제목","stops":[{"contentId":"...","title":"장소명","note":"..."}]}]}`;
+{"region":"선택한 지역명(목록에 있는 이름 그대로)","regionLabel":"표시용 지역명","title":"여행 시나리오 제목","intro":"3~5문장 도입부","days":[{"day":1,"dayTitle":"1일차 소제목","stops":[{"contentId":"...","title":"장소명","reason":"이 장소를 넣은 이유 한 줄","note":"..."}]}]}`;
   }
 
   return `You are the travel-scenario writer for WayMeld, a Korea trip planner.
@@ -258,6 +260,7 @@ LANGUAGE LOCK (critical):
 - Do not write those fields in Korean. Korean appears only in the candidate list as koreanTitle for reference.
 - stop.title must be a natural ${localeLabel} place name a traveler would recognize (common local name, not a letter-by-letter romanization unless that is the usual name).
 - regionLabel is the traveler-facing region name in ${localeLabel} (e.g. Seoul, Jeju, Busan).
+- reason: a short one-line phrase in ${localeLabel} (5-10 words, does not need to be a full sentence) giving the single clearest reason this stop was picked for this itinerary — separate from note, punchier and more specific (e.g. "the theme's must-see anchor spot", "steps from the previous stop").
 - notes: 1–2 useful sentences in ${localeLabel} explaining why this stop fits the theme and the day's flow.
 
 Hard rules:
@@ -270,7 +273,7 @@ Candidates:
 ${regionListing}
 
 Respond with JSON only:
-{"region":"exact region key from the list","regionLabel":"region name in ${localeLabel}","title":"scenario title in ${localeLabel}","intro":"3-5 sentence intro in ${localeLabel}","days":[{"day":1,"dayTitle":"day subtitle in ${localeLabel}","stops":[{"contentId":"...","title":"place name in ${localeLabel}","note":"..."}]}]}`;
+{"region":"exact region key from the list","regionLabel":"region name in ${localeLabel}","title":"scenario title in ${localeLabel}","intro":"3-5 sentence intro in ${localeLabel}","days":[{"day":1,"dayTitle":"day subtitle in ${localeLabel}","stops":[{"contentId":"...","title":"place name in ${localeLabel}","reason":"short one-line reason in ${localeLabel}","note":"..."}]}]}`;
 }
 
 export interface FixedStop {
@@ -314,9 +317,10 @@ ${dayListing}
 Task: write the narrative text for this already-chosen itinerary entirely in ${localeLabel}.
 
 LANGUAGE LOCK (critical):
-- Write title, intro, dayTitle, regionLabel, every stop.title, and every stop.note entirely in ${localeLabel}. Do not use Korean.
+- Write title, intro, dayTitle, regionLabel, every stop.title, stop.reason, and stop.note entirely in ${localeLabel}. Do not use Korean.
 - stop.title must be a natural ${localeLabel} place name a traveler would recognize for that koreanName (common local name, not a letter-by-letter romanization unless that is the usual name).
 - regionLabel is the traveler-facing region name in ${localeLabel}.
+- reason: a short one-line phrase in ${localeLabel} (5-10 words, does not need to be a full sentence) giving the single clearest reason this stop was picked for this itinerary — separate from note, punchier and more specific (e.g. "the theme's must-see anchor spot", "steps from the previous stop").
 - notes: 1-2 useful sentences in ${localeLabel} explaining why this stop fits the theme and the day's flow.
 
 Hard rules:
@@ -324,7 +328,7 @@ Hard rules:
 - "region" in your JSON response must be exactly "${regionKey}" (unchanged).
 
 Respond with JSON only:
-{"region":"${regionKey}","regionLabel":"region name in ${localeLabel}","title":"scenario title in ${localeLabel}","intro":"3-5 sentence intro in ${localeLabel}","days":[{"day":1,"dayTitle":"day subtitle in ${localeLabel}","stops":[{"contentId":"...","title":"place name in ${localeLabel}","note":"..."}]}]}`;
+{"region":"${regionKey}","regionLabel":"region name in ${localeLabel}","title":"scenario title in ${localeLabel}","intro":"3-5 sentence intro in ${localeLabel}","days":[{"day":1,"dayTitle":"day subtitle in ${localeLabel}","stops":[{"contentId":"...","title":"place name in ${localeLabel}","reason":"short one-line reason in ${localeLabel}","note":"..."}]}]}`;
 }
 
 async function requestClaudeText(prompt: string, apiKey: string, localeLabel: string, model: string): Promise<string> {
@@ -338,7 +342,7 @@ async function requestClaudeText(prompt: string, apiKey: string, localeLabel: st
     body: JSON.stringify({
       model,
       max_tokens: 4096,
-      system: `Output language: ${localeLabel} only for narrative JSON fields (title, intro, dayTitle, regionLabel, stop.title, stop.note). Return JSON only. The JSON must be strictly valid: escape every double-quote and newline that appears inside a string value.`,
+      system: `Output language: ${localeLabel} only for narrative JSON fields (title, intro, dayTitle, regionLabel, stop.title, stop.reason, stop.note). Return JSON only. The JSON must be strictly valid: escape every double-quote and newline that appears inside a string value.`,
       messages: [{ role: 'user', content: prompt }],
     }),
   });

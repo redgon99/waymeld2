@@ -534,6 +534,11 @@ export default function AdminScenariosPage() {
                                 .join(' · ')}
                             </span>
                           )}
+                          {stop.reason && (
+                            <div className="admin-cell-sub" style={{ fontWeight: 700, color: '#b45309' }}>
+                              {stop.reason}
+                            </div>
+                          )}
                           {stop.note && <div className="admin-cell-sub">{stop.note}</div>}
                         </li>
                       ))}
