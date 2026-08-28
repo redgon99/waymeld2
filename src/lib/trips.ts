@@ -482,9 +482,20 @@ export function plazaListingToTrip(listing: PlazaListing): Trip {
   });
 }
 
-function listLocal(): TripSummary[] {
+/**
+ * 로컬 캐시(localStorage)는 브라우저 하나에 저장되므로 같은 기기에서 다른
+ * 계정으로 로그인해도 물리적으로는 같은 저장소를 공유한다. 계정 간 데이터가
+ * 섞이지 않도록 트립 자체의 ownerId로 걸러낸다: 로그인 상태면 본인 소유만,
+ * 비로그인(게스트) 상태면 아직 아무 계정에도 귀속되지 않은 트립만 보여준다.
+ */
+function ownedBy(trip: Trip, userId?: string | null): boolean {
+  return userId ? trip.ownerId === userId : !trip.ownerId;
+}
+
+function listLocal(userId?: string | null): TripSummary[] {
   const store = readStore();
-  return [...store.trips]
+  return store.trips
+    .filter((t) => ownedBy(t, userId))
     .sort((a, b) => b.updatedAt - a.updatedAt)
     .map((t) => ({
       id: t.id,
@@ -495,11 +506,12 @@ function listLocal(): TripSummary[] {
     }));
 }
 
-function readLocal(tripId?: string): Trip | null {
+function readLocal(tripId?: string, userId?: string | null): Trip | null {
   const store = readStore();
-  if (store.trips.length === 0) return null;
-  const id = tripId ?? store.activeId ?? store.trips[0]?.id;
-  return store.trips.find((t) => t.id === id) ?? null;
+  const pool = store.trips.filter((t) => ownedBy(t, userId));
+  if (pool.length === 0) return null;
+  const id = tripId ?? store.activeId ?? pool[0]?.id;
+  return pool.find((t) => t.id === id) ?? null;
 }
 
 function readLocalBySlug(slug: string): Trip | null {
@@ -557,7 +569,7 @@ export const tripsRepo: TripsRepo = {
       const remote = await listRemote(userId);
       if (remote.length > 0) return remote;
     }
-    return listLocal();
+    return listLocal(userId);
   },
 
   async load(userId, tripId) {
@@ -569,7 +581,7 @@ export const tripsRepo: TripsRepo = {
       const latest = await readRemoteLatest(userId);
       if (latest) return latest;
     }
-    return readLocal(tripId);
+    return readLocal(tripId, userId);
   },
 
   async loadBySlug(slug) {
@@ -601,10 +613,13 @@ export const tripsRepo: TripsRepo = {
   async migrateLocalToUser(userId) {
     if (!isSupabaseConfigured) return 0;
     const store = readStore();
-    if (store.trips.length === 0) return 0;
+    /* 이미 다른 계정 소유로 찍힌 로컬 트립은 절대 이 계정으로 끌어오지 않는다 —
+     * 아직 아무 계정에도 귀속되지 않은(순수 게스트) 트립만 첫 로그인 계정에 준다. */
+    const unclaimed = store.trips.filter((t) => !t.ownerId);
+    if (unclaimed.length === 0) return 0;
 
     let migrated = 0;
-    for (const trip of store.trips) {
+    for (const trip of unclaimed) {
       const normalized = normalizeTrip({ ...trip, ownerId: userId });
       try {
         await writeRemote(normalized);
