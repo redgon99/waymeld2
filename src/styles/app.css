@@ -7044,25 +7044,10 @@ button {
 }
 
 .plaza-header {
-  padding: 16px 20px 0;
+  padding: 24px 20px 0;
   max-width: 960px;
   margin: 0 auto;
   width: 100%;
-}
-
-.plaza-header-top {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.plaza-home-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  color: var(--color-text-secondary);
-  text-decoration: none;
 }
 
 .plaza-title {
@@ -7116,7 +7101,7 @@ button {
   max-width: 960px;
   margin: 0 auto;
   width: 100%;
-  padding: 16px 20px 80px;
+  padding: 16px 20px 40px;
 }
 
 .plaza-board {
@@ -7260,19 +7245,9 @@ button {
   border-radius: 4px;
 }
 
-.plaza-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.95);
-  border-top: 1px solid var(--color-border);
-}
-
 .plaza-toast {
   position: fixed;
-  bottom: 56px;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 11000;
