@@ -486,7 +486,15 @@ export default function PlannerPage() {
       } else {
         const fresh = makeEmptyTrip();
         setTrip(fresh);
-        await tripsRepo.save({ ...fresh, ownerId: userId ?? undefined });
+        try {
+          await tripsRepo.save({ ...fresh, ownerId: userId ?? undefined });
+        } catch (e) {
+          /* 클라우드 저장이 실패해도 로컬에는 이미 저장됐다(tripsRepo.save 내부 순서상
+           * writeLocal이 writeRemote보다 먼저 실행됨). 여기서 그대로 던지면 hydrated가
+           * true로 세팅되지 못해, 다음 리렌더/새로고침마다 이 분기가 다시 실행되며
+           * 매번 새로운 "새 여행"을 만들어내는 문제가 생긴다. */
+          console.warn('새 여행 클라우드 저장 실패(로컬에는 저장됨)', e);
+        }
         await refreshTripList(userId);
       }
       setLastSavedAt(loaded?.updatedAt ?? Date.now());
