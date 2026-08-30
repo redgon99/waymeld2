@@ -189,7 +189,7 @@ function reportRouteMetrics(route: GeneratedRoute) {
 export default function PlannerPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, configured: authConfigured, plan, isAdmin } = useAuth();
+  const { user, configured: authConfigured, plan, isAdmin, refreshProfile } = useAuth();
   const { t: tc } = useTranslation('common');
   const { t: tp, i18n: plannerI18n } = useTranslation('planner');
   const { t: tb } = useTranslation('billing');
@@ -1882,7 +1882,13 @@ export default function PlannerPage() {
           {tc('loadingMap')}
         </div>
       )}
-      <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} plan={plan} />
+      <UpgradeModal
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        plan={plan}
+        userId={user?.id}
+        onPlanChanged={refreshProfile}
+      />
       {!mapProviderBooting &&
         ((mapProvider === 'kakao' && kakaoReady) ||
           (mapProvider === 'google' && googleReady)) && (

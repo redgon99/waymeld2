@@ -20,6 +20,8 @@ import KoreaInfoPage from './pages/KoreaInfoPage';
 import KoreaSetupPage from './pages/KoreaSetupPage';
 import HelpPage from './pages/HelpPage';
 import ThemesPage from './pages/ThemesPage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from './lib/locale';
 
 const PAGE_ROUTES = (
@@ -44,6 +46,8 @@ const PAGE_ROUTES = (
     <Route path="setup" element={<KoreaSetupPage />} />
     <Route path="help" element={<HelpPage />} />
     <Route path="themes" element={<ThemesPage />} />
+    <Route path="terms" element={<TermsPage />} />
+    <Route path="privacy" element={<PrivacyPage />} />
   </>
 );
 
