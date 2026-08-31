@@ -702,7 +702,9 @@
     "addDayShort": "+ Tag",
     "pinFromMap": "Auf Karte anpinnen",
     "sheetRouteTitle": "Route Tag {{n}}",
-    "sheetPinsSummary": "{{count}} Pins · Tag {{n}}"
+    "sheetPinsSummary": "{{count}} Pins · Tag {{n}}",
+    "tabTrips": "Meine Reisen",
+    "tabAccount": "Konto"
   },
   "map": {
     "centerHere": "Hier in der Nähe suchen",

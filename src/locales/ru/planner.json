@@ -702,7 +702,9 @@
     "addDayShort": "+ День",
     "pinFromMap": "Закрепить на карте",
     "sheetRouteTitle": "Маршрут дня {{n}}",
-    "sheetPinsSummary": "{{count}} пинов · День {{n}}"
+    "sheetPinsSummary": "{{count}} пинов · День {{n}}",
+    "tabTrips": "Мои поездки",
+    "tabAccount": "Аккаунт"
   },
   "map": {
     "centerHere": "Искать вокруг этой точки",

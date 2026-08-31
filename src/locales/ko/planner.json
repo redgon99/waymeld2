@@ -702,7 +702,9 @@
     "addDayShort": "+ 일차",
     "pinFromMap": "지도에서 핀업",
     "sheetRouteTitle": "{{n}}일차 동선",
-    "sheetPinsSummary": "핀 {{count}} · {{n}}일차"
+    "sheetPinsSummary": "핀 {{count}} · {{n}}일차",
+    "tabTrips": "내 여행",
+    "tabAccount": "계정"
   },
   "map": {
     "centerHere": "현재 위치를 중심으로",

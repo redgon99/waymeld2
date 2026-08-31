@@ -497,7 +497,9 @@
     "addDayShort": "+ 天",
     "pinFromMap": "在地圖上釘選",
     "sheetRouteTitle": "第 {{n}} 天路線",
-    "sheetPinsSummary": "{{count}} 個圖釘 · 第 {{n}} 天"
+    "sheetPinsSummary": "{{count}} 個圖釘 · 第 {{n}} 天",
+    "tabTrips": "我的行程",
+    "tabAccount": "帳戶"
   },
   "map": {
     "centerHere": "以此處為中心搜索",

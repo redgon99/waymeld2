@@ -702,7 +702,9 @@
     "addDayShort": "+ Jour",
     "pinFromMap": "Épingler sur la carte",
     "sheetRouteTitle": "Itinéraire jour {{n}}",
-    "sheetPinsSummary": "{{count}} épingles · Jour {{n}}"
+    "sheetPinsSummary": "{{count}} épingles · Jour {{n}}",
+    "tabTrips": "Mes voyages",
+    "tabAccount": "Compte"
   },
   "map": {
     "centerHere": "Chercher autour d’ici",

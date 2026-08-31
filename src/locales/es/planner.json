@@ -702,7 +702,9 @@
     "addDayShort": "+ Día",
     "pinFromMap": "Fijar en el mapa",
     "sheetRouteTitle": "Ruta del día {{n}}",
-    "sheetPinsSummary": "{{count}} pines · Día {{n}}"
+    "sheetPinsSummary": "{{count}} pines · Día {{n}}",
+    "tabTrips": "Mis viajes",
+    "tabAccount": "Cuenta"
   },
   "map": {
     "centerHere": "Buscar alrededor de aquí",

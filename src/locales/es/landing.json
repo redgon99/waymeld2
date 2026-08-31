@@ -17,7 +17,8 @@
     "tips": "Consejos de viaje",
     "info": "Info de viaje en Corea",
     "start": "Planear una ruta",
-    "login": "Iniciar sesión"
+    "login": "Iniciar sesión",
+    "menu": "Menú"
   },
   "hero": {
     "eyebrow": "Planificador de rutas",
@@ -25,7 +26,11 @@
     "subtitle": "Busca y fija sitios: se agrupan por categoría. Arrastra para reordenar y crea un itinerario con horarios. No es un mapa de visitas: es una herramienta para tejer tu próxima ruta.",
     "ctaPrimary": "Empezar gratis",
     "ctaSecondary": "Ver la plaza",
-    "note": "App web · funciona en local sin iniciar sesión"
+    "note": "App web · funciona en local sin iniciar sesión",
+    "demo": {
+      "pins": "Guardados · 4 lugares",
+      "route": "Ruta del día 1"
+    }
   },
   "pillars": {
     "title": "Tres pasos",

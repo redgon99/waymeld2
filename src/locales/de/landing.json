@@ -17,7 +17,8 @@
     "tips": "Reisetipps",
     "info": "Korea-Reiseinfos",
     "start": "Route planen",
-    "login": "Anmelden"
+    "login": "Anmelden",
+    "menu": "Menü"
   },
   "hero": {
     "eyebrow": "Routenplaner",
@@ -25,7 +26,11 @@
     "subtitle": "Suchen und pinnen — die Orte gruppieren sich nach Kategorie. Ziehen zum Umsortieren, dann einen zeitlichen Plan erstellen. Keine Besuchskarte, sondern ein Werkzeug für die nächste Route.",
     "ctaPrimary": "Kostenlos starten",
     "ctaSecondary": "Platz ansehen",
-    "note": "Web-App · funktioniert lokal ohne Anmeldung"
+    "note": "Web-App · funktioniert lokal ohne Anmeldung",
+    "demo": {
+      "pins": "Gepinnt · 4 Orte",
+      "route": "Route Tag 1"
+    }
   },
   "pillars": {
     "title": "Drei Schritte",

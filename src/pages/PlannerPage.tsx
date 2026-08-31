@@ -73,6 +73,7 @@ import {
 import type { ShareTripModalSubmit } from '../components/ShareTripModal';
 import { ShareTripModal } from '../components/ShareTripModal';
 import { PlannerAppBar } from '../components/PlannerAppBar';
+import { TripSelectMenu } from '../components/TripSelectMenu';
 import { ItineraryTableView } from '../components/ItineraryTableView';
 import { PlannerSidePanel, type PlannerPanelTab } from '../components/PlannerSidePanel';
 import { PanelIconRail } from '../components/PanelIconRail';
@@ -2377,6 +2378,30 @@ export default function PlannerPage() {
                 onCategorySubFiltersChange={setCategorySubFilters}
                 preferences={trip.preferences}
               />
+            </div>
+          )}
+
+          {mobileSheet !== 'search' && (
+            <div className="mobile-planner-tabbar">
+              <TripSelectMenu
+                summaries={tripSummaries}
+                currentTripId={trip.id}
+                onSelect={handleSelectTrip}
+                onNewTrip={handleNewTrip}
+                onDeleteTrip={() => void handleDeleteTrip()}
+                label={tp('chrome.tabTrips')}
+                triggerClassName="mobile-tabbar-btn"
+              />
+              <button
+                type="button"
+                className="mobile-tabbar-btn"
+                onClick={() => setUpgradeOpen(true)}
+              >
+                <span className={`mobile-tabbar-plan-badge plan-${plan}`}>
+                  {tb(`plan.${plan}`)}
+                </span>
+                {tp('chrome.tabAccount')}
+              </button>
             </div>
           )}
         </>

@@ -497,7 +497,9 @@
     "addDayShort": "+ 日",
     "pinFromMap": "地図からピン",
     "sheetRouteTitle": "{{n}}日目のルート",
-    "sheetPinsSummary": "ピン {{count}} · {{n}}日目"
+    "sheetPinsSummary": "ピン {{count}} · {{n}}日目",
+    "tabTrips": "マイ旅行",
+    "tabAccount": "アカウント"
   },
   "map": {
     "centerHere": "ここを中心に検索",

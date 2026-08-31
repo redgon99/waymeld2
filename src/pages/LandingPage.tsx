@@ -126,10 +126,37 @@ export default function LandingPage() {
           <p className="landing-hero-note">{heroNote}</p>
         </div>
         <div className="landing-hero-visual">
-          <div className="landing-phone">
-            <div className="landing-phone-glow" aria-hidden />
-            <div className="landing-phone-screen">
-              <img src="/landing/hero.png" alt="" width={280} height={560} />
+          <div className="landing-hero-demo" aria-hidden>
+            <div className="landing-hero-demo-glow" />
+            <div className="landing-hero-demo-card">
+              <p className="landing-hero-demo-label">{t('hero.demo.pins')}</p>
+              <div className="landing-hero-demo-pin" style={{ background: '#fef9c3' }}>
+                <span style={{ background: '#a16207' }} />
+                경복궁
+              </div>
+              <div className="landing-hero-demo-pin" style={{ background: '#eff6ff' }}>
+                <span style={{ background: '#2563eb' }} />
+                인사동 카페
+              </div>
+              <div className="landing-hero-demo-pin" style={{ background: '#fef2f2' }}>
+                <span style={{ background: '#dc2626' }} />
+                광장시장
+              </div>
+            </div>
+            <span className="landing-hero-demo-arrow">
+              <Icon name="route" size={18} />
+            </span>
+            <div className="landing-hero-demo-card">
+              <p className="landing-hero-demo-label">{t('hero.demo.route')}</p>
+              <div className="landing-hero-demo-stop">
+                <span className="landing-hero-demo-time">09:00</span>경복궁
+              </div>
+              <div className="landing-hero-demo-stop">
+                <span className="landing-hero-demo-time">10:40</span>인사동 카페
+              </div>
+              <div className="landing-hero-demo-stop">
+                <span className="landing-hero-demo-time">12:10</span>광장시장
+              </div>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Icon } from './Icon';
@@ -42,9 +42,52 @@ export function SiteHeader({ active, beforeLinks }: SiteHeaderProps) {
   const guidesPath = pathWithLocale('/guides', locale);
   const infoPath = pathWithLocale('/info', locale);
   const planPath = plannerPath(locale);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const navLinks = (
+    <>
+      {beforeLinks}
+      <a href={`${homePath}#features`} onClick={() => setMenuOpen(false)}>
+        {t('nav.features')}
+      </a>
+      <a href={`${homePath}#how`} onClick={() => setMenuOpen(false)}>
+        {t('nav.howItWorks')}
+      </a>
+      <Link
+        to={plazaPath}
+        className={active === 'plaza' ? 'nav-active' : ''}
+        onClick={() => setMenuOpen(false)}
+      >
+        {t('nav.plaza')}
+      </Link>
+      <Link
+        to={guidesPath}
+        className={active === 'guides' ? 'nav-active' : ''}
+        onClick={() => setMenuOpen(false)}
+      >
+        {t('nav.tips')}
+      </Link>
+      <Link
+        to={infoPath}
+        className={active === 'info' ? 'nav-active' : ''}
+        onClick={() => setMenuOpen(false)}
+      >
+        {t('nav.info')}
+      </Link>
+    </>
+  );
 
   return (
     <header className="landing-nav">
+      <button
+        type="button"
+        className="landing-nav-hamburger"
+        aria-label={t('nav.menu')}
+        aria-expanded={menuOpen}
+        onClick={() => setMenuOpen((v) => !v)}
+      >
+        <Icon name={menuOpen ? 'close' : 'menu'} size={18} />
+      </button>
       <Link to={homePath} className="landing-brand">
         <span className="landing-brand-mark" aria-hidden>
           <Icon name="pin" size={20} />
@@ -52,18 +95,7 @@ export function SiteHeader({ active, beforeLinks }: SiteHeaderProps) {
         <SiteBrand />
       </Link>
       <nav className="landing-nav-links" aria-label="Main">
-        {beforeLinks}
-        <a href={`${homePath}#features`}>{t('nav.features')}</a>
-        <a href={`${homePath}#how`}>{t('nav.howItWorks')}</a>
-        <Link to={plazaPath} className={active === 'plaza' ? 'nav-active' : ''}>
-          {t('nav.plaza')}
-        </Link>
-        <Link to={guidesPath} className={active === 'guides' ? 'nav-active' : ''}>
-          {t('nav.tips')}
-        </Link>
-        <Link to={infoPath} className={active === 'info' ? 'nav-active' : ''}>
-          {t('nav.info')}
-        </Link>
+        {navLinks}
       </nav>
       <div className="landing-nav-actions">
         <LocaleSwitcher compact />
@@ -72,6 +104,21 @@ export function SiteHeader({ active, beforeLinks }: SiteHeaderProps) {
           {t('nav.start')}
         </Link>
       </div>
+      <Link to={planPath} className="landing-btn landing-btn-primary landing-nav-cta-mobile">
+        {t('nav.start')}
+      </Link>
+
+      {menuOpen && (
+        <div className="landing-nav-drawer" role="dialog" aria-label={t('nav.menu')}>
+          <nav className="landing-nav-drawer-links" aria-label="Main">
+            {navLinks}
+          </nav>
+          <div className="landing-nav-drawer-actions">
+            <LocaleSwitcher compact />
+            <AuthBar hideLocale />
+          </div>
+        </div>
+      )}
     </header>
   );
 }

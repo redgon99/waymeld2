@@ -5704,8 +5704,78 @@ button {
   font-family: inherit;
 }
 
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal-card {
+  position: relative;
+  width: 100%;
+  background: var(--color-surface-solid);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--shadow-popup);
+  padding: 28px 24px 24px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
 .upgrade-modal {
   max-width: 400px;
+}
+
+.upgrade-modal .btn-primary,
+.upgrade-modal .btn-secondary {
+  width: 100%;
+  padding: 13px;
+  border-radius: var(--radius-pill);
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  margin-top: 4px;
+  cursor: pointer;
+}
+
+.upgrade-modal .btn-primary {
+  background: var(--color-accent);
+  color: var(--color-primary);
+}
+
+.upgrade-modal .btn-primary:hover {
+  background: var(--color-accent-hover);
+}
+
+.upgrade-modal .btn-primary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.upgrade-modal .btn-secondary {
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  font-size: 13px;
 }
 
 .upgrade-subtitle {
@@ -5775,6 +5845,11 @@ button {
   align-items: center;
   gap: 4px;
   text-decoration: none;
+  white-space: nowrap;
+}
+
+.auth-link-label {
+  white-space: nowrap;
 }
 
 .auth-form {
@@ -11727,10 +11802,11 @@ button {
 }
 
 .mobile-planner-sheet {
+  --mobile-tabbar-h: 58px;
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: calc(var(--mobile-tabbar-h) + env(safe-area-inset-bottom, 0px));
   z-index: 22;
   background: #fff;
   border-radius: 22px 22px 0 0;
@@ -11744,6 +11820,81 @@ button {
 
 .waymeld-root.mobile-layout:not(.presentation-mode) .mobile-planner-sheet {
   display: flex;
+}
+
+.mobile-planner-tabbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 23;
+  display: flex;
+  background: #fff;
+  border-top: 1px solid var(--color-border);
+  box-shadow: 0 -4px 14px rgba(15, 23, 42, 0.06);
+  padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+}
+
+.mobile-planner-tabbar .mobile-tabbar-btn,
+.mobile-planner-tabbar .trip-select-trigger {
+  flex: 1;
+  width: auto;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 4px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 10.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  position: relative;
+}
+
+.mobile-planner-tabbar .trip-select-trigger:hover,
+.mobile-planner-tabbar .trip-select-menu.open .trip-select-trigger {
+  border-color: transparent;
+  background: var(--color-bg-secondary);
+  box-shadow: none;
+  color: var(--color-text-secondary);
+}
+
+.mobile-planner-tabbar .trip-select-dropdown {
+  bottom: calc(100% + 8px);
+  top: auto;
+  left: 6px;
+}
+
+.mobile-planner-tabbar .trip-select-menu {
+  flex: 1;
+  display: flex;
+}
+
+.trip-select-trigger-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.mobile-tabbar-plan-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-tertiary);
+}
+
+.mobile-tabbar-plan-badge.plan-plus,
+.mobile-tabbar-plan-badge.plan-team {
+  background: var(--color-primary-soft);
+  color: var(--color-amber);
 }
 
 .mobile-planner-sheet.sheet-peek {

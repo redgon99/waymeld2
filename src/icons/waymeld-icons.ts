@@ -6,6 +6,7 @@
 export type IconName =
   | 'search'
   | 'close'
+  | 'menu'
   | 'help'
   | 'layoutGrid'
   | 'layoutList'
@@ -100,6 +101,7 @@ export const WAYMELD_ICONS: Record<IconName, IconPath[]> = {
     { d: 'M16.5 16.5 5 21' },
   ],
   close: [{ d: 'M6 6l12 12M18 6 6 18' }],
+  menu: [{ d: 'M4 7h16M4 12h16M4 17h16' }],
   help: [
     { d: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20z' },
     { d: 'M9.5 9.25a2.75 2.75 0 1 1 4.6 1.1c-.9.9-2.1 1.15-2.1 2.65' },

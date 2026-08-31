@@ -17,7 +17,8 @@
     "tips": "Conseils de voyage",
     "info": "Infos voyage en Corée",
     "start": "Planifier un itinéraire",
-    "login": "Connexion"
+    "login": "Connexion",
+    "menu": "Menu"
   },
   "hero": {
     "eyebrow": "Planificateur d’itinéraires",
@@ -25,7 +26,11 @@
     "subtitle": "Recherchez et épinglez des spots : ils se regroupent par catégorie. Glissez pour réordonner, puis créez un itinéraire horodaté. Pas une carte des visites — un outil pour tisser votre prochaine route.",
     "ctaPrimary": "Commencer gratuitement",
     "ctaSecondary": "Voir la place",
-    "note": "App web · fonctionne en local sans connexion"
+    "note": "App web · fonctionne en local sans connexion",
+    "demo": {
+      "pins": "Épinglés · 4 lieux",
+      "route": "Itinéraire jour 1"
+    }
   },
   "pillars": {
     "title": "Trois étapes",
