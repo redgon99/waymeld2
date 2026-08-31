@@ -4858,6 +4858,25 @@ button {
   word-break: keep-all;
 }
 
+.map-place-bubble-roadview {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #334155;
+  cursor: pointer;
+  padding: 0;
+}
+
+.map-place-bubble-roadview:hover {
+  background: #e2e8f0;
+}
+
 .map-place-bubble-pin {
   flex-shrink: 0;
   width: 36px;

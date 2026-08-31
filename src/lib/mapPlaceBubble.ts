@@ -50,6 +50,7 @@ function bubbleInnerHtml(place: Place, isPinned = false): string {
   const pinLabel = isPinned
     ? i18n.t('map.pinned', { ns: 'planner' })
     : i18n.t('map.pin', { ns: 'planner' });
+  const roadviewLabel = i18n.t('search.roadview', { ns: 'planner' });
   return `
     <div class="map-place-bubble-card">
       ${thumbInnerHtml(place)}
@@ -61,6 +62,14 @@ function bubbleInnerHtml(place: Place, isPinned = false): string {
             : ''
         }
       </div>
+      <button
+        type="button"
+        class="map-place-bubble-roadview"
+        title="${escapeHtml(roadviewLabel)}"
+        aria-label="${escapeHtml(roadviewLabel)}"
+      >
+        ${iconSvgMarkup('roadview', { size: 18, color: '#334155' })}
+      </button>
       <button
         type="button"
         class="map-place-bubble-pin${isPinned ? ' pinned' : ''}"
@@ -81,6 +90,7 @@ export function createMapPlaceBubbleElement(
     onClose?: () => void;
     onOpenDetail?: (place: Place) => void;
     onTogglePin?: (place: Place) => void;
+    onOpenRoadview?: (place: Place) => void;
     isPinned?: boolean;
   }
 ): HTMLElement {
@@ -98,9 +108,15 @@ export function createMapPlaceBubbleElement(
     e.stopPropagation();
     opts?.onTogglePin?.(place);
   };
+  const openRoadview = (e: Event) => {
+    e.preventDefault();
+    e.stopPropagation();
+    opts?.onOpenRoadview?.(place);
+  };
 
   root.querySelector('.map-place-bubble-thumb')?.addEventListener('click', openDetail);
   root.querySelector('.map-place-bubble-pin')?.addEventListener('click', togglePin);
+  root.querySelector('.map-place-bubble-roadview')?.addEventListener('click', openRoadview);
 
   root.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -127,5 +143,12 @@ export function isMapPlaceBubbleDetailClick(target: EventTarget | null): boolean
 export function isMapPlaceBubblePinClick(target: EventTarget | null): boolean {
   return Boolean(
     target instanceof Element && target.closest('.map-place-bubble-pin')
+  );
+}
+
+/** 말풍선에서 로드뷰/스트리트뷰 버튼 클릭인지 판별 */
+export function isMapPlaceBubbleRoadviewClick(target: EventTarget | null): boolean {
+  return Boolean(
+    target instanceof Element && target.closest('.map-place-bubble-roadview')
   );
 }

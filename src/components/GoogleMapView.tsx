@@ -11,6 +11,7 @@ import {
   createMapPlaceBubbleHtml,
   isMapPlaceBubbleDetailClick,
   isMapPlaceBubblePinClick,
+  isMapPlaceBubbleRoadviewClick,
 } from '../lib/mapPlaceBubble';
 import {
   googleZoomForPlannerLevel,
@@ -48,6 +49,7 @@ interface Props {
   onCloseInfoWindow?: () => void;
   onTogglePinFromInfo?: (place: Place) => void;
   onOpenPlacePhotosFromInfo?: (place: Place) => void;
+  onOpenRoadviewFromInfo?: (place: Place) => void;
   fitRouteBounds?: boolean;
   fitSearchBounds?: boolean;
   /** 조감(Overview) 등 — 보이는 핀(+출발지) 전체가 들어오도록 축척 맞춤 */
@@ -86,6 +88,7 @@ export function GoogleMapView({
   onCloseInfoWindow,
   onTogglePinFromInfo,
   onOpenPlacePhotosFromInfo,
+  onOpenRoadviewFromInfo,
   fitRouteBounds = false,
   fitSearchBounds = false,
   fitPinsBounds = false,
@@ -119,8 +122,10 @@ export function GoogleMapView({
   const infoBubbleRef = useRef<GoogleHtmlMarker | null>(null);
   const openPlacePhotosRef = useRef(onOpenPlacePhotosFromInfo);
   const togglePinFromInfoRef = useRef(onTogglePinFromInfo);
+  const openRoadviewRef = useRef(onOpenRoadviewFromInfo);
   openPlacePhotosRef.current = onOpenPlacePhotosFromInfo;
   togglePinFromInfoRef.current = onTogglePinFromInfo;
+  openRoadviewRef.current = onOpenRoadviewFromInfo;
 
   const pinSelectionActive = pinSelectionFilter != null && pinSelectionFilter.size > 0;
   let visiblePinned = pinCategoryFilter
@@ -310,6 +315,11 @@ export function GoogleMapView({
           if (isMapPlaceBubbleDetailClick(e.target)) {
             e.preventDefault();
             openPlacePhotosRef.current?.(place);
+            return;
+          }
+          if (isMapPlaceBubbleRoadviewClick(e.target)) {
+            e.preventDefault();
+            openRoadviewRef.current?.(place);
           }
         },
       }

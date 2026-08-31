@@ -97,6 +97,7 @@ export function MapView({
         onCloseInfoWindow={rest.onCloseInfoWindow}
         onTogglePinFromInfo={rest.onTogglePinFromInfo}
         onOpenPlacePhotosFromInfo={rest.onOpenPlacePhotosFromInfo}
+        onOpenRoadviewFromInfo={rest.onOpenRoadviewFromInfo}
         fitRouteBounds={rest.fitRouteBounds}
         fitSearchBounds={rest.fitSearchBounds}
         fitPinsBounds={rest.fitPinsBounds}
@@ -610,6 +611,7 @@ function KakaoMapView({
       onClose: () => infoHandlersRef.current.onCloseInfoWindow?.(),
       onOpenDetail: (p) => infoHandlersRef.current.onOpenPlacePhotosFromInfo?.(p),
       onTogglePin: (p) => infoHandlersRef.current.onTogglePinFromInfo?.(p),
+      onOpenRoadview: (p) => infoHandlersRef.current.onOpenRoadviewFromInfo?.(p),
       isPinned: pinnedIds.has(place.id),
     });
 

@@ -2487,6 +2487,7 @@ export default function PlannerPage() {
         lat={roadviewTarget?.lat ?? 0}
         lng={roadviewTarget?.lng ?? 0}
         placeName={roadviewTarget?.name}
+        provider={mapProvider}
         onClose={() => setRoadviewTarget(null)}
       />
 

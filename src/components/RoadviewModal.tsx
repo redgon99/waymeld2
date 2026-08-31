@@ -6,10 +6,21 @@ interface Props {
   lat: number;
   lng: number;
   placeName?: string;
+  /** 카카오 로드뷰 vs 구글 스트리트뷰 — 현재 지도 provider에 맞춰 렌더링 */
+  provider?: 'kakao' | 'google';
   onClose: () => void;
 }
 
-export function RoadviewModal({ open, lat, lng, placeName, onClose }: Props) {
+const GOOGLE_SEARCH_RADIUS_M = 80;
+
+export function RoadviewModal({
+  open,
+  lat,
+  lng,
+  placeName,
+  provider = 'kakao',
+  onClose,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [unavailable, setUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -22,7 +33,7 @@ export function RoadviewModal({ open, lat, lng, placeName, onClose }: Props) {
     }
 
     const container = containerRef.current;
-    if (!container || !window.kakao?.maps?.Roadview) {
+    if (!container) {
       setUnavailable(true);
       setLoading(false);
       return;
@@ -31,6 +42,42 @@ export function RoadviewModal({ open, lat, lng, placeName, onClose }: Props) {
     let cancelled = false;
     setLoading(true);
     setUnavailable(false);
+
+    if (provider === 'google') {
+      if (!window.google?.maps?.StreetViewPanorama) {
+        setUnavailable(true);
+        setLoading(false);
+        return;
+      }
+      const service = new window.google.maps.StreetViewService();
+      service.getPanorama(
+        { location: { lat, lng }, radius: GOOGLE_SEARCH_RADIUS_M },
+        (data: any, status: string) => {
+          if (cancelled) return;
+          setLoading(false);
+          if (status !== 'OK' || !data?.location?.pano) {
+            setUnavailable(true);
+            return;
+          }
+          setUnavailable(false);
+          new window.google.maps.StreetViewPanorama(container, {
+            pano: data.location.pano,
+            visible: true,
+            addressControl: false,
+            fullscreenControl: false,
+          });
+        }
+      );
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    if (!window.kakao?.maps?.Roadview) {
+      setUnavailable(true);
+      setLoading(false);
+      return;
+    }
 
     const position = new window.kakao.maps.LatLng(lat, lng);
     const roadview = new window.kakao.maps.Roadview(container);
@@ -50,18 +97,22 @@ export function RoadviewModal({ open, lat, lng, placeName, onClose }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [open, lat, lng]);
+  }, [open, lat, lng, provider]);
 
   if (!open) return null;
 
-  const externalUrl = `https://map.kakao.com/link/roadview/${lat},${lng}`;
+  const isGoogle = provider === 'google';
+  const title = isGoogle ? '스트리트뷰' : '로드뷰';
+  const externalUrl = isGoogle
+    ? `https://www.google.com/maps?layer=c&cbll=${lat},${lng}`
+    : `https://map.kakao.com/link/roadview/${lat},${lng}`;
 
   return (
-    <div className="roadview-overlay" role="dialog" aria-modal="true" aria-label="로드뷰">
+    <div className="roadview-overlay" role="dialog" aria-modal="true" aria-label={title}>
       <div className="roadview-panel">
         <header className="roadview-header">
           <span className="roadview-title">
-            <Icon name="roadview" /> 로드뷰
+            <Icon name="roadview" /> {title}
             {placeName ? ` · ${placeName}` : ''}
           </span>
           <button type="button" className="icon-btn" onClick={onClose} aria-label="닫기">
@@ -69,13 +120,13 @@ export function RoadviewModal({ open, lat, lng, placeName, onClose }: Props) {
           </button>
         </header>
 
-        {loading && <p className="roadview-status">로드뷰 불러오는 중…</p>}
+        {loading && <p className="roadview-status">{title} 불러오는 중…</p>}
 
         {unavailable && !loading && (
           <div className="roadview-unavailable">
-            <p>이 위치 근처에 로드뷰가 없습니다.</p>
+            <p>이 위치 근처에 {title}가 없습니다.</p>
             <a href={externalUrl} target="_blank" rel="noopener noreferrer">
-              카카오맵에서 확인
+              {isGoogle ? 'Google 지도에서 확인' : '카카오맵에서 확인'}
             </a>
           </div>
         )}
