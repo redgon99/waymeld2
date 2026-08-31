@@ -190,7 +190,14 @@ function reportRouteMetrics(route: GeneratedRoute) {
 export default function PlannerPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, configured: authConfigured, plan, isAdmin, refreshProfile } = useAuth();
+  const {
+    user,
+    configured: authConfigured,
+    plan,
+    isAdmin,
+    refreshProfile,
+    loading: authLoading,
+  } = useAuth();
   const { t: tc } = useTranslation('common');
   const { t: tp, i18n: plannerI18n } = useTranslation('planner');
   const { t: tb } = useTranslation('billing');
@@ -470,7 +477,11 @@ export default function PlannerPage() {
 
   // ============== 저장된 Trip 로드 ==============
   useEffect(() => {
-    if (hydrated) return;
+    /* authLoading이 끝나기 전엔 user가 아직 null일 수 있다(세션 복구가 비동기라서).
+     * 이 시점에 로그인 사용자를 게스트로 오판해 로컬에 "새 여행"을 만들어버리면,
+     * hydrated가 true로 고정돼 이후 user.id가 확정돼도 다시 로드하지 않고,
+     * 새로고침마다 같은 경쟁 조건이 반복되며 "새 여행"이 매번 쌓이는 문제가 생긴다. */
+    if (hydrated || authLoading) return;
     (async () => {
       const userId = user?.id ?? null;
       await refreshTripList(userId);
@@ -501,7 +512,7 @@ export default function PlannerPage() {
       setLastSavedAt(loaded?.updatedAt ?? Date.now());
       setHydrated(true);
     })();
-  }, [user?.id, hydrated, refreshTripList, focusMapOnTrip]);
+  }, [user?.id, hydrated, authLoading, refreshTripList, focusMapOnTrip]);
 
   const pendingOpenTripId = (location.state as { openTripId?: string } | null)?.openTripId;
 
