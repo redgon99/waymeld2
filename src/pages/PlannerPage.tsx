@@ -1442,7 +1442,12 @@ export default function PlannerPage() {
   );
 
   const handleTogglePresentation = useCallback(() => {
-    setPresentationMode((prev) => !prev);
+    setPresentationMode((prev) => {
+      const next = !prev;
+      // 조감 모드로 들어갈 때 검색결과 클릭으로 열려 있던 정보 카드도 같이 닫는다.
+      if (next) setInfoWindowPlace(null);
+      return next;
+    });
   }, []);
 
   const handleToggleTableView = useCallback(() => {
@@ -1818,12 +1823,14 @@ export default function PlannerPage() {
   }, [trip.pinnedByDay, trip.totalDays]);
 
   const displayResults = useMemo(() => {
+    // 조감 모드는 저장된 핀만 보여주는 게 목적 — 검색결과 마커·클러스터는 숨긴다.
+    if (presentationMode) return [];
     const selected =
       categoryFilter === 'FD6'
         ? (trip.foodRestrictions ?? [])
         : categorySubFilters;
     return filterPlacesBySubFilters(results, categoryFilter, selected);
-  }, [results, categoryFilter, categorySubFilters, trip.foodRestrictions]);
+  }, [results, categoryFilter, categorySubFilters, trip.foodRestrictions, presentationMode]);
 
   const pinnedIds = new Set(pinned.map((p) => p.id));
   const totalPinCount = useMemo(
