@@ -1097,6 +1097,11 @@ export default function PlannerPage() {
       }
       nearbySearchCenterRef.current = center;
       setMapCenter(center);
+      // 축척이 큰(많이 축소된) 상태로 현재위치 검색을 하면 결과 마커가 한 점에
+      // 뭉쳐 보이므로, 기본 개요 레벨보다 더 축소돼 있을 때만 살짝 확대해준다.
+      if (mapLevelRef.current > KAKAO_LEVEL_DEFAULT) {
+        setMapLevel(KAKAO_LEVEL_DEFAULT);
+      }
       setNearbySearchCenter(center);
       setSearchScope('nearby');
       setFitSearchBounds(false);
