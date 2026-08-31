@@ -21,7 +21,10 @@
   text-transform: none;
 }
 
-.landing-page {
+/* SiteHeader가 랜딩 외 페이지(공유마당·가이드·정보)에서도 쓰이므로,
+ * 이 토큰들은 .landing-page 안에서만이 아니라 전역으로 필요하다.
+ * .landing-page 밖에서 쓰이면 var()가 값을 못 찾아 배너 등이 흐리게 보였다. */
+:root {
   --landing-bg: #fafaf8;
   --landing-ink: #0f172a;
   --landing-muted: #64748b;
@@ -30,6 +33,9 @@
   --landing-surface: #ffffff;
   --landing-border: rgba(15, 23, 42, 0.08);
   --landing-max: 1120px;
+}
+
+.landing-page {
   min-height: 100%;
   background: var(--landing-bg);
   color: var(--landing-ink);

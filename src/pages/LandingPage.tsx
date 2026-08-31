@@ -98,14 +98,11 @@ export default function LandingPage() {
 
   return (
     <div className="landing-page">
-      <div className="landing-top">
-        {noticeTexts.map((text, i) => (
-          <p key={`${i}-${text}`} className="landing-notice" role="status">
-            {text}
-          </p>
-        ))}
-      <SiteHeader active="home" beforeLinks={<LandingCmsNav items={cmsNav} />} />
-      </div>
+      <SiteHeader
+        active="home"
+        beforeLinks={<LandingCmsNav items={cmsNav} />}
+        noticeTexts={noticeTexts}
+      />
 
       <section
         className="landing-section landing-hero"
