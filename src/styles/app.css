@@ -5042,9 +5042,10 @@ button {
 
 .map-type-toggle {
   position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 90;
+  /* 데스크톱 상단 앱바(--app-bar-h) 아래로 — 앱바 위에 겹쳐 보이던 문제 수정 */
+  top: calc(var(--app-bar-h) + var(--chrome-gutter));
+  right: var(--chrome-gutter);
+  z-index: 40;
   width: 40px;
   height: 40px;
   display: inline-flex;
@@ -5058,6 +5059,12 @@ button {
   color: var(--color-text-primary);
   box-shadow: var(--shadow-float);
   cursor: pointer;
+}
+
+.waymeld-root.mobile-layout .map-type-toggle {
+  /* 모바일은 앱바가 따로 없이 지도가 화면 최상단부터 시작 */
+  top: 16px;
+  right: 16px;
 }
 
 .map-type-toggle:hover {
