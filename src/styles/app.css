@@ -2919,6 +2919,65 @@ button {
   gap: 6px;
 }
 
+.place-detail-status {
+  margin: 0;
+  padding: 16px 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.place-detail-ranking-disclaimer {
+  padding: 8px 10px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+}
+
+.place-detail-ranking-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.place-detail-ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 6px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+}
+
+.place-detail-ranking-item.current {
+  background: var(--color-bg-secondary);
+  font-weight: 600;
+}
+
+.place-detail-ranking-rank {
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.place-detail-ranking-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.place-detail-ranking-stat {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
 .search-category-row {
   display: flex;
   flex-wrap: wrap;

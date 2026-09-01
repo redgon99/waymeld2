@@ -1,9 +1,10 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Icon } from './Icon';
 import type { Place } from '../types';
 import { proxiedThumbnailUrl } from '../lib/kakaoPlaceApi';
 import { getPanelSummary, hasMenu } from '../lib/placePanelTabs';
+import { computeNearbyRanking, type NearbyRankingResult } from '../lib/nearbyRanking';
 import type { PlacePanelTabId } from '../lib/placePanelTabs';
 import {
   getBusinessOpenStatus,
@@ -53,7 +54,7 @@ export function PlaceDetailTabPanel({
     case 'SPECIAL':
       return <SpecialTab panel={panel} />;
     case 'RANKING':
-      return <RankingTab panel={panel} />;
+      return <RankingTab panel={panel} place={place} />;
     case 'HOME':
       return <HomeTab panel={panel} />;
     default:
@@ -948,19 +949,64 @@ function SpecialTab({ panel }: TabProps) {
   );
 }
 
-function RankingTab({ panel }: TabProps) {
+function RankingTab({ place }: TabProps) {
   const { t } = useTranslation('planner');
-  const rank = panel?.trend_rank as Record<string, unknown> | undefined;
-  if (!rank?.show_ranking_card) {
+  const [result, setResult] = useState<NearbyRankingResult | null | 'loading'>(
+    'loading'
+  );
+
+  useEffect(() => {
+    if (!place) {
+      setResult(null);
+      return;
+    }
+    let cancelled = false;
+    setResult('loading');
+    computeNearbyRanking(place).then((r) => {
+      if (!cancelled) setResult(r);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [place]);
+
+  if (result === 'loading') {
+    return <p className="place-detail-status">{t('place.detail.rankingLoading')}</p>;
+  }
+  if (!result || !place) {
     return <EmptyTab message={t('place.detail.empty.ranking')} />;
   }
 
+  const top = result.entries.slice(0, 5);
+
   return (
     <div className="place-detail-ranking">
-      <p className="place-detail-ok">
-        <Icon name="trophy" /> {t('place.detail.rankingIncluded')}
+      <p className="place-detail-muted place-detail-ranking-disclaimer">
+        {t('place.detail.rankingDisclaimer')}
       </p>
-      <p className="place-detail-muted">{t('place.detail.rankingSeeKakao')}</p>
+      {result.currentRank && (
+        <p className="place-detail-ok">
+          <Icon name="trophy" />{' '}
+          {t('place.detail.rankingMyRank', {
+            rank: result.currentRank,
+            total: result.entries.length,
+          })}
+        </p>
+      )}
+      <ol className="place-detail-ranking-list">
+        {top.map((p, i) => (
+          <li
+            key={p.id}
+            className={`place-detail-ranking-item ${p.id === place.id ? 'current' : ''}`}
+          >
+            <span className="place-detail-ranking-rank">{i + 1}</span>
+            <span className="place-detail-ranking-name">{p.name}</span>
+            <span className="place-detail-ranking-stat">
+              ★{p.rating.toFixed(1)} · {t('place.detail.rankingReviews', { count: p.reviewCount })}
+            </span>
+          </li>
+        ))}
+      </ol>
     </div>
   );
 }
