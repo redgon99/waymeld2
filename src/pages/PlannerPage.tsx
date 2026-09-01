@@ -742,10 +742,13 @@ export default function PlannerPage() {
           setSearchHasMore(false);
           setSearchEmpty(clipped.length === 0);
           if (!keepMapCenter) {
-            if (clipped.length === 1) {
-              setMapCenter({ lat: clipped[0].lat, lng: clipped[0].lng });
-            } else if (clipped.length > 1) {
-              setFitSearchBounds(true);
+            /* 지도 주변 둘러보기는 반경 내 흩어진 결과 전체를 bounds-fit하면
+             * 실제 기준점(현재위치·지도중심)에서 먼 결과 하나 때문에 지도가
+             * 엉뚱하게 축소·이동해 보일 수 있다. 기준점 중심을 유지하고,
+             * 축척이 너무 축소돼 있을 때만 기본 레벨로 확대한다. */
+            setMapCenter(searchCenter);
+            if (mapLevelRef.current > KAKAO_LEVEL_DEFAULT) {
+              setMapLevel(KAKAO_LEVEL_DEFAULT);
             }
           }
           if (clipped.length > 0 && mapProvider === 'kakao') {
