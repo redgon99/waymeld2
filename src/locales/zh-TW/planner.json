@@ -105,7 +105,9 @@
     "overview": "總覽",
     "overviewTitle": "總覽",
     "overviewExit": "退出",
-    "overviewAll": "全部"
+    "overviewAll": "全部",
+    "mapTypeSatellite": "查看衛星地圖",
+    "mapTypeRoadmap": "查看一般地圖"
   },
   "table": {
     "col": {

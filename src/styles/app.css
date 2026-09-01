@@ -5040,6 +5040,36 @@ button {
    지도 도구 · 수동 핀업
    ============================================= */
 
+.map-type-toggle {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 90;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  backdrop-filter: var(--blur-surface);
+  -webkit-backdrop-filter: var(--blur-surface);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-float);
+  cursor: pointer;
+}
+
+.map-type-toggle:hover {
+  background: var(--color-bg-secondary);
+}
+
+.map-type-toggle.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
+}
+
 .overlay-map-tools {
   position: absolute;
   bottom: 24px;

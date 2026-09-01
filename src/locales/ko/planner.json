@@ -115,7 +115,9 @@
     "overview": "조감",
     "overviewTitle": "조감",
     "overviewExit": "나가기",
-    "overviewAll": "전체"
+    "overviewAll": "전체",
+    "mapTypeSatellite": "위성지도 보기",
+    "mapTypeRoadmap": "일반지도 보기"
   },
   "table": {
     "col": {

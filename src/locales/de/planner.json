@@ -115,7 +115,9 @@
     "overview": "Übersicht",
     "overviewTitle": "Übersicht",
     "overviewExit": "Beenden",
-    "overviewAll": "Alle"
+    "overviewAll": "Alle",
+    "mapTypeSatellite": "Satellitenansicht anzeigen",
+    "mapTypeRoadmap": "Kartenansicht anzeigen"
   },
   "table": {
     "col": {

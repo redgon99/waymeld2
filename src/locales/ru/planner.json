@@ -115,7 +115,9 @@
     "overview": "Обзор",
     "overviewTitle": "Обзор",
     "overviewExit": "Выйти",
-    "overviewAll": "Все"
+    "overviewAll": "Все",
+    "mapTypeSatellite": "Спутниковый вид",
+    "mapTypeRoadmap": "Обычная карта"
   },
   "table": {
     "col": {

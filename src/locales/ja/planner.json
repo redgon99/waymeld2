@@ -105,7 +105,9 @@
     "overview": "俯瞰",
     "overviewTitle": "俯瞰",
     "overviewExit": "終了",
-    "overviewAll": "すべて"
+    "overviewAll": "すべて",
+    "mapTypeSatellite": "衛星写真を表示",
+    "mapTypeRoadmap": "地図表示に戻す"
   },
   "table": {
     "col": {

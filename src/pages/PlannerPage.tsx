@@ -291,6 +291,7 @@ export default function PlannerPage() {
   const [mapLevel, setMapLevel] = useState(
     () => readMapViewport()?.level ?? KAKAO_LEVEL_DEFAULT
   );
+  const [mapType, setMapType] = useState<'roadmap' | 'satellite'>('roadmap');
   const [mapProviderBooting, setMapProviderBooting] = useState(
     () => !hasSavedMapProviderChoice()
   );
@@ -1928,6 +1929,7 @@ export default function PlannerPage() {
           googleMapsReady={googleReady}
           center={mapCenter}
           level={mapLevel}
+          mapType={mapType}
           searchResults={displayResults}
           pinned={mapPins}
           pinCategoryFilter={mapPinCategoryFilter}
@@ -1959,6 +1961,16 @@ export default function PlannerPage() {
           onMapLevelChange={handleMapLevelChange}
         />
       )}
+
+      <button
+        type="button"
+        className={`map-type-toggle ${mapType === 'satellite' ? 'active' : ''}`}
+        onClick={() => setMapType((prev) => (prev === 'satellite' ? 'roadmap' : 'satellite'))}
+        title={tp(mapType === 'satellite' ? 'view.mapTypeRoadmap' : 'view.mapTypeSatellite')}
+        aria-label={tp(mapType === 'satellite' ? 'view.mapTypeRoadmap' : 'view.mapTypeSatellite')}
+      >
+        <Icon name="layers" size={18} />
+      </button>
 
       {!useMobileChrome && (
         <>

@@ -22,6 +22,8 @@ interface Props {
   level?: number;
   /** level 적용을 강제할 때 증가 (같은 level로 재클릭해도 setLevel) */
   levelTick?: number;
+  /** 일반 지도 vs 위성(하이브리드) 지도 */
+  mapType?: 'roadmap' | 'satellite';
   searchResults: Place[];
   pinned: PinnedPlace[];
   pinCategoryFilter?: SimpleCategory | null;
@@ -76,6 +78,7 @@ export function MapView({
         center={rest.center}
         level={rest.level}
         levelTick={rest.levelTick}
+        mapType={rest.mapType}
         searchResults={rest.searchResults}
         pinned={rest.pinned}
         pinCategoryFilter={rest.pinCategoryFilter}
@@ -119,6 +122,7 @@ function KakaoMapView({
   center,
   level = 5,
   levelTick = 0,
+  mapType = 'roadmap',
   searchResults,
   pinned,
   pinCategoryFilter = null,
@@ -282,6 +286,15 @@ function KakaoMapView({
     }
     mapRef.current.setLevel(level);
   }, [level, levelTick, fitSearchBounds]);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+    mapRef.current.setMapTypeId(
+      mapType === 'satellite'
+        ? window.kakao.maps.MapTypeId.HYBRID
+        : window.kakao.maps.MapTypeId.ROADMAP
+    );
+  }, [mapType]);
 
   // 사용자가 지도를 움직이면 중심 좌표 동기화 (카테고리·지도 주변 검색용)
   useEffect(() => {

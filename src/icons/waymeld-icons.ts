@@ -14,6 +14,7 @@ export type IconName =
   | 'location'
   | 'star'
   | 'roadview'
+  | 'layers'
   | 'check'
   | 'pin'
   | 'pushpin'
@@ -131,6 +132,12 @@ export const WAYMELD_ICONS: Record<IconName, IconPath[]> = {
     { d: 'M12 5a7 7 0 1 1 0 14 7 7 0 0 1 0-14z' },
     { d: 'M9 10h6M12 7v6' },
     { d: 'M8 16l2-2M16 16l-2-2' },
+  ],
+  /** 지도유형(일반/위성) 전환 버튼 */
+  layers: [
+    { d: 'M12 2 2 7l10 5 10-5-10-5z' },
+    { d: 'M2 12l10 5 10-5' },
+    { d: 'M2 17l10 5 10-5' },
   ],
   check: [{ d: 'M5 12.5 9.5 17 19 7' }],
   pin: [

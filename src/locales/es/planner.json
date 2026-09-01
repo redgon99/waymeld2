@@ -115,7 +115,9 @@
     "overview": "Vista",
     "overviewTitle": "Vista",
     "overviewExit": "Salir",
-    "overviewAll": "Todo"
+    "overviewAll": "Todo",
+    "mapTypeSatellite": "Ver vista satelital",
+    "mapTypeRoadmap": "Ver mapa"
   },
   "table": {
     "col": {

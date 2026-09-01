@@ -28,6 +28,7 @@ interface Props {
   center: { lat: number; lng: number };
   level?: number;
   levelTick?: number;
+  mapType?: 'roadmap' | 'satellite';
   searchResults: Place[];
   pinned: PinnedPlace[];
   pinCategoryFilter?: SimpleCategory | null;
@@ -67,6 +68,7 @@ export function GoogleMapView({
   center,
   level = 5,
   levelTick = 0,
+  mapType = 'roadmap',
   searchResults,
   pinned,
   pinCategoryFilter = null,
@@ -219,6 +221,11 @@ export function GoogleMapView({
     suppressZoomSyncRef.current = true;
     mapRef.current.setZoom(nextZoom);
   }, [level, levelTick, fitSearchBounds]);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+    mapRef.current.setMapTypeId(mapType === 'satellite' ? 'hybrid' : 'roadmap');
+  }, [mapType]);
 
   useEffect(() => {
     if (!mapRef.current) return;
