@@ -933,6 +933,24 @@ export default function PlannerPage() {
     });
   }, [runSearch]);
 
+  // 한국여행정보(관광사진 등)「이 장소 검색하기」→ 동선짜기 검색창에 자동 입력·실행
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const keyword = params.get('searchKeyword')?.trim();
+    if (!keyword || !searchReady) return;
+    navigate(location.pathname, { replace: true, state: location.state ?? {} });
+    openSearchPanel();
+    handleSearchCandidate(keyword);
+  }, [
+    location.search,
+    location.pathname,
+    location.state,
+    searchReady,
+    navigate,
+    openSearchPanel,
+    handleSearchCandidate,
+  ]);
+
   const handleLoadMore = useCallback(() => {
     if (!searchHasMore || loadingMore) return;
     void runSearch(searchPage + 1, true);

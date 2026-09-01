@@ -50,6 +50,12 @@
   },
   "photos": {
     "searchPlaceholder": "장소·키워드로 검색 (예: 경복궁, 야경)",
+    "viewLarge": "크게 보기",
+    "searchThisPlace": "이 장소 검색하기",
+    "photographer": "촬영: {{name}}",
+    "close": "닫기",
+    "prev": "이전 사진",
+    "next": "다음 사진",
     "themes": {
       "night": "야경",
       "festival": "축제",

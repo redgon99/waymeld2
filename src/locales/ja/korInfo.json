@@ -50,6 +50,12 @@
   },
   "photos": {
     "searchPlaceholder": "場所・キーワードで検索 (例: 景福宮, 夜景)",
+    "viewLarge": "拡大表示",
+    "searchThisPlace": "この場所を検索",
+    "photographer": "撮影: {{name}}",
+    "close": "閉じる",
+    "prev": "前の写真",
+    "next": "次の写真",
     "themes": {
       "night": "夜景",
       "festival": "祭り",

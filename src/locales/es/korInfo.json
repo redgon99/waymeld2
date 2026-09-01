@@ -50,6 +50,12 @@
   },
   "photos": {
     "searchPlaceholder": "Buscar por lugar o palabra (p. ej. Gyeongbokgung, vista nocturna)",
+    "viewLarge": "Ver en grande",
+    "searchThisPlace": "Buscar este lugar",
+    "photographer": "Foto: {{name}}",
+    "close": "Cerrar",
+    "prev": "Foto anterior",
+    "next": "Foto siguiente",
     "themes": {
       "night": "Vista nocturna",
       "festival": "Festival",

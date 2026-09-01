@@ -50,6 +50,12 @@
   },
   "photos": {
     "searchPlaceholder": "按地點或關鍵詞搜索 (如: 景福宮, 夜景)",
+    "viewLarge": "查看大圖",
+    "searchThisPlace": "搜尋該地點",
+    "photographer": "攝影: {{name}}",
+    "close": "關閉",
+    "prev": "上一張",
+    "next": "下一張",
     "themes": {
       "night": "夜景",
       "festival": "慶典",

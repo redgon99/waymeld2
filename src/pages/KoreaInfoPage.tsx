@@ -1,11 +1,14 @@
 import { useEffect, useState, type MouseEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { SiteHeader } from '../components/SiteHeader';
 import { SegmentedTabs } from '../components/SegmentedTabs';
 import { TrailRouteModal } from '../components/TrailRouteModal';
 import { OdiiStoriesModal } from '../components/OdiiStoriesModal';
+import { Icon } from '../components/Icon';
 import { useSeoMeta } from '../hooks/useSeoMeta';
-import { normalizeLocale } from '../lib/locale';
+import { normalizeLocale, type AppLocale } from '../lib/locale';
+import { plannerPath } from '../lib/routes';
 import i18n from '../lib/i18n';
 import {
   fetchDataLabRegions,
@@ -207,6 +210,86 @@ function FilteredPlaceSection({
   );
 }
 
+/** 관광사진 고화질 보기 + 동선짜기 검색 연결 */
+function PhotoLightbox({
+  photos,
+  index,
+  locale,
+  onClose,
+  onNavigate,
+}: {
+  photos: TourPhoto[];
+  index: number;
+  locale: AppLocale;
+  onClose: () => void;
+  onNavigate: (index: number) => void;
+}) {
+  const { t } = useTranslation('korInfo');
+  const photo = photos[index];
+  const hasPrev = index > 0;
+  const hasNext = index < photos.length - 1;
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      else if (e.key === 'ArrowLeft' && index > 0) onNavigate(index - 1);
+      else if (e.key === 'ArrowRight' && index < photos.length - 1) onNavigate(index + 1);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [index, photos.length, onClose, onNavigate]);
+
+  if (!photo) return null;
+
+  const searchHref = `${plannerPath(locale)}?searchKeyword=${encodeURIComponent(photo.title)}`;
+
+  return (
+    <div className="modal-backdrop photo-lightbox-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
+      <div
+        className="modal-card photo-lightbox-card"
+        onClick={(e: MouseEvent) => e.stopPropagation()}
+      >
+        <button type="button" className="modal-close" onClick={onClose} aria-label={t('photos.close')}>
+          <Icon name="close" />
+        </button>
+        {hasPrev && (
+          <button
+            type="button"
+            className="photo-lightbox-nav photo-lightbox-prev"
+            onClick={() => onNavigate(index - 1)}
+            aria-label={t('photos.prev')}
+          >
+            <Icon name="chevronLeft" />
+          </button>
+        )}
+        {hasNext && (
+          <button
+            type="button"
+            className="photo-lightbox-nav photo-lightbox-next"
+            onClick={() => onNavigate(index + 1)}
+            aria-label={t('photos.next')}
+          >
+            <Icon name="chevronRight" />
+          </button>
+        )}
+        <img src={photo.imageUrl} alt={photo.title} className="photo-lightbox-img" />
+        <div className="photo-lightbox-caption">
+          <strong>{photo.title}</strong>
+          <span>{[photo.location, formatMonth(photo.month)].filter(Boolean).join(' · ')}</span>
+          {photo.photographer && (
+            <span className="place-detail-muted">
+              {t('photos.photographer', { name: photo.photographer })}
+            </span>
+          )}
+          <Link to={searchHref} className="landing-btn landing-btn-primary photo-lightbox-search-btn">
+            <Icon name="search" size={16} /> {t('photos.searchThisPlace')}
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function KoreaInfoPage() {
   const { t } = useTranslation('korInfo');
   const locale = normalizeLocale(i18n.language);
@@ -219,6 +302,7 @@ export default function KoreaInfoPage() {
   const [photos, setPhotos] = useState<TourPhoto[]>([]);
   const [photosLoading, setPhotosLoading] = useState(true);
   const [photosError, setPhotosError] = useState<string | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const [trailKeyword, setTrailKeyword] = useState('');
   const [trailBrand, setTrailBrand] = useState<string>('');
@@ -253,6 +337,7 @@ export default function KoreaInfoPage() {
     let alive = true;
     setPhotosLoading(true);
     setPhotosError(null);
+    setLightboxIndex(null);
     const timer = setTimeout(() => {
       fetchTourPhotos({ keyword: photoKeyword, numOfRows: 24 })
         .then(({ items }) => {
@@ -457,9 +542,16 @@ export default function KoreaInfoPage() {
               <p className="guides-muted">{t('list.empty')}</p>
             )}
             <div className="info-photo-grid">
-              {photos.map((p) => (
+              {photos.map((p, i) => (
                 <figure key={p.contentId} className="info-photo-card">
-                  <img src={p.imageUrl} alt={p.title} loading="lazy" />
+                  <button
+                    type="button"
+                    className="info-photo-card-open"
+                    onClick={() => setLightboxIndex(i)}
+                    aria-label={t('photos.viewLarge')}
+                  >
+                    <img src={p.imageUrl} alt={p.title} loading="lazy" />
+                  </button>
                   <figcaption>
                     <strong>{p.title}</strong>
                     <span>
@@ -469,6 +561,15 @@ export default function KoreaInfoPage() {
                 </figure>
               ))}
             </div>
+            {lightboxIndex !== null && (
+              <PhotoLightbox
+                photos={photos}
+                index={lightboxIndex}
+                locale={locale}
+                onClose={() => setLightboxIndex(null)}
+                onNavigate={setLightboxIndex}
+              />
+            )}
           </section>
         )}
 
