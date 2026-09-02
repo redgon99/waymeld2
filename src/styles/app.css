@@ -10719,6 +10719,31 @@ button {
   padding: 0;
 }
 
+.pinup-panel-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 10px 16px 0;
+  position: relative;
+  z-index: 6;
+}
+
+.pinup-panel-toolbar-spacer {
+  flex: 1 1 auto;
+  min-width: 4px;
+}
+
+.pinup-bar-panel .pin-transfer-actions {
+  display: inline-flex;
+}
+
+.pinup-bar-panel .pin-export-dropdown,
+.pinup-bar-panel .pin-import-dropdown {
+  right: auto;
+  left: 0;
+}
+
 .pinup-bar-panel .pinup-panel-scroll {
   flex: 1 1 auto;
   min-height: 0;

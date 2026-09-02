@@ -399,6 +399,29 @@ export function PinupBar({
 
       {panel ? (
         <>
+          {(transferMenus ||
+            (onClearAll && pinned.length > 0) ||
+            (onToggleMustVisitOnly && pinned.some((p) => p.required))) && (
+            <div className="pinup-panel-toolbar">
+              {transferMenus}
+              <div className="pinup-panel-toolbar-spacer" />
+              {onToggleMustVisitOnly && pinned.some((p) => p.required) && (
+                <button
+                  type="button"
+                  className={`pinup-must-visit-btn ${mustVisitOnly ? 'active' : ''}`}
+                  onClick={onToggleMustVisitOnly}
+                  aria-pressed={mustVisitOnly}
+                >
+                  <Icon name="flag" /> {t('pinup.mustVisitOnly')}
+                </button>
+              )}
+              {onClearAll && pinned.length > 0 && (
+                <button type="button" className="pinup-clear-btn" onClick={onClearAll}>
+                  {t('pinup.clearAll')}
+                </button>
+              )}
+            </div>
+          )}
           <div className="pinup-panel-scroll">
             <DndContext
               sensors={sensors}
