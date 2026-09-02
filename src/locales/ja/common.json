@@ -72,5 +72,10 @@
   },
   "mobility": {
     "straightLineOnly": "韓国外は直線距離で推定されます。"
+  },
+  "legal": {
+    "navAria": "規約とプライバシー",
+    "terms": "利用規約",
+    "privacy": "プライバシーポリシー"
   }
 }

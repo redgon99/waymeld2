@@ -736,6 +736,15 @@
   color: var(--landing-ink);
 }
 
+.landing-footer-legal {
+  font-size: 0.8125rem;
+  color: var(--landing-muted);
+}
+
+.landing-footer-legal a:hover {
+  color: var(--landing-ink);
+}
+
 .landing-footer-copy {
   margin: 0;
   font-size: 0.8125rem;

@@ -76,5 +76,10 @@
   },
   "mobility": {
     "straightLineOnly": "Außerhalb Koreas wird die Entfernung als Luftlinie geschätzt."
+  },
+  "legal": {
+    "navAria": "Rechtliches",
+    "terms": "Nutzungsbedingungen",
+    "privacy": "Datenschutz"
   }
 }

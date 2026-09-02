@@ -76,5 +76,10 @@
   },
   "mobility": {
     "straightLineOnly": "Hors de Corée, la distance est estimée à vol d’oiseau."
+  },
+  "legal": {
+    "navAria": "Mentions légales",
+    "terms": "Conditions d’utilisation",
+    "privacy": "Politique de confidentialité"
   }
 }

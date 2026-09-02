@@ -76,5 +76,10 @@
   },
   "mobility": {
     "straightLineOnly": "Outside Korea, distance is estimated in a straight line."
+  },
+  "legal": {
+    "navAria": "Legal",
+    "terms": "Terms of Use",
+    "privacy": "Privacy Policy"
   }
 }

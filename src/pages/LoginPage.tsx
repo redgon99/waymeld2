@@ -1,7 +1,8 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Icon } from '../components/Icon';
+import { LegalLinks } from '../components/LegalLinks';
 import { useAuth } from '../contexts/AuthContext';
 import {
   clearAuthCallbackErrorFromUrl,
@@ -15,7 +16,7 @@ import {
 } from '../lib/authSetup';
 import { normalizeLocale } from '../lib/locale';
 import i18n from '../lib/i18n';
-import { plannerPath } from '../lib/routes';
+import { plannerPath, privacyPath, termsPath } from '../lib/routes';
 import '../styles/app.css';
 
 const FEATURE_ICONS = ['cloudOk', 'route', 'share'] as const;
@@ -56,6 +57,11 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [migrating, setMigrating] = useState(false);
   const [copiedCallback, setCopiedCallback] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreePrivacy, setAgreePrivacy] = useState(false);
+  const canAuth = agreeTerms && agreePrivacy;
+  const termsHref = termsPath(locale);
+  const privacyHref = privacyPath(locale);
 
   async function copyCallbackUrl() {
     try {
@@ -98,6 +104,10 @@ export default function LoginPage() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     if (!email.trim()) return;
+    if (!canAuth) {
+      setError(ta('login.consentRequired'));
+      return;
+    }
     setSending(true);
     setError(null);
     try {
@@ -111,6 +121,10 @@ export default function LoginPage() {
   }
 
   async function handleGoogle() {
+    if (!canAuth) {
+      setError(ta('login.consentRequired'));
+      return;
+    }
     setError(null);
     try {
       await signInWithGoogle();
@@ -191,6 +205,42 @@ export default function LoginPage() {
               <h2>{ta('login.startTitle')}</h2>
               <p className="login-page-lead">{ta('login.startLead')}</p>
 
+              <fieldset className="login-consent">
+                <legend className="sr-only">{ta('login.consentLegend')}</legend>
+                <label className="login-consent-item">
+                  <input
+                    type="checkbox"
+                    checked={agreeTerms}
+                    onChange={(e) => setAgreeTerms(e.target.checked)}
+                  />
+                  <span>
+                    <Trans
+                      i18nKey="login.agreeTerms"
+                      ns="auth"
+                      components={{
+                        terms: <Link to={termsHref} className="login-legal-link" />,
+                      }}
+                    />
+                  </span>
+                </label>
+                <label className="login-consent-item">
+                  <input
+                    type="checkbox"
+                    checked={agreePrivacy}
+                    onChange={(e) => setAgreePrivacy(e.target.checked)}
+                  />
+                  <span>
+                    <Trans
+                      i18nKey="login.agreePrivacy"
+                      ns="auth"
+                      components={{
+                        privacy: <Link to={privacyHref} className="login-legal-link" />,
+                      }}
+                    />
+                  </span>
+                </label>
+              </fieldset>
+
               <form className="login-form" onSubmit={submit}>
                 <label className="login-label" htmlFor="login-email">
                   {ta('login.email')}
@@ -206,7 +256,11 @@ export default function LoginPage() {
                   autoFocus
                   autoComplete="email"
                 />
-                <button type="submit" className="login-primary-btn" disabled={sending || loading}>
+                <button
+                  type="submit"
+                  className="login-primary-btn"
+                  disabled={sending || loading || !canAuth}
+                >
                   {sending ? ta('login.sending') : ta('login.sendLink')}
                 </button>
               </form>
@@ -221,6 +275,7 @@ export default function LoginPage() {
                     type="button"
                     className="login-oauth-btn"
                     onClick={() => void handleGoogle()}
+                    disabled={!canAuth}
                   >
                     <Icon name="globe" size={18} />
                     {ta('login.google')}
@@ -272,6 +327,7 @@ export default function LoginPage() {
           <button type="button" className="login-guest-link" onClick={() => navigate(planPath)}>
             {ta('login.guestStart')}
           </button>
+          <LegalLinks className="login-legal-links" />
           {migrating && (
             <p className="login-migrating">
               <Icon name="loader" spin size={14} /> {ta('login.syncing')}

@@ -72,5 +72,10 @@
   },
   "mobility": {
     "straightLineOnly": "韓國以外按直線距離估算。"
+  },
+  "legal": {
+    "navAria": "條款與隱私",
+    "terms": "使用條款",
+    "privacy": "隱私權政策"
   }
 }

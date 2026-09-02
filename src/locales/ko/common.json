@@ -76,5 +76,10 @@
   },
   "mobility": {
     "straightLineOnly": "해외·비한국 구간은 직선 거리로 추정됩니다."
+  },
+  "legal": {
+    "navAria": "약관 및 개인정보",
+    "terms": "이용약관",
+    "privacy": "개인정보처리방침"
   }
 }

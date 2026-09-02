@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Icon } from '../components/Icon';
+import { LegalLinks } from '../components/LegalLinks';
 import { SiteHeader } from '../components/SiteHeader';
 import { useSeoMeta } from '../hooks/useSeoMeta';
 import { normalizeLocale, pathWithLocale } from '../lib/locale';
@@ -346,6 +347,7 @@ export default function LandingPage() {
             <Link to={infoPath}>{t('footer.info')}</Link>
             <Link to={loginPath}>{t('footer.login')}</Link>
           </nav>
+          <LegalLinks className="landing-footer-legal" />
           <p className="landing-footer-copy">{t('footer.rights', { year })}</p>
         </div>
       </footer>
