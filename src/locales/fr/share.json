@@ -78,5 +78,22 @@
     "cancel": "Annuler",
     "share": "Partager",
     "saving": "Enregistrement…"
+  },
+  "collab": {
+    "entry": "Gérer les collaborateurs",
+    "title": "Gérer les collaborateurs",
+    "hint": "Invitez par e-mail — la personne qui se connecte avec cette adresse pourra modifier (ou voir) ce voyage avec vous.",
+    "emailPlaceholder": "E-mail à inviter",
+    "roleEditor": "Peut modifier",
+    "roleViewer": "Lecture seule",
+    "invite": "Inviter",
+    "inviting": "Invitation…",
+    "inviteFailed": "Échec de l'invitation. Vérifiez l'adresse e-mail.",
+    "remove": "Retirer",
+    "cancelInvite": "Annuler l'invitation",
+    "pendingLabel": "Pas encore inscrit — connexion automatique dès la connexion",
+    "empty": "Aucun collaborateur invité pour l'instant.",
+    "readOnlyBanner": "Voyage partagé avec vous en lecture seule",
+    "editorBanner": "Voyage partagé avec vous en tant qu'éditeur"
   }
 }

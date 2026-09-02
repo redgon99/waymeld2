@@ -78,5 +78,22 @@
     "cancel": "取消",
     "share": "分享",
     "saving": "保存中…"
+  },
+  "collab": {
+    "entry": "管理協作者",
+    "title": "管理協作者",
+    "hint": "透過電子郵件邀請後，使用該郵件登入的人就能和你一起編輯(或檢視)這個行程。",
+    "emailPlaceholder": "要邀請的電子郵件",
+    "roleEditor": "可編輯",
+    "roleViewer": "僅檢視",
+    "invite": "邀請",
+    "inviting": "邀請中…",
+    "inviteFailed": "邀請失敗，請確認電子郵件地址。",
+    "remove": "移除",
+    "cancelInvite": "取消邀請",
+    "pendingLabel": "尚未註冊 — 登入後會自動連結",
+    "empty": "尚未邀請任何協作者。",
+    "readOnlyBanner": "此行程與您共享為僅檢視",
+    "editorBanner": "此行程與您共享為協作編輯"
   }
 }

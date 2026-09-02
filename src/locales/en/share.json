@@ -78,5 +78,22 @@
     "cancel": "Cancel",
     "share": "Share",
     "saving": "Saving…"
+  },
+  "collab": {
+    "entry": "Manage collaborators",
+    "title": "Manage collaborators",
+    "hint": "Invite by email — whoever signs in with that email can edit (or view) this trip with you.",
+    "emailPlaceholder": "Email to invite",
+    "roleEditor": "Can edit",
+    "roleViewer": "Can view",
+    "invite": "Invite",
+    "inviting": "Inviting…",
+    "inviteFailed": "Couldn't send the invite. Check the email address.",
+    "remove": "Remove",
+    "cancelInvite": "Cancel invite",
+    "pendingLabel": "Not signed up yet — connects automatically once they sign in",
+    "empty": "No collaborators invited yet.",
+    "readOnlyBanner": "Shared with you as view-only",
+    "editorBanner": "Shared with you as an editor"
   }
 }

@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { getSupabase, isSupabaseConfigured } from '../lib/supabase';
-import { tripsRepo } from '../lib/trips';
+import { tripsRepo, acceptPendingInvites } from '../lib/trips';
 import { formatAuthError, isGoogleAuthEnabled } from '../lib/authErrors';
 import { fetchUserProfile } from '../lib/profiles';
 import { isCurrentUserAdmin } from '../lib/admin';
@@ -118,6 +118,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void syncLocalTrips();
     void refreshProfile();
     void refreshAdmin();
+    // 이 이메일로 온 여행 공동편집 초대가 있으면 로그인 시점에 자동 수락
+    void acceptPendingInvites();
   }, [state.user?.id, syncLocalTrips, refreshProfile, refreshAdmin]);
 
   useEffect(() => {

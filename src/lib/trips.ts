@@ -43,6 +43,24 @@ export interface Trip {
   foodRestrictions?: FoodRestriction[];
   /** 여행 지역 (서울, 부산 등) */
   region?: string;
+  /** 내가 소유자가 아니라 협업자로 접근 중일 때만 채워짐 (owner면 undefined) */
+  collaboratorRole?: CollaboratorRole;
+}
+
+export type CollaboratorRole = 'editor' | 'viewer';
+
+export interface TripCollaborator {
+  userId: string;
+  email: string | null;
+  role: CollaboratorRole;
+  createdAt: number;
+}
+
+export interface TripInvite {
+  id: string;
+  email: string;
+  role: CollaboratorRole;
+  createdAt: number;
 }
 
 export interface PlazaListing {
@@ -65,6 +83,8 @@ export interface TripSummary {
   title: string;
   updatedAt: number;
   totalDays: number;
+  /** 내가 소유자가 아니라 협업자로 접근 중일 때만 채워짐 */
+  collaboratorRole?: CollaboratorRole;
 }
 
 const LS_STORE = 'waymeld:trips-store:v2';
@@ -115,7 +135,7 @@ function rowToTrip(data: {
   plaza_center_lng?: number | null;
   plaza_listed_at?: string | null;
   plaza_locale?: string | null;
-}): Trip {
+}, collaboratorRole?: CollaboratorRole): Trip {
   const payload = data.payload as {
     pinnedByDay?: Trip['pinnedByDay'];
     routeOptions?: RouteOptions;
@@ -147,6 +167,7 @@ function rowToTrip(data: {
       ? new Date(data.plaza_listed_at).getTime()
       : undefined,
     plazaLocale: data.plaza_locale ?? undefined,
+    collaboratorRole,
   });
 }
 
@@ -255,13 +276,31 @@ export function applyPlazaPublish(
   };
 }
 
+/**
+ * 내가 협업자로 접근 가능한 trip_id → role 맵.
+ * waymeld_trips 조회에서 owner_id 필터를 뺀 만큼(RLS가 owner OR collaborator를
+ * 이미 허용) 여기서 role만 UI 표시용으로 별도 조회한다.
+ */
+async function fetchCollaboratorRoles(userId: string): Promise<Map<string, CollaboratorRole>> {
+  const sb = getSupabase();
+  if (!sb) return new Map();
+  const { data, error } = await sb
+    .from('trip_collaborators')
+    .select('trip_id, role')
+    .eq('user_id', userId);
+  if (error || !data) return new Map();
+  return new Map(data.map((r) => [r.trip_id as string, r.role as CollaboratorRole]));
+}
+
 async function listRemote(userId: string): Promise<TripSummary[]> {
   const sb = getSupabase();
   if (!sb) return [];
+  const roles = await fetchCollaboratorRoles(userId);
+  // RLS가 owner_id=나 OR trip_collaborators에 내가 있는 행만 돌려주므로
+  // 여기서 owner_id 필터를 걸면 공유받은 여행이 목록에서 빠진다.
   const { data, error } = await sb
     .from('waymeld_trips')
     .select('id, slug, title, total_days, updated_at')
-    .eq('owner_id', userId)
     .order('updated_at', { ascending: false });
   if (error || !data) return [];
   return data.map((row) => ({
@@ -270,6 +309,7 @@ async function listRemote(userId: string): Promise<TripSummary[]> {
     title: row.title,
     totalDays: row.total_days,
     updatedAt: new Date(row.updated_at).getTime(),
+    collaboratorRole: roles.get(row.id),
   }));
 }
 
@@ -279,11 +319,11 @@ async function readRemoteById(userId: string, tripId: string): Promise<Trip | nu
   const { data, error } = await sb
     .from('waymeld_trips')
     .select(TRIP_SELECT)
-    .eq('owner_id', userId)
     .eq('id', tripId)
     .maybeSingle();
   if (error || !data) return null;
-  return rowToTrip(data);
+  const roles = await fetchCollaboratorRoles(userId);
+  return rowToTrip(data, roles.get(tripId));
 }
 
 async function readRemoteLatest(userId: string): Promise<Trip | null> {
@@ -292,12 +332,12 @@ async function readRemoteLatest(userId: string): Promise<Trip | null> {
   const { data, error } = await sb
     .from('waymeld_trips')
     .select(TRIP_SELECT)
-    .eq('owner_id', userId)
     .order('updated_at', { ascending: false })
     .limit(1)
     .maybeSingle();
   if (error || !data) return null;
-  return rowToTrip(data);
+  const roles = await fetchCollaboratorRoles(userId);
+  return rowToTrip(data, roles.get(data.id));
 }
 
 async function readBySlugRemote(slug: string): Promise<Trip | null> {
@@ -348,6 +388,106 @@ async function writeRemote(trip: Trip): Promise<void> {
     { onConflict: 'id' }
   );
   if (error) throw error;
+}
+
+// =============================================
+// 공동편집 협업자 관리
+// =============================================
+
+export async function listCollaborators(tripId: string): Promise<TripCollaborator[]> {
+  const sb = getSupabase();
+  if (!sb) return [];
+  const { data, error } = await sb
+    .from('trip_collaborators')
+    .select('user_id, email, role, created_at')
+    .eq('trip_id', tripId)
+    .order('created_at', { ascending: true });
+  if (error || !data) return [];
+  return data.map((r) => ({
+    userId: r.user_id,
+    email: r.email,
+    role: r.role as CollaboratorRole,
+    createdAt: new Date(r.created_at).getTime(),
+  }));
+}
+
+export async function listPendingInvites(tripId: string): Promise<TripInvite[]> {
+  const sb = getSupabase();
+  if (!sb) return [];
+  const { data, error } = await sb
+    .from('trip_invites')
+    .select('id, email, role, created_at')
+    .eq('trip_id', tripId)
+    .is('accepted_at', null)
+    .order('created_at', { ascending: true });
+  if (error || !data) return [];
+  return data.map((r) => ({
+    id: r.id,
+    email: r.email,
+    role: r.role as CollaboratorRole,
+    createdAt: new Date(r.created_at).getTime(),
+  }));
+}
+
+/** 이메일로 편집/보기 권한 초대 — 이미 가입된 이메일이면 바로 collaborator로, 아니면 보류 초대로 남는다 */
+export async function inviteCollaboratorByEmail(
+  tripId: string,
+  email: string,
+  role: CollaboratorRole,
+  invitedBy: string
+): Promise<void> {
+  const sb = getSupabase();
+  if (!sb) throw new Error('Supabase 미설정');
+  const normalizedEmail = email.trim().toLowerCase();
+  const { error } = await sb.from('trip_invites').insert({
+    trip_id: tripId,
+    email: normalizedEmail,
+    role,
+    invited_by: invitedBy,
+  });
+  if (error) throw error;
+}
+
+export async function updateCollaboratorRole(
+  tripId: string,
+  userId: string,
+  role: CollaboratorRole
+): Promise<void> {
+  const sb = getSupabase();
+  if (!sb) throw new Error('Supabase 미설정');
+  const { error } = await sb
+    .from('trip_collaborators')
+    .update({ role })
+    .eq('trip_id', tripId)
+    .eq('user_id', userId);
+  if (error) throw error;
+}
+
+export async function removeCollaborator(tripId: string, userId: string): Promise<void> {
+  const sb = getSupabase();
+  if (!sb) throw new Error('Supabase 미설정');
+  const { error } = await sb
+    .from('trip_collaborators')
+    .delete()
+    .eq('trip_id', tripId)
+    .eq('user_id', userId);
+  if (error) throw error;
+}
+
+export async function cancelInvite(inviteId: string): Promise<void> {
+  const sb = getSupabase();
+  if (!sb) throw new Error('Supabase 미설정');
+  const { error } = await sb.from('trip_invites').delete().eq('id', inviteId);
+  if (error) throw error;
+}
+
+/** 로그인 직후 호출 — 내 이메일로 온 보류 초대를 협업자로 승격시킨다. 수락된 개수를 반환 */
+export async function acceptPendingInvites(): Promise<number> {
+  const sb = getSupabase();
+  if (!sb) return 0;
+  const { data, error } = await sb.rpc('accept_trip_invites');
+  if (error) return 0;
+  return typeof data === 'number' ? data : 0;
 }
 
 async function listPlazaRemote(localeFilter?: string | null): Promise<PlazaListing[]> {

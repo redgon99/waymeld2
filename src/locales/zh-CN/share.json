@@ -78,5 +78,22 @@
     "cancel": "取消",
     "share": "分享",
     "saving": "保存中…"
+  },
+  "collab": {
+    "entry": "管理协作者",
+    "title": "管理协作者",
+    "hint": "通过邮箱邀请后，使用该邮箱登录的人就能和你一起编辑(或查看)这个行程。",
+    "emailPlaceholder": "要邀请的邮箱地址",
+    "roleEditor": "可编辑",
+    "roleViewer": "仅查看",
+    "invite": "邀请",
+    "inviting": "邀请中…",
+    "inviteFailed": "邀请失败，请检查邮箱地址。",
+    "remove": "移除",
+    "cancelInvite": "取消邀请",
+    "pendingLabel": "尚未注册 — 登录后会自动关联",
+    "empty": "还没有邀请任何协作者。",
+    "readOnlyBanner": "此行程与您共享为仅查看",
+    "editorBanner": "此行程与您共享为协作编辑"
   }
 }

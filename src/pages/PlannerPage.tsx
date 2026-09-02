@@ -72,6 +72,7 @@ import {
 } from '../lib/trips';
 import type { ShareTripModalSubmit } from '../components/ShareTripModal';
 import { ShareTripModal } from '../components/ShareTripModal';
+import { CollaboratorsModal } from '../components/CollaboratorsModal';
 import { PlannerAppBar } from '../components/PlannerAppBar';
 import { TripSelectMenu } from '../components/TripSelectMenu';
 import { ItineraryTableView } from '../components/ItineraryTableView';
@@ -201,6 +202,7 @@ export default function PlannerPage() {
   const { t: tc } = useTranslation('common');
   const { t: tp, i18n: plannerI18n } = useTranslation('planner');
   const { t: tb } = useTranslation('billing');
+  const { t: ts } = useTranslation('share');
 
   useEffect(() => {
     document.title = tp('chrome.appTitle');
@@ -227,6 +229,7 @@ export default function PlannerPage() {
   const [savePending, setSavePending] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<number | null>(null);
   const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [collabModalOpen, setCollabModalOpen] = useState(false);
   const [shareSaving, setShareSaving] = useState(false);
   const [plazaNavVisible, setPlazaNavVisible] = useState(() => isPlazaNavUnlocked());
 
@@ -570,7 +573,11 @@ export default function PlannerPage() {
         focusMapOnTrip(next);
         setLastSavedAt(loaded.updatedAt);
       } else if (userId && !prev) {
-        setTrip((prevTrip) => ({ ...prevTrip, ownerId: userId, updatedAt: Date.now() }));
+        setTrip((prevTrip) => ({
+          ...prevTrip,
+          ownerId: prevTrip.ownerId ?? userId,
+          updatedAt: Date.now(),
+        }));
       }
       if (userId && !prev) {
         showToast(i18n.t('toast.cloudSynced', { ns: 'planner' }));
@@ -585,10 +592,16 @@ export default function PlannerPage() {
     setSavePending(true);
     if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
     saveTimerRef.current = window.setTimeout(async () => {
+      if (trip.collaboratorRole === 'viewer') {
+        setSavePending(false);
+        return;
+      }
       const userId = user?.id ?? null;
       await tripsRepo.save({
         ...trip,
-        ownerId: userId ?? undefined,
+        // 협업자가 저장해도 원래 소유자를 절대 덮어쓰지 않는다 —
+        // trip에 이미 ownerId가 있으면 그대로 두고, 없을 때(새 여행)만 나로 채운다.
+        ownerId: trip.ownerId ?? userId ?? undefined,
         updatedAt: Date.now(),
       });
       await refreshTripList(userId);
@@ -1202,6 +1215,10 @@ export default function PlannerPage() {
 
   const handleTogglePin = useCallback(
     (place: Place) => {
+      if (trip.collaboratorRole === 'viewer') {
+        showToast(ts('collab.readOnlyBanner'));
+        return;
+      }
       const current = trip.pinnedByDay[currentDay] ?? [];
       const exists = current.find((p) => p.id === place.id);
       if (exists) {
@@ -1679,14 +1696,18 @@ export default function PlannerPage() {
   }
 
   const handleTitleChange = useCallback((title: string) => {
-    setTrip((prev) => ({ ...prev, title, updatedAt: Date.now() }));
+    setTrip((prev) =>
+      prev.collaboratorRole === 'viewer' ? prev : { ...prev, title, updatedAt: Date.now() }
+    );
   }, []);
 
   const handleSelectTrip = useCallback(
     async (tripId: string) => {
       if (tripId === trip.id) return;
       const userId = user?.id ?? null;
-      await tripsRepo.save({ ...trip, ownerId: userId ?? undefined, updatedAt: Date.now() });
+      if (trip.collaboratorRole !== 'viewer') {
+        await tripsRepo.save({ ...trip, ownerId: trip.ownerId ?? userId ?? undefined, updatedAt: Date.now() });
+      }
       const loaded = await tripsRepo.load(userId, tripId);
       if (loaded) {
         const next = normalizeTrip({
@@ -1719,7 +1740,9 @@ export default function PlannerPage() {
       return;
     }
     const userId = user?.id ?? null;
-    await tripsRepo.save({ ...trip, ownerId: userId ?? undefined, updatedAt: Date.now() });
+    if (trip.collaboratorRole !== 'viewer') {
+      await tripsRepo.save({ ...trip, ownerId: trip.ownerId ?? userId ?? undefined, updatedAt: Date.now() });
+    }
     const fresh = makeEmptyTrip();
     setTrip(fresh);
     await tripsRepo.save({ ...fresh, ownerId: userId ?? undefined });
@@ -1733,6 +1756,11 @@ export default function PlannerPage() {
   }, [trip, user?.id, refreshTripList, plan, isAdmin, tripSummaries.length, tb]);
 
   const handleDeleteTrip = useCallback(async () => {
+    // 삭제는 협업자(editor 포함)가 아니라 소유자만 — 실수로 상대방 여행이 지워지는 사고 방지
+    if (trip.collaboratorRole) {
+      showToast(ts('collab.readOnlyBanner'));
+      return;
+    }
     const userId = user?.id ?? null;
     const others = tripSummaries.filter((s) => s.id !== trip.id);
     const msg =
@@ -1808,7 +1836,7 @@ export default function PlannerPage() {
       setShareSaving(true);
       const userId = user?.id ?? null;
       let publicTrip = applyPlazaPublish(
-        { ...trip, ownerId: userId ?? undefined },
+        { ...trip, ownerId: trip.ownerId ?? userId ?? undefined },
         {
           listInPlaza: opts.listInPlaza,
           displayName: opts.displayName,
@@ -1881,6 +1909,9 @@ export default function PlannerPage() {
     if (authConfigured && !user) return 'guest';
     return 'local';
   }, [savePending, authConfigured, user]);
+
+  const isTripOwner = Boolean(user?.id) && Boolean(trip.ownerId) && trip.ownerId === user?.id;
+  const isReadOnlyViewer = trip.collaboratorRole === 'viewer';
 
   const useMobileChrome = isMobile && !presentationMode;
   const searchExpanded =
@@ -1993,6 +2024,13 @@ export default function PlannerPage() {
         <Icon name="layers" size={18} />
       </button>
 
+      {trip.collaboratorRole && (
+        <div className="trip-readonly-banner">
+          <Icon name={isReadOnlyViewer ? 'lock' : 'pushpin'} size={14} />
+          {ts(isReadOnlyViewer ? 'collab.readOnlyBanner' : 'collab.editorBanner')}
+        </div>
+      )}
+
       {!useMobileChrome && (
         <>
           <PlannerAppBar
@@ -2011,6 +2049,7 @@ export default function PlannerPage() {
             onNewTrip={handleNewTrip}
             onDeleteTrip={() => void handleDeleteTrip()}
             onShare={openShareModal}
+            onManageCollaborators={isTripOwner ? () => setCollabModalOpen(true) : undefined}
             presentationMode={presentationMode}
             onTogglePresentation={handleTogglePresentation}
             tableViewMode={tableViewMode}
@@ -2577,6 +2616,16 @@ export default function PlannerPage() {
         onClose={() => !shareSaving && setShareModalOpen(false)}
         onConfirm={handleShareConfirm}
       />
+
+      {isTripOwner && user?.id && (
+        <CollaboratorsModal
+          open={collabModalOpen}
+          tripId={trip.id}
+          tripTitle={trip.title}
+          currentUserId={user.id}
+          onClose={() => setCollabModalOpen(false)}
+        />
+      )}
 
       <Toast message={toast} />
     </div>

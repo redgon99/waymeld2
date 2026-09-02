@@ -5934,6 +5934,41 @@ button {
   color: var(--color-text-secondary);
 }
 
+.legal-page ol,
+.legal-page ul {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.legal-notice {
+  margin: 0 0 24px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted, #f4f4f5);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--color-text-secondary);
+}
+
+.legal-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  justify-content: center;
+}
+
+.legal-links a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.static-page-legal-links {
+  margin-top: 32px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
 .plaza-locale-filter {
   display: flex;
   align-items: center;
@@ -6824,6 +6859,41 @@ button {
   line-height: 1.5;
 }
 
+.login-consent {
+  margin: 0 0 16px;
+  padding: 0;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.login-consent-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.login-consent-item input {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.login-legal-link {
+  color: var(--color-text-primary);
+  font-weight: 600;
+  text-underline-offset: 2px;
+}
+
+.login-legal-links {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
+
 .login-form {
   display: flex;
   flex-direction: column;
@@ -6890,6 +6960,11 @@ button {
 .login-oauth-btn:hover,
 .login-secondary-btn:hover {
   border-color: var(--color-border-hover);
+}
+
+.login-oauth-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .login-divider {
@@ -7215,6 +7290,118 @@ button {
 
 .share-trip-modal-warn--muted {
   color: var(--color-text-secondary);
+}
+
+.collab-modal {
+  max-width: 440px;
+}
+
+.collab-invite-row {
+  display: flex;
+  gap: 6px;
+  margin: 10px 0 4px;
+}
+
+.collab-invite-email {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-strong);
+  font-size: 13px;
+}
+
+.collab-invite-role {
+  padding: 9px 8px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-strong);
+  font-size: 12.5px;
+  background: #fff;
+}
+
+.collab-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.collab-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-secondary);
+}
+
+.collab-list-item--pending {
+  opacity: 0.75;
+}
+
+.collab-list-email {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.collab-role-badge {
+  flex-shrink: 0;
+  font-size: 11.5px;
+  color: var(--color-text-secondary);
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--color-border-strong);
+}
+
+.collab-remove-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: #b91c1c;
+  cursor: pointer;
+}
+
+.collab-remove-btn:hover {
+  background: rgba(185, 28, 28, 0.1);
+}
+
+.collab-pending-label {
+  margin-top: 12px;
+}
+
+.trip-readonly-banner {
+  position: absolute;
+  top: calc(var(--app-bar-h) + var(--chrome-gutter));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.85);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: var(--shadow-float);
+}
+
+.waymeld-root.mobile-layout .trip-readonly-banner {
+  top: 16px;
 }
 
 .share-trip-modal-footer {

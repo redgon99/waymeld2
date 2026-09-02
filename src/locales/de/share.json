@@ -78,5 +78,22 @@
     "cancel": "Abbrechen",
     "share": "Teilen",
     "saving": "Speichern…"
+  },
+  "collab": {
+    "entry": "Mitwirkende verwalten",
+    "title": "Mitwirkende verwalten",
+    "hint": "Per E-Mail einladen — wer sich mit dieser E-Mail anmeldet, kann diese Reise mit dir bearbeiten (oder ansehen).",
+    "emailPlaceholder": "Einzuladende E-Mail",
+    "roleEditor": "Kann bearbeiten",
+    "roleViewer": "Nur ansehen",
+    "invite": "Einladen",
+    "inviting": "Einladen…",
+    "inviteFailed": "Einladung fehlgeschlagen. Bitte E-Mail-Adresse prüfen.",
+    "remove": "Entfernen",
+    "cancelInvite": "Einladung stornieren",
+    "pendingLabel": "Noch nicht registriert — wird bei der Anmeldung automatisch verknüpft",
+    "empty": "Noch keine Mitwirkenden eingeladen.",
+    "readOnlyBanner": "Diese Reise wurde nur zum Ansehen mit dir geteilt",
+    "editorBanner": "Diese Reise wurde als Bearbeiter mit dir geteilt"
   }
 }

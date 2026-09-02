@@ -78,5 +78,22 @@
     "cancel": "취소",
     "share": "공유하기",
     "saving": "저장 중…"
+  },
+  "collab": {
+    "entry": "협업자 관리",
+    "title": "협업자 관리",
+    "hint": "이메일로 초대하면, 그 이메일로 로그인한 사람이 여행을 함께 편집(또는 보기)할 수 있습니다.",
+    "emailPlaceholder": "초대할 이메일 주소",
+    "roleEditor": "편집 가능",
+    "roleViewer": "보기만",
+    "invite": "초대",
+    "inviting": "초대 중…",
+    "inviteFailed": "초대에 실패했습니다. 이메일을 확인해 주세요.",
+    "remove": "제거",
+    "cancelInvite": "초대 취소",
+    "pendingLabel": "아직 가입 전 — 로그인하면 자동으로 연결됩니다",
+    "empty": "아직 초대한 협업자가 없습니다.",
+    "readOnlyBanner": "보기 전용으로 공유받은 여행입니다",
+    "editorBanner": "편집자로 공유받은 여행입니다"
   }
 }

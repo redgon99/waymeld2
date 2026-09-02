@@ -78,5 +78,22 @@
     "cancel": "キャンセル",
     "share": "共有する",
     "saving": "保存中…"
+  },
+  "collab": {
+    "entry": "共同編集者を管理",
+    "title": "共同編集者を管理",
+    "hint": "メールで招待すると、そのメールでログインした人が一緒に編集(または閲覧)できます。",
+    "emailPlaceholder": "招待するメールアドレス",
+    "roleEditor": "編集可能",
+    "roleViewer": "閲覧のみ",
+    "invite": "招待",
+    "inviting": "招待中…",
+    "inviteFailed": "招待に失敗しました。メールアドレスをご確認ください。",
+    "remove": "削除",
+    "cancelInvite": "招待を取り消す",
+    "pendingLabel": "未登録 — ログインすると自動的に連携されます",
+    "empty": "まだ招待した共同編集者がいません。",
+    "readOnlyBanner": "閲覧専用で共有された旅行です",
+    "editorBanner": "編集者として共有された旅行です"
   }
 }

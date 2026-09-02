@@ -78,5 +78,22 @@
     "cancel": "Cancelar",
     "share": "Compartir",
     "saving": "Guardando…"
+  },
+  "collab": {
+    "entry": "Gestionar colaboradores",
+    "title": "Gestionar colaboradores",
+    "hint": "Invita por correo — quien inicie sesión con ese correo podrá editar (o ver) este viaje contigo.",
+    "emailPlaceholder": "Correo para invitar",
+    "roleEditor": "Puede editar",
+    "roleViewer": "Solo ver",
+    "invite": "Invitar",
+    "inviting": "Invitando…",
+    "inviteFailed": "No se pudo enviar la invitación. Revisa el correo.",
+    "remove": "Quitar",
+    "cancelInvite": "Cancelar invitación",
+    "pendingLabel": "Aún no registrado — se conecta automáticamente al iniciar sesión",
+    "empty": "Todavía no has invitado a nadie.",
+    "readOnlyBanner": "Viaje compartido contigo solo para ver",
+    "editorBanner": "Viaje compartido contigo como editor"
   }
 }

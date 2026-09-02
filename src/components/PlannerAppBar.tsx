@@ -32,6 +32,7 @@ interface Props {
   onNewTrip?: () => void;
   onDeleteTrip?: () => void;
   onShare: () => void;
+  onManageCollaborators?: () => void;
   presentationMode: boolean;
   onTogglePresentation: () => void;
   tableViewMode?: boolean;
@@ -55,6 +56,7 @@ export function PlannerAppBar({
   onNewTrip,
   onDeleteTrip,
   onShare,
+  onManageCollaborators,
   presentationMode,
   onTogglePresentation,
   tableViewMode = false,
@@ -62,6 +64,7 @@ export function PlannerAppBar({
   plazaNavVisible,
 }: Props) {
   const { t } = useTranslation('planner');
+  const { t: ts } = useTranslation('share');
   const [moreOpen, setMoreOpen] = useState(false);
   const [sheet, setSheet] = useState<AppSheet | null>(null);
   const [helpAirportFocus, setHelpAirportFocus] = useState(false);
@@ -220,6 +223,18 @@ export function PlannerAppBar({
       >
         <Icon name="share" size={17} />
       </button>
+
+      {onManageCollaborators && (
+        <button
+          type="button"
+          className="planner-bar-icon-btn"
+          onClick={onManageCollaborators}
+          title={ts('collab.entry')}
+          aria-label={ts('collab.entry')}
+        >
+          <Icon name="facilityGroup" size={17} />
+        </button>
+      )}
 
       <div className="planner-bar-more" ref={moreRef}>
         <button
