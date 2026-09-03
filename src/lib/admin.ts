@@ -39,6 +39,16 @@ export interface AdminNotice {
   updatedAt: string;
 }
 
+export interface AdminUserAccount {
+  id: string;
+  email: string;
+  createdAt: string;
+}
+
+export function getEnvAdminEmails(): string[] {
+  return [...ADMIN_EMAILS_FROM_ENV];
+}
+
 function requireSupabase() {
   if (!isSupabaseConfigured) {
     throw new Error('Supabase가 설정되어야 관리자 기능을 사용할 수 있습니다.');
@@ -264,5 +274,33 @@ export async function updateAdminNotice(
 export async function deleteAdminNotice(id: string): Promise<void> {
   const sb = requireSupabase();
   const { error } = await sb.from('admin_notices').delete().eq('id', id);
+  if (error) throw error;
+}
+
+export async function listAdminUserAccounts(): Promise<AdminUserAccount[]> {
+  const sb = requireSupabase();
+  const { data, error } = await sb
+    .from('admin_users')
+    .select('id, email, created_at')
+    .order('created_at', { ascending: true });
+  if (error) throw error;
+  return (data ?? []).map((row) => ({
+    id: row.id as string,
+    email: row.email as string,
+    createdAt: row.created_at as string,
+  }));
+}
+
+export async function addAdminUserAccount(email: string): Promise<void> {
+  const sb = requireSupabase();
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) throw new Error('이메일을 입력해 주세요.');
+  const { error } = await sb.from('admin_users').insert({ email: normalized });
+  if (error) throw error;
+}
+
+export async function removeAdminUserAccount(id: string): Promise<void> {
+  const sb = requireSupabase();
+  const { error } = await sb.from('admin_users').delete().eq('id', id);
   if (error) throw error;
 }

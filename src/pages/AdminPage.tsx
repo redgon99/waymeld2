@@ -3,16 +3,21 @@ import { Navigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { AdminHeader } from '../components/AdminHeader';
 import {
+  addAdminUserAccount,
   createAdminNotice,
   deleteAdminNotice,
   fetchAdminShareStats,
+  getEnvAdminEmails,
   isCurrentUserAdmin,
   listAdminNotices,
+  listAdminUserAccounts,
   listAdminUserRows,
+  removeAdminUserAccount,
   updateAdminNotice,
   upsertUserVerification,
   type AdminNotice,
   type AdminShareStats,
+  type AdminUserAccount,
   type AdminUserRow,
 } from '../lib/admin';
 import { evaluateTier3Gates, type GateStatus } from '../lib/tierGates';
@@ -36,26 +41,35 @@ export default function AdminPage() {
   const [stats, setStats] = useState<AdminShareStats | null>(null);
   const [notices, setNotices] = useState<AdminNotice[]>([]);
   const [gates, setGates] = useState<GateStatus[]>([]);
+  const [adminAccounts, setAdminAccounts] = useState<AdminUserAccount[]>([]);
 
   const [noticeTitle, setNoticeTitle] = useState('');
   const [noticeBody, setNoticeBody] = useState('');
   const [noticePublished, setNoticePublished] = useState(true);
   const [noticePinned, setNoticePinned] = useState(false);
 
+  const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [addingAdmin, setAddingAdmin] = useState(false);
+
+  const envAdminEmails = useMemo(() => getEnvAdminEmails(), []);
+  const currentEmail = user?.email?.trim().toLowerCase() ?? null;
+
   const loadAll = useCallback(async () => {
     setRefreshing(true);
     setError(null);
     try {
-      const [userRows, shareStats, noticeRows, gateRows] = await Promise.all([
+      const [userRows, shareStats, noticeRows, gateRows, adminRows] = await Promise.all([
         listAdminUserRows(),
         fetchAdminShareStats(),
         listAdminNotices(),
         evaluateTier3Gates(),
+        listAdminUserAccounts(),
       ]);
       setUsers(userRows);
       setStats(shareStats);
       setNotices(noticeRows);
       setGates(gateRows);
+      setAdminAccounts(adminRows);
     } catch (e) {
       const msg = e instanceof Error ? e.message : '관리자 데이터를 불러오지 못했습니다.';
       setError(msg);
@@ -165,6 +179,34 @@ export default function AdminPage() {
     }
   };
 
+  const handleAddAdmin = async () => {
+    if (!newAdminEmail.trim()) {
+      setError('추가할 관리자 이메일을 입력해 주세요.');
+      return;
+    }
+    setAddingAdmin(true);
+    try {
+      await addAdminUserAccount(newAdminEmail);
+      setNewAdminEmail('');
+      await loadAll();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '관리자 추가 실패');
+    } finally {
+      setAddingAdmin(false);
+    }
+  };
+
+  const handleRemoveAdmin = async (account: AdminUserAccount) => {
+    const ok = window.confirm(`관리자 "${account.email}"의 권한을 제거할까요?`);
+    if (!ok) return;
+    try {
+      await removeAdminUserAccount(account.id);
+      await loadAll();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '관리자 삭제 실패');
+    }
+  };
+
   const handleCreateNotice = async () => {
     if (!noticeTitle.trim() || !noticeBody.trim()) {
       setError('공지 제목과 내용을 입력해 주세요.');
@@ -228,6 +270,89 @@ export default function AdminPage() {
         />
 
         {error && <div className="admin-error">{error}</div>}
+
+        <section className="admin-section">
+          <h2>관리자 계정 관리</h2>
+          <p className="admin-section-lead">
+            여기서 추가/삭제한 관리자는 DB(admin_users)에 저장됩니다. 마지막 관리자 1명은 잠금 방지를 위해 삭제할 수 없습니다.
+          </p>
+
+          {envAdminEmails.length > 0 && (
+            <div style={{ marginBottom: 14 }}>
+              <strong style={{ fontSize: 13 }}>환경변수(VITE_ADMIN_EMAILS) 관리자</strong>
+              <p className="admin-cell-sub" style={{ marginBottom: 6 }}>
+                배포 환경설정으로 지정된 관리자입니다. 이 화면에서는 추가·삭제할 수 없고, 배포 환경변수를 수정해야 합니다.
+              </p>
+              <div>
+                {envAdminEmails.map((email) => (
+                  <span key={email} className="admin-pill ok">
+                    {email}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="admin-notice-form-row" style={{ marginBottom: 12 }}>
+            <input
+              style={{ flex: 1 }}
+              value={newAdminEmail}
+              onChange={(e) => setNewAdminEmail(e.currentTarget.value)}
+              placeholder="추가할 관리자 이메일"
+            />
+            <button
+              type="button"
+              className="admin-create-btn"
+              disabled={addingAdmin}
+              onClick={() => void handleAddAdmin()}
+            >
+              {addingAdmin ? '추가 중…' : '관리자 추가'}
+            </button>
+          </div>
+
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>이메일</th>
+                  <th>등록일</th>
+                  <th>액션</th>
+                </tr>
+              </thead>
+              <tbody>
+                {adminAccounts.map((account) => {
+                  const isSelf = currentEmail === account.email.toLowerCase();
+                  const isLastAdmin = adminAccounts.length <= 1;
+                  return (
+                    <tr key={account.id}>
+                      <td className="mono">
+                        {account.email}
+                        {isSelf && <span className="admin-pill" style={{ marginLeft: 6 }}>나</span>}
+                      </td>
+                      <td>{formatDateTime(account.createdAt)}</td>
+                      <td>
+                        <button
+                          type="button"
+                          className="danger"
+                          disabled={isLastAdmin}
+                          title={isLastAdmin ? '마지막 관리자는 삭제할 수 없습니다.' : undefined}
+                          onClick={() => void handleRemoveAdmin(account)}
+                        >
+                          삭제
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+                {adminAccounts.length === 0 && (
+                  <tr>
+                    <td colSpan={3}>DB에 등록된 관리자가 없습니다.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
         <section className="admin-section">
           <h2>현재 사용자확인 관리</h2>
