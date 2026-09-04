@@ -85,6 +85,7 @@ export function RouteOptionsPanel({
   const [originMenuOpen, setOriginMenuOpen] = useState(false);
   const [aiStayLoading, setAiStayLoading] = useState(false);
   const [aiStayReasons, setAiStayReasons] = useState<Record<string, string>>({});
+  const [aiStayError, setAiStayError] = useState(false);
   const [hoursOnly, setHoursOnly] = useState(false);
   const [comparisons, setComparisons] = useState<RouteComparison[]>([]);
   const [comparing, setComparing] = useState(false);
@@ -169,6 +170,7 @@ export function RouteOptionsPanel({
     }
 
     setAiStayLoading(true);
+    setAiStayError(false);
     const targets = pinned.map((p) => ({
       id: p.id,
       name: p.name,
@@ -185,15 +187,15 @@ export function RouteOptionsPanel({
         if (s.reason) reasons[s.id] = s.reason;
       }
       setAiStayReasons(reasons);
+      patch('autoStayTime', true);
     } else {
-      // AI 호출 실패 시 기존 카테고리 고정값으로 조용히 대체
-      for (const p of pinned) {
-        onUpdateStayMinutes(p.id, suggestStayMinutes(p.category).minutes);
-      }
-      setAiStayReasons({});
+      // 실패를 화면에 알린다 — 여기서 autoStayTime을 true로 바꾸지 않는다.
+      // true는 "AI 추천이 실제로 적용된 상태"를 뜻하므로, 실패했는데 켜진 것처럼
+      // 보이면 사용자가 다시 시도할 수 없고(버튼이 이미 눌린 상태) 체류시간 직접
+      // 수정도 막힌다(§ options.autoStayTime이 입력창을 숨기는 조건이기 때문).
+      setAiStayError(true);
     }
     setAiStayLoading(false);
-    patch('autoStayTime', true);
   }
 
   function setOriginType(type: OriginType) {
@@ -495,6 +497,9 @@ export function RouteOptionsPanel({
               {aiStayLoading ? t('route.options.aiSuggesting') : t('route.options.aiSuggest')}
             </button>
           </div>
+          {aiStayError && (
+            <p className="route-ai-suggest-error">{t('route.options.aiSuggestError')}</p>
+          )}
           <div className="route-stay-list">
             {stayRows.map((p, idx) => {
               const meta = getCategoryMeta(p.categoryCode);

@@ -224,6 +224,7 @@
       "orderPins": "Pin-Reihenfolge",
       "aiSuggest": "KI-Vorschlag",
       "aiSuggesting": "KI denkt nach…",
+      "aiSuggestError": "KI-Vorschläge konnten nicht geladen werden. Es werden Kategorie-Standardwerte verwendet — unten anpassen oder erneut versuchen.",
       "stayMinutesAria": "Aufenthalt {{name}} (Min.)",
       "preview": "Vorschau",
       "previewStats": "{{km}} km · {{minutes}} Min. Fahrt · {{stayMinutes}} Min. Aufenthalt · Ende {{time}}",

@@ -224,6 +224,7 @@
       "orderPins": "Ordre des épingles",
       "aiSuggest": "Suggestion IA",
       "aiSuggesting": "L’IA réfléchit…",
+      "aiSuggestError": "Impossible d’obtenir les suggestions de l’IA. Valeurs par catégorie utilisées — ajustez ci-dessous ou réessayez.",
       "stayMinutesAria": "Durée à {{name}} (min)",
       "preview": "Aperçu",
       "previewStats": "{{km}} km · {{minutes}} min de trajet · {{stayMinutes}} min sur place · fin {{time}}",

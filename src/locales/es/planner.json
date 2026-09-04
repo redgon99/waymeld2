@@ -224,6 +224,7 @@
       "orderPins": "Orden de pines",
       "aiSuggest": "Sugerencia IA",
       "aiSuggesting": "La IA está pensando…",
+      "aiSuggestError": "No se pudieron obtener sugerencias de la IA. Usando valores predeterminados por categoría — ajusta abajo o vuelve a intentarlo.",
       "stayMinutesAria": "{{name}} estancia (min)",
       "preview": "Vista previa",
       "previewStats": "{{km}} km · {{minutes}} min de trayecto · {{stayMinutes}} min de estancia · termina {{time}}",

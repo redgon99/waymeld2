@@ -224,6 +224,7 @@
       "orderPins": "Pin order",
       "aiSuggest": "AI suggest",
       "aiSuggesting": "AI thinking…",
+      "aiSuggestError": "Couldn't get AI suggestions. Using category defaults instead — adjust below or try again.",
       "stayMinutesAria": "{{name}} stay (min)",
       "preview": "Preview",
       "previewStats": "{{km}} km · {{minutes}} min travel · {{stayMinutes}} min stay · ends {{time}}",

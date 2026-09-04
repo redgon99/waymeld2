@@ -8,7 +8,7 @@ export const DEFAULT_ROUTE_OPTIONS: RouteOptions = {
   optimizeBy: 'distance',
   autoOrder: true,
   reflectMealTime: true,
-  autoStayTime: true,
+  autoStayTime: false, // true는 "AI가 실제로 추천을 마친 상태"를 뜻한다 — 기본값을 true로 두면 AI를 부른 적도 없는데 버튼이 이미 켜져 보인다
   useHighway: true,
   useRealTimeTraffic: false,
 };

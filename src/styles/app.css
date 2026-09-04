@@ -10655,6 +10655,12 @@ button {
   color: #0f172a;
 }
 
+.route-ai-suggest-error {
+  margin: 4px 0 0;
+  color: #b45309;
+  font-size: 11.5px;
+}
+
 .route-stay-list {
   display: flex;
   flex-direction: column;

@@ -210,6 +210,7 @@
       "orderPins": "標記順序",
       "aiSuggest": "AI suggest 自動推薦",
       "aiSuggesting": "AI推薦中…",
+      "aiSuggestError": "未能取得AI推薦,目前使用的是分類預設值 — 可在下方手動調整,或重試。",
       "stayMinutesAria": "{{name}} 停留時間(分鐘)",
       "preview": "Preview 預估",
       "previewStats": "{{km}} km · 移動 {{minutes}} 分鐘 · 停留 {{stayMinutes}} 分鐘 · {{time}} 結束",

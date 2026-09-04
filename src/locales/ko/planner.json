@@ -224,6 +224,7 @@
       "orderPins": "핀 순서",
       "aiSuggest": "AI suggest 자동 추천",
       "aiSuggesting": "AI 추천 중…",
+      "aiSuggestError": "AI 추천을 불러오지 못했어요. 카테고리 기본값을 쓰고 있어요 — 아래에서 직접 조정하거나 다시 시도해 보세요.",
       "stayMinutesAria": "{{name}} 체류시간(분)",
       "preview": "Preview 예상",
       "previewStats": "{{km}} km · 이동 {{minutes}}분 · 체류 {{stayMinutes}}분 · {{time}} 끝",
