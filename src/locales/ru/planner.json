@@ -247,7 +247,10 @@
       "date": "Дата визита",
       "dateHint": "Укажите дату, чтобы проверить часы работы по дням недели",
       "hoursFilter": "Проверить часы {{n}}",
-      "optimizeCarOnly": "Применяется только для автомобиля"
+      "optimizeCarOnly": "Применяется только для автомобиля",
+      "compareLoading": "Сравнение маршрутов…",
+      "compareStats": "{{km}} км · {{minutes}} мин",
+      "compareToll": "Платная дорога {{fare}} KRW"
     },
     "reservedAt": "Бронь на {{time}} · время фиксировано",
     "reservedLate": "Опоздание на {{minutes}} мин к брони на {{time}}",

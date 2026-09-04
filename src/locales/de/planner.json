@@ -247,7 +247,10 @@
       "date": "Besuchsdatum",
       "dateHint": "Mit Datum werden die Öffnungszeiten je Wochentag geprüft",
       "hoursFilter": "Zeiten prüfen {{n}}",
-      "optimizeCarOnly": "Gilt nur für Autofahrten"
+      "optimizeCarOnly": "Gilt nur für Autofahrten",
+      "compareLoading": "Routen werden verglichen…",
+      "compareStats": "{{km}} km · {{minutes}} Min.",
+      "compareToll": "Maut {{fare}} KRW"
     },
     "reservedAt": "Reserviert um {{time}} · feste Zeit",
     "reservedLate": "{{minutes}} Min. zu spät zur Reservierung um {{time}}",

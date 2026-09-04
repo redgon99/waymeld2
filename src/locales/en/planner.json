@@ -247,7 +247,10 @@
       "date": "Visit date",
       "dateHint": "Add a date to check day-of-week opening hours",
       "hoursFilter": "Hours to check {{n}}",
-      "optimizeCarOnly": "Applies to driving only"
+      "optimizeCarOnly": "Applies to driving only",
+      "compareLoading": "Comparing routes…",
+      "compareStats": "{{km}} km · {{minutes}} min",
+      "compareToll": "Toll ₩{{fare}}"
     },
     "reservedAt": "Reserved at {{time}} · fixed",
     "reservedLate": "{{minutes}} min late for the {{time}} reservation",

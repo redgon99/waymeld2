@@ -233,7 +233,10 @@
       "date": "到访日期",
       "dateHint": "填入日期后可按星期核对营业时间",
       "hoursFilter": "需核对营业时间 {{n}}",
-      "optimizeCarOnly": "仅在驾车时生效"
+      "optimizeCarOnly": "仅在驾车时生效",
+      "compareLoading": "正在比较路线…",
+      "compareStats": "{{km}}公里 · {{minutes}}分钟",
+      "compareToll": "过路费 {{fare}}韩元"
     },
     "reservedAt": "预约 {{time}}·时间固定",
     "reservedLate": "比预约时间 {{time}} 晚 {{minutes}} 分钟",

@@ -247,7 +247,10 @@
       "date": "방문 날짜",
       "dateHint": "날짜를 넣으면 요일별 영업시간까지 확인합니다",
       "hoursFilter": "영업시간 확인 {{n}}",
-      "optimizeCarOnly": "자동차일 때만 적용됩니다"
+      "optimizeCarOnly": "자동차일 때만 적용됩니다",
+      "compareLoading": "경로 비교 중…",
+      "compareStats": "{{km}}km · {{minutes}}분",
+      "compareToll": "통행료 {{fare}}원"
     },
     "reservedAt": "예약 {{time}} · 시각 고정",
     "reservedLate": "예약 {{time}}보다 {{minutes}}분 늦습니다",

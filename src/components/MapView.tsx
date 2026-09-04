@@ -29,6 +29,9 @@ interface Props {
   pinCategoryFilter?: SimpleCategory | null;
   origin?: Origin;
   generatedRoute?: GeneratedRoute | null;
+  /** 최적화 3종 비교 경로 — 확정 경로 아래에 겹쳐 그린다 */
+  compareRoutes?: Array<{ optimizeBy: string; color: string; path: Array<{ lat: number; lng: number }> }>;
+  selectedOptimizeBy?: string;
   nearbySearchCenter?: { lat: number; lng: number } | null;
   pickingOriginFromMap?: boolean;
   pickingPinFromMap?: boolean;
@@ -84,6 +87,8 @@ export function MapView({
         pinCategoryFilter={rest.pinCategoryFilter}
         origin={rest.origin}
         generatedRoute={rest.generatedRoute}
+        compareRoutes={rest.compareRoutes}
+        selectedOptimizeBy={rest.selectedOptimizeBy}
         nearbySearchCenter={rest.nearbySearchCenter}
         pickingOriginFromMap={rest.pickingOriginFromMap}
         pickingPinFromMap={rest.pickingPinFromMap}
@@ -128,6 +133,10 @@ function KakaoMapView({
   pinCategoryFilter = null,
   origin,
   generatedRoute,
+
+  compareRoutes,
+
+  selectedOptimizeBy,
   nearbySearchCenter = null,
   pickingOriginFromMap = false,
   pickingPinFromMap = false,
@@ -164,6 +173,7 @@ function KakaoMapView({
   const overlaysRef = useRef<any[]>([]);
   const placeMarkerContentsRef = useRef<HTMLElement[]>([]);
   const polylineRef = useRef<any>(null);
+  const comparePolylinesRef = useRef<any[]>([]);
   const originMarkerRef = useRef<any>(null);
   const searchCenterMarkerRef = useRef<any>(null);
   const infoOverlayRef = useRef<any>(null);
@@ -756,6 +766,37 @@ function KakaoMapView({
     overlay.setMap(mapRef.current);
     searchCenterMarkerRef.current = overlay;
   }, [nearbySearchCenter?.lat, nearbySearchCenter?.lng]);
+
+  /**
+   * 최적화 3종 비교 경로.
+   * 확정된 경로(아래 폴리라인)보다 먼저·연하게 깔아 배경처럼 보이게 한다.
+   * 선택된 기준만 진하게 그려 어느 것을 고른 상태인지 지도에서 바로 보인다.
+   */
+  useEffect(() => {
+    if (!mapRef.current) return;
+    for (const line of comparePolylinesRef.current) line.setMap(null);
+    comparePolylinesRef.current = [];
+    if (!compareRoutes?.length) return;
+
+    for (const r of compareRoutes) {
+      if (r.path.length < 2) continue;
+      const selected = r.optimizeBy === selectedOptimizeBy;
+      const line = new window.kakao.maps.Polyline({
+        path: r.path.map((p) => new window.kakao.maps.LatLng(p.lat, p.lng)),
+        strokeWeight: selected ? 6 : 4,
+        strokeColor: r.color,
+        strokeOpacity: selected ? 0.9 : 0.4,
+        strokeStyle: 'solid',
+        zIndex: selected ? 3 : 2,
+      });
+      line.setMap(mapRef.current);
+      comparePolylinesRef.current.push(line);
+    }
+    return () => {
+      for (const line of comparePolylinesRef.current) line.setMap(null);
+      comparePolylinesRef.current = [];
+    };
+  }, [compareRoutes, selectedOptimizeBy]);
 
   // 생성된 경로 폴리라인
   useEffect(() => {

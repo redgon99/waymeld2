@@ -34,6 +34,9 @@ interface Props {
   pinCategoryFilter?: SimpleCategory | null;
   origin?: Origin;
   generatedRoute?: GeneratedRoute | null;
+  /** 최적화 3종 비교 경로 — 확정 경로 아래에 겹쳐 그린다 */
+  compareRoutes?: Array<{ optimizeBy: string; color: string; path: Array<{ lat: number; lng: number }> }>;
+  selectedOptimizeBy?: string;
   nearbySearchCenter?: { lat: number; lng: number } | null;
   pickingOriginFromMap?: boolean;
   pickingPinFromMap?: boolean;
@@ -74,6 +77,10 @@ export function GoogleMapView({
   pinCategoryFilter = null,
   origin,
   generatedRoute,
+
+  compareRoutes,
+
+  selectedOptimizeBy,
   nearbySearchCenter = null,
   pickingOriginFromMap = false,
   pickingPinFromMap = false,
@@ -111,6 +118,7 @@ export function GoogleMapView({
   const markersRef = useRef<any[]>([]);
   const placeMarkersRef = useRef<GoogleHtmlMarker[]>([]);
   const routeLineRef = useRef<any>(null);
+  const compareLinesRef = useRef<any[]>([]);
   const originMarkerRef = useRef<any>(null);
   const searchCenterMarkerRef = useRef<any>(null);
   const draftPinRef = useRef<any>(null);
@@ -468,6 +476,33 @@ export function GoogleMapView({
       },
     });
   }, [draftPinLocation?.lat, draftPinLocation?.lng, i18n.language]);
+
+  /** 최적화 3종 비교 경로 — 확정 경로 아래에 연하게, 선택된 것만 진하게 */
+  useEffect(() => {
+    if (!mapRef.current) return;
+    for (const line of compareLinesRef.current) line.setMap(null);
+    compareLinesRef.current = [];
+    if (!compareRoutes?.length) return;
+
+    for (const r of compareRoutes) {
+      if (r.path.length < 2) continue;
+      const selected = r.optimizeBy === selectedOptimizeBy;
+      compareLinesRef.current.push(
+        new window.google.maps.Polyline({
+          map: mapRef.current,
+          path: r.path,
+          strokeColor: r.color,
+          strokeOpacity: selected ? 0.9 : 0.4,
+          strokeWeight: selected ? 6 : 4,
+          zIndex: selected ? 3 : 2,
+        }),
+      );
+    }
+    return () => {
+      for (const line of compareLinesRef.current) line.setMap(null);
+      compareLinesRef.current = [];
+    };
+  }, [compareRoutes, selectedOptimizeBy]);
 
   useEffect(() => {
     if (!mapRef.current) return;

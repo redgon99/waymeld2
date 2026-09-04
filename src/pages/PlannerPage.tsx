@@ -56,6 +56,7 @@ import { fetchLegs } from '../lib/mobility';
 import { resolveOriginForRoute } from '../lib/resolveOrigin';
 import { suggestStayMinutes, CATEGORY_MAP } from '../lib/categories';
 import { currentBubblePinRect, flyPinToTab } from '../lib/pinFlyAnimation';
+import { COMPARE_COLORS, type RouteComparison } from '../lib/routeCompare';
 import {
   normalizeTrip,
   DEFAULT_ROUTE_OPTIONS,
@@ -281,6 +282,8 @@ export default function PlannerPage() {
   const [pickingPinFromMap, setPickingPinFromMap] = useState(false);
   const [pendingManualPin, setPendingManualPin] = useState<PendingManualPin | null>(null);
   const [refining, setRefining] = useState(false);
+  // 최적화 3종 비교 경로 — 동선 패널이 받아와 지도에 겹쳐 그린다
+  const [compareRoutes, setCompareRoutes] = useState<RouteComparison[]>([]);
   const isMobile = useIsMobile();
   const [mobileSheet, setMobileSheet] = useState<MobileSheetKind>(null);
   const [mobileSheetLevel, setMobileSheetLevel] = useState<MobileSheetLevel>('half');
@@ -2002,6 +2005,12 @@ export default function PlannerPage() {
           pinCategoryFilter={mapPinCategoryFilter}
           origin={routeOptions.origin}
           generatedRoute={generatedRoute}
+          compareRoutes={compareRoutes.map((c) => ({
+            optimizeBy: c.optimizeBy,
+            color: COMPARE_COLORS[c.optimizeBy],
+            path: c.path,
+          }))}
+          selectedOptimizeBy={routeOptions.optimizeBy}
           nearbySearchCenter={searchScope === 'nearby' ? nearbySearchCenter : null}
           fitSearchBounds={fitSearchBounds}
           fitPinsBounds={presentationMode}
@@ -2163,6 +2172,7 @@ export default function PlannerPage() {
               <RouteOptionsPanel
                 embedded
                 open
+                onCompareRoutesChange={setCompareRoutes}
                 pinned={routePins}
                 currentDay={currentDay}
                 totalDays={trip.totalDays}
@@ -2433,6 +2443,7 @@ export default function PlannerPage() {
                 <RouteOptionsPanel
                   embedded
                   open
+                  onCompareRoutesChange={setCompareRoutes}
                   pinned={routePins}
                   currentDay={currentDay}
                   totalDays={trip.totalDays}

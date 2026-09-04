@@ -247,7 +247,10 @@
       "date": "Fecha de visita",
       "dateHint": "Añade la fecha para comprobar el horario según el día",
       "hoursFilter": "Horarios por revisar {{n}}",
-      "optimizeCarOnly": "Solo se aplica en coche"
+      "optimizeCarOnly": "Solo se aplica en coche",
+      "compareLoading": "Comparando rutas…",
+      "compareStats": "{{km}} km · {{minutes}} min",
+      "compareToll": "Peaje {{fare}} KRW"
     },
     "reservedAt": "Reservado a las {{time}} · hora fija",
     "reservedLate": "{{minutes}} min tarde para la reserva de las {{time}}",

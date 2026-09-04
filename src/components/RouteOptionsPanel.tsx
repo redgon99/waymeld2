@@ -1,5 +1,5 @@
 import { Icon } from './Icon';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type {
   PinnedPlace,
@@ -17,6 +17,12 @@ import { useTravelModeMeta } from '../lib/i18nCategories';
 import { generateRoute } from '../lib/planner';
 import { normalizeLocale } from '../lib/locale';
 import { fetchAiStaySuggestions } from '../lib/routeStaySuggest';
+import {
+ COMPARE_COLORS,
+ compareRouteOptions,
+ comparisonKey,
+ type RouteComparison,
+} from '../lib/routeCompare';
 import { BookingLinkCards } from './BookingLinkCards';
 import { BookingSearchSuggestions } from './BookingSearchSuggestions';
 
@@ -42,6 +48,8 @@ interface Props {
   onUpdateNote?: (placeId: string, note: string) => void;
   /** 좌측 탭 패널 안에 임베드 (고정 우측 슬라이드 비활성) */
   embedded?: boolean;
+  /** 최적화 3종 비교 경로 — 지도에 겹쳐 그리도록 상위로 올린다 */
+  onCompareRoutesChange?: (routes: RouteComparison[]) => void;
 }
 
 const OPTIMIZE_KEYS: OptimizeBy[] = ['distance', 'time', 'no-toll'];
@@ -70,6 +78,7 @@ export function RouteOptionsPanel({
   onUpdateItemKind,
   onUpdateNote,
   embedded = false,
+  onCompareRoutesChange,
 }: Props) {
   const { t, i18n } = useTranslation('planner');
   const travelModeMeta = useTravelModeMeta();
@@ -77,6 +86,8 @@ export function RouteOptionsPanel({
   const [aiStayLoading, setAiStayLoading] = useState(false);
   const [aiStayReasons, setAiStayReasons] = useState<Record<string, string>>({});
   const [hoursOnly, setHoursOnly] = useState(false);
+  const [comparisons, setComparisons] = useState<RouteComparison[]>([]);
+  const [comparing, setComparing] = useState(false);
 
   const preview = useMemo(() => {
     if (pinned.length === 0) return null;
@@ -95,6 +106,49 @@ export function RouteOptionsPanel({
   const hoursProblemCount = hoursProblemStops.length;
   const stayRows: Array<PinnedPlace & Partial<RouteStop>> =
     hoursOnly && hoursProblemCount > 0 ? hoursProblemStops : (preview?.stops ?? pinned);
+
+  /**
+   * 최적화 3종 경로를 미리 받아 지도에 겹쳐 보여준다.
+   * 좌표·이동수단이 그대로면 다시 부르지 않는다(호출 3회를 아끼려고 키로 묶음).
+   */
+  const comparePoints = useMemo(() => {
+    const pts: Array<{ lat: number; lng: number }> = [];
+    if (options.origin.lat !== undefined && options.origin.lng !== undefined) {
+      pts.push({ lat: options.origin.lat, lng: options.origin.lng });
+    }
+    for (const s of preview?.stops ?? pinned) pts.push({ lat: s.lat, lng: s.lng });
+    return pts;
+  }, [options.origin.lat, options.origin.lng, preview, pinned]);
+
+  const compareKey = useMemo(
+    () => comparisonKey(comparePoints, options.travelMode),
+    [comparePoints, options.travelMode],
+  );
+
+  useEffect(() => {
+    if (options.travelMode !== 'car' || comparePoints.length < 2) {
+      setComparisons([]);
+      return;
+    }
+    let alive = true;
+    setComparing(true);
+    void compareRouteOptions(comparePoints, options.travelMode).then((rows) => {
+      if (!alive) return;
+      setComparisons(rows);
+      setComparing(false);
+    });
+    return () => {
+      alive = false;
+    };
+    // comparePoints는 compareKey에 녹아 있다 — 키가 같으면 재호출하지 않는다
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [compareKey]);
+
+  useEffect(() => {
+    onCompareRoutesChange?.(comparisons);
+  }, [comparisons, onCompareRoutesChange]);
+
+  const selectedComparison = comparisons.find((c) => c.optimizeBy === options.optimizeBy) ?? null;
 
   function patch<K extends keyof RouteOptions>(key: K, value: RouteOptions[K]) {
     onChange({ ...options, [key]: value });
@@ -355,6 +409,47 @@ export function RouteOptionsPanel({
           {options.travelMode !== 'car' && (
             <p className="route-optimize-hint">{t('route.options.optimizeCarOnly')}</p>
           )}
+
+          {/* 세 경로를 미리 받아 지도에 겹쳐 보여주고, 여기서 수치로 비교한다 */}
+          {options.travelMode === 'car' && comparing && comparisons.length === 0 && (
+            <p className="route-optimize-hint">{t('route.options.compareLoading')}</p>
+          )}
+          {comparisons.length > 0 && (
+            <ul className="route-compare-list">
+              {comparisons.map((c) => (
+                <li
+                  key={c.optimizeBy}
+                  className={`route-compare-row ${
+                    options.optimizeBy === c.optimizeBy ? 'selected' : ''
+                  }`}
+                >
+                  <button type="button" onClick={() => patch('optimizeBy', c.optimizeBy)}>
+                    <span
+                      className="route-compare-dot"
+                      style={{ background: COMPARE_COLORS[c.optimizeBy] }}
+                      aria-hidden
+                    />
+                    <span className="route-compare-name">{t(OPTIMIZE_I18N[c.optimizeBy])}</span>
+                    <span className="route-compare-stats">
+                      {t('route.options.compareStats', {
+                        km: c.distanceKm,
+                        minutes: c.durationMinutes,
+                      })}
+                      {/* 무료도로는 정의상 0원이라 통행료를 따로 적지 않는다 */}
+                      {c.optimizeBy !== 'no-toll' && c.tollFare !== null && (
+                        <>
+                          {' · '}
+                          {t('route.options.compareToll', {
+                            fare: c.tollFare.toLocaleString('ko-KR'),
+                          })}
+                        </>
+                      )}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
           <div className="route-order-row">
             <button
               type="button"
@@ -529,6 +624,15 @@ export function RouteOptionsPanel({
                 minutes: preview.totalTravelMinutes,
                 time: preview.finishAt,
               })}
+              {/* 무료도로는 0원이 당연하므로 나머지 두 기준에서만 통행료를 적는다 */}
+              {options.optimizeBy !== 'no-toll' && selectedComparison?.tollFare != null && (
+                <>
+                  {' · '}
+                  {t('route.options.compareToll', {
+                    fare: selectedComparison.tollFare.toLocaleString('ko-KR'),
+                  })}
+                </>
+              )}
             </span>
           </div>
         )}
