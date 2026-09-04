@@ -94,6 +94,19 @@
     "pendingLabel": "尚未注册 — 登录后会自动关联",
     "empty": "还没有邀请任何协作者。",
     "readOnlyBanner": "此行程与您共享为仅查看",
-    "editorBanner": "此行程与您共享为协作编辑"
+    "editorBanner": "此行程与您共享为协作编辑",
+    "copyLink": "复制链接",
+    "linkCopied": "已复制",
+    "copyFailed": "无法复制链接。"
+  },
+  "invite": {
+    "heading": "行程协作邀请",
+    "needLogin": "{{inviter}} 邀请你加入“{{trip}}”。使用 {{email}} 登录后将自动关联。",
+    "wrongAccount": "该邀请发送至 {{email}}，但你当前以 {{current}} 登录，因此无法关联。请使用受邀账号登录。",
+    "connecting": "正在将你连接到“{{trip}}”，稍后会出现在列表中。",
+    "alreadyJoined": "你已加入“{{trip}}”。",
+    "notFound": "未找到邀请。链接可能已取消或不正确。",
+    "loginCta": "登录并加入",
+    "dismiss": "关闭"
   }
 }

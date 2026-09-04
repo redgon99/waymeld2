@@ -94,6 +94,19 @@
     "pendingLabel": "Pas encore inscrit — connexion automatique dès la connexion",
     "empty": "Aucun collaborateur invité pour l'instant.",
     "readOnlyBanner": "Voyage partagé avec vous en lecture seule",
-    "editorBanner": "Voyage partagé avec vous en tant qu'éditeur"
+    "editorBanner": "Voyage partagé avec vous en tant qu'éditeur",
+    "copyLink": "Copier le lien",
+    "linkCopied": "Copié",
+    "copyFailed": "Impossible de copier le lien."
+  },
+  "invite": {
+    "heading": "Invitation à co-éditer le voyage",
+    "needLogin": "{{inviter}} vous a invité à « {{trip}} ». Connectez-vous avec {{email}} et la liaison se fera automatiquement.",
+    "wrongAccount": "Cette invitation est destinée à {{email}}, mais vous êtes connecté en tant que {{current}} : la liaison est impossible. Connectez-vous avec le compte invité.",
+    "connecting": "Connexion à « {{trip}} » en cours. Le voyage apparaîtra bientôt dans votre liste.",
+    "alreadyJoined": "Vous participez déjà à « {{trip}} ».",
+    "notFound": "Invitation introuvable. Le lien a peut-être été annulé ou est incorrect.",
+    "loginCta": "Se connecter pour rejoindre",
+    "dismiss": "Fermer"
   }
 }

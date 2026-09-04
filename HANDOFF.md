@@ -355,3 +355,31 @@ Supabase 프로젝트 ref: `ainftwifvclgiookzrwm` (대시보드: `https://supaba
 **교훈 (다음 세션이 꼭 기억할 것):** **RLS에 "내 것 판별"을 맡기지 말 것.** RLS는 "접근해도 되는가"를 정하고, 화면 목록은 대개 그보다 의도적으로 좁은 질의다. 정책이 하나 추가되면 조용히 넓어진다.
 
 **검증:** PostgREST에 실제 요청을 보내 `.or()` 필터 문법이 200으로 파싱되는지 확인(문법 오류는 타입체크로 안 잡힌다). 위 표의 4가지 사용자 유형을 롤백 트랜잭션으로 각각 검증. `tsc`·`npm run build` 클린.
+
+---
+
+## 3-12. 초대 알림 — 초대 링크 방식 (A안, 완료)
+
+**문제:** 협업자 초대는 `trip_invites`에 행을 넣는 게 전부였고, **초대받은 사람에게 알림이 전혀 가지 않았다.** 저장소 전체에 이메일 발송 수단(Resend·SendGrid·SMTP 등)이 없다. 초대받은 사람이 그 이메일로 로그인해야 `accept_trip_invites()`가 연결하는데, 로그인하게 만들 방법 자체가 없었다.
+
+**선택:** 사용자와 논의해 **A안(초대 링크 복사)**으로 진행. 외부 서비스 없이 오늘 해결되고, 나중에 이메일 발송(B안)을 붙일 때 링크를 본문에 그대로 넣으면 되므로 버려지는 작업이 없다.
+
+**변경한 파일:**
+1. `supabase/migrations/20260904100000_trip_invite_preview.sql` (신규) — `mask_email()`, `get_trip_invite_preview(p_invite_id)`. `trip_invites`의 SELECT 정책은 소유자 전용이라 **초대받은 사람이 자기 초대를 못 읽는다.** SECURITY DEFINER로 최소 정보만 돌려준다.
+2. `src/lib/trips.ts` — `buildInviteLink()`, `fetchInvitePreview()`
+3. `src/components/CollaboratorsModal.tsx` — 대기 중 초대마다 "링크 복사"
+4. `src/components/InviteBanner.tsx` (신규) — `/plan?invite=<id>` 진입 시 안내 배너
+5. `src/pages/PlannerPage.tsx` — 배너 배치
+6. `src/locales/*/share.json` (9개) — `collab.copyLink/linkCopied/copyFailed`, `invite.*` 8키
+7. `src/styles/app.css` — `.invite-banner*`, `.collab-copy-link-btn`
+
+**보안 설계:**
+- **링크만으로는 권한이 생기지 않는다.** 연결은 여전히 `accept_trip_invites()`가 로그인 계정 이메일과 `trip_invites.email`이 일치할 때만 수행한다. 링크는 "알림" 역할일 뿐이다.
+- 미리보기는 로그아웃 상태(anon)에서도 봐야 하므로 anon에 실행 권한을 준다. 대신 **이메일을 마스킹**(`gwf***@gmail.com`)하고 여행 제목·권한 외에는 아무것도 반환하지 않는다. 여행 내용·소유자 id는 노출되지 않는다.
+- `trip_invites` 원본 테이블 직접 조회는 여전히 anon에게 0건이다(확인함).
+
+**배너가 다루는 4가지 상태:** 미로그인(로그인 CTA) / **다른 계정으로 로그인**(초대 대상 이메일을 알려줌 — 이게 없으면 조용히 실패한다) / 연결 중 / 이미 참여 중. 취소·잘못된 링크는 "초대를 찾을 수 없습니다".
+
+**검증:** 로그아웃 상태 브라우저(Playwright)로 실제 초대 링크 진입 → `red***@gmail.com님이 «춘천여행» 여행에 초대했습니다. gwf***@gmail.com 계정으로 로그인하면…` 정상 표시, 잘못된 id → "초대를 찾을 수 없습니다", JS 오류 없음. 9개 로케일 키 존재 확인. `tsc`·`npm run build` 클린.
+
+**⚠️ 남은 것:** B안(실제 이메일 발송)은 미착수. 외부 서비스 가입 + 발신 도메인 인증(SPF/DKIM)이 선행되어야 한다.

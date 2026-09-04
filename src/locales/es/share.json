@@ -94,6 +94,19 @@
     "pendingLabel": "Aún no registrado — se conecta automáticamente al iniciar sesión",
     "empty": "Todavía no has invitado a nadie.",
     "readOnlyBanner": "Viaje compartido contigo solo para ver",
-    "editorBanner": "Viaje compartido contigo como editor"
+    "editorBanner": "Viaje compartido contigo como editor",
+    "copyLink": "Copiar enlace",
+    "linkCopied": "Copiado",
+    "copyFailed": "No se pudo copiar el enlace."
+  },
+  "invite": {
+    "heading": "Invitación a editar el viaje",
+    "needLogin": "{{inviter}} te invitó a «{{trip}}». Inicia sesión con {{email}} y se conectará automáticamente.",
+    "wrongAccount": "Esta invitación es para {{email}}, pero has iniciado sesión como {{current}}, así que no se puede conectar. Inicia sesión con la cuenta invitada.",
+    "connecting": "Conectándote a «{{trip}}». Aparecerá en tu lista en breve.",
+    "alreadyJoined": "Ya participas en «{{trip}}».",
+    "notFound": "No se encontró la invitación. El enlace pudo cancelarse o ser incorrecto.",
+    "loginCta": "Iniciar sesión para unirte",
+    "dismiss": "Cerrar"
   }
 }

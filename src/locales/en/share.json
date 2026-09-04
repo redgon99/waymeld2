@@ -94,6 +94,19 @@
     "pendingLabel": "Not signed up yet — connects automatically once they sign in",
     "empty": "No collaborators invited yet.",
     "readOnlyBanner": "Shared with you as view-only",
-    "editorBanner": "Shared with you as an editor"
+    "editorBanner": "Shared with you as an editor",
+    "copyLink": "Copy link",
+    "linkCopied": "Copied",
+    "copyFailed": "Could not copy the link."
+  },
+  "invite": {
+    "heading": "Trip collaboration invite",
+    "needLogin": "{{inviter}} invited you to “{{trip}}”. Sign in with {{email}} and you will be connected automatically.",
+    "wrongAccount": "This invite was sent to {{email}}, but you are signed in as {{current}}, so it cannot be connected. Please sign in with the invited account.",
+    "connecting": "Connecting you to “{{trip}}”. It will appear in your list shortly.",
+    "alreadyJoined": "You have already joined “{{trip}}”.",
+    "notFound": "Invite not found. The link may have been cancelled or is incorrect.",
+    "loginCta": "Sign in to join",
+    "dismiss": "Close"
   }
 }

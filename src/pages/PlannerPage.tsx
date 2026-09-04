@@ -73,6 +73,7 @@ import {
 import type { ShareTripModalSubmit } from '../components/ShareTripModal';
 import { ShareTripModal } from '../components/ShareTripModal';
 import { CollaboratorsModal } from '../components/CollaboratorsModal';
+import { InviteBanner } from '../components/InviteBanner';
 import { PlannerAppBar } from '../components/PlannerAppBar';
 import { TripSelectMenu } from '../components/TripSelectMenu';
 import { ItineraryTableView } from '../components/ItineraryTableView';
@@ -2023,6 +2024,8 @@ export default function PlannerPage() {
       >
         <Icon name="layers" size={18} />
       </button>
+
+      <InviteBanner />
 
       {trip.collaboratorRole && (
         <div className="trip-readonly-banner">

@@ -436,6 +436,42 @@ export async function listCollaborators(tripId: string): Promise<TripCollaborato
   }));
 }
 
+/** 초대 링크. 아직 이메일 발송 수단이 없어 소유자가 직접 전달한다. */
+export function buildInviteLink(inviteId: string): string {
+  const origin = typeof window !== 'undefined' ? window.location.origin : '';
+  return `${origin}/plan?invite=${inviteId}`;
+}
+
+export interface TripInvitePreview {
+  tripTitle: string;
+  role: CollaboratorRole;
+  accepted: boolean;
+  /** 마스킹된 주소 — 어느 계정으로 로그인해야 하는지 알아볼 정도만 */
+  invitedEmail: string | null;
+  inviterEmail: string | null;
+}
+
+/**
+ * 초대 링크로 들어온 사람에게 보여줄 최소 정보.
+ * trip_invites는 소유자만 읽을 수 있어 SECURITY DEFINER 함수를 거친다.
+ * 링크만으로는 권한이 생기지 않는다 — 실제 연결은 로그인 계정의 이메일이
+ * 초대 이메일과 일치할 때 accept_trip_invites()가 수행한다.
+ */
+export async function fetchInvitePreview(inviteId: string): Promise<TripInvitePreview | null> {
+  const sb = getSupabase();
+  if (!sb) return null;
+  const { data, error } = await sb.rpc('get_trip_invite_preview', { p_invite_id: inviteId });
+  if (error || !data) return null;
+  const row = data as Record<string, unknown>;
+  return {
+    tripTitle: (row.trip_title as string) ?? '',
+    role: (row.role as CollaboratorRole) ?? 'editor',
+    accepted: Boolean(row.accepted),
+    invitedEmail: (row.invited_email as string | null) ?? null,
+    inviterEmail: (row.inviter_email as string | null) ?? null,
+  };
+}
+
 export async function listPendingInvites(tripId: string): Promise<TripInvite[]> {
   const sb = getSupabase();
   if (!sb) return [];

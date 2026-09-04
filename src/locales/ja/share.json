@@ -94,6 +94,19 @@
     "pendingLabel": "未登録 — ログインすると自動的に連携されます",
     "empty": "まだ招待した共同編集者がいません。",
     "readOnlyBanner": "閲覧専用で共有された旅行です",
-    "editorBanner": "編集者として共有された旅行です"
+    "editorBanner": "編集者として共有された旅行です",
+    "copyLink": "リンクをコピー",
+    "linkCopied": "コピーしました",
+    "copyFailed": "リンクをコピーできませんでした。"
+  },
+  "invite": {
+    "heading": "旅行の共同編集への招待",
+    "needLogin": "{{inviter}}さんが「{{trip}}」に招待しました。{{email}} でログインすると自動的に連携されます。",
+    "wrongAccount": "この招待は {{email}} 宛てです。現在 {{current}} でログインしているため連携できません。招待されたアカウントでログインしてください。",
+    "connecting": "「{{trip}}」に接続しています。まもなく一覧に表示されます。",
+    "alreadyJoined": "すでに「{{trip}}」に参加しています。",
+    "notFound": "招待が見つかりません。リンクが取り消されたか、正しくない可能性があります。",
+    "loginCta": "ログインして参加",
+    "dismiss": "閉じる"
   }
 }

@@ -94,6 +94,19 @@
     "pendingLabel": "Noch nicht registriert — wird bei der Anmeldung automatisch verknüpft",
     "empty": "Noch keine Mitwirkenden eingeladen.",
     "readOnlyBanner": "Diese Reise wurde nur zum Ansehen mit dir geteilt",
-    "editorBanner": "Diese Reise wurde als Bearbeiter mit dir geteilt"
+    "editorBanner": "Diese Reise wurde als Bearbeiter mit dir geteilt",
+    "copyLink": "Link kopieren",
+    "linkCopied": "Kopiert",
+    "copyFailed": "Der Link konnte nicht kopiert werden."
+  },
+  "invite": {
+    "heading": "Einladung zur Reise-Zusammenarbeit",
+    "needLogin": "{{inviter}} hat dich zu „{{trip}}“ eingeladen. Melde dich mit {{email}} an, dann wird die Reise automatisch verknüpft.",
+    "wrongAccount": "Diese Einladung gilt für {{email}}, du bist aber als {{current}} angemeldet – die Verknüpfung ist nicht möglich. Bitte melde dich mit dem eingeladenen Konto an.",
+    "connecting": "Du wirst mit „{{trip}}“ verbunden. Die Reise erscheint gleich in deiner Liste.",
+    "alreadyJoined": "Du nimmst bereits an „{{trip}}“ teil.",
+    "notFound": "Einladung nicht gefunden. Der Link wurde möglicherweise storniert oder ist falsch.",
+    "loginCta": "Anmelden und beitreten",
+    "dismiss": "Schließen"
   }
 }

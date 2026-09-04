@@ -8,6 +8,7 @@ import {
   updateCollaboratorRole,
   removeCollaborator,
   cancelInvite,
+  buildInviteLink,
   type TripCollaborator,
   type TripInvite,
   type CollaboratorRole,
@@ -31,6 +32,22 @@ export function CollaboratorsModal({ open, tripId, tripTitle, currentUserId, onC
   const [role, setRole] = useState<CollaboratorRole>('editor');
   const [inviting, setInviting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  /**
+   * 아직 초대 메일을 보내는 수단이 없어서, 소유자가 링크를 복사해
+   * 직접(카톡·문자 등) 전달한다. 링크만으로는 권한이 생기지 않고
+   * 초대한 이메일로 로그인해야 연결된다.
+   */
+  const handleCopyLink = async (inviteId: string) => {
+    try {
+      await navigator.clipboard.writeText(buildInviteLink(inviteId));
+      setCopiedId(inviteId);
+      window.setTimeout(() => setCopiedId((prev) => (prev === inviteId ? null : prev)), 2000);
+    } catch {
+      setError(t('collab.copyFailed'));
+    }
+  };
 
   const refresh = async () => {
     setLoading(true);
@@ -171,6 +188,13 @@ export function CollaboratorsModal({ open, tripId, tripTitle, currentUserId, onC
                         <span className="collab-role-badge">
                           {i.role === 'editor' ? t('collab.roleEditor') : t('collab.roleViewer')}
                         </span>
+                        <button
+                          type="button"
+                          className="collab-copy-link-btn"
+                          onClick={() => void handleCopyLink(i.id)}
+                        >
+                          {copiedId === i.id ? t('collab.linkCopied') : t('collab.copyLink')}
+                        </button>
                         <button
                           type="button"
                           className="collab-remove-btn"
