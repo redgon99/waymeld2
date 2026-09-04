@@ -4,11 +4,16 @@ import { useAuth } from '../hooks/useAuth';
 import { AdminHeader } from '../components/AdminHeader';
 import { isCurrentUserAdmin } from '../lib/admin';
 import {
+  fetchReportTargetStates,
   listContentReports,
+  moderateReport,
   updateContentReport,
+  MODERATABLE_TARGETS,
+  MODERATION_ACTION_LABEL,
   REPORT_STATUSES,
   type ContentReport,
   type ReportStatus,
+  type ReportTargetState,
 } from '../lib/contentReports';
 import '../styles/app.css';
 
@@ -51,12 +56,20 @@ export default function AdminReportsPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<StatusFilter>('open');
   const [reports, setReports] = useState<ContentReport[]>([]);
+  const [targetStates, setTargetStates] = useState<Map<string, ReportTargetState>>(new Map());
+  const [moderatingId, setModeratingId] = useState<string | null>(null);
 
   const loadAll = useCallback(async (status: StatusFilter) => {
     setRefreshing(true);
     setError(null);
     try {
-      setReports(await listContentReports(status));
+      const [rows, states] = await Promise.all([
+        listContentReports(status),
+        // 대상 상태 조회가 실패해도 목록 자체는 보여준다
+        fetchReportTargetStates().catch(() => new Map<string, ReportTargetState>()),
+      ]);
+      setReports(rows);
+      setTargetStates(states);
     } catch (e) {
       setError(e instanceof Error ? e.message : '신고 목록을 불러오지 못했습니다.');
     } finally {
@@ -100,6 +113,24 @@ export default function AdminReportsPage() {
       await loadAll(filter);
     } catch (e) {
       setError(e instanceof Error ? e.message : '상태 변경 실패');
+    }
+  };
+
+  const handleModerate = async (report: ContentReport) => {
+    const action = MODERATION_ACTION_LABEL[report.targetType] ?? '제재';
+    const label = report.targetLabel ?? report.targetId;
+    if (!window.confirm(`"${label}"을(를) ${action} 처리하고 신고를 조치 완료로 바꿉니다. 진행할까요?`)) {
+      return;
+    }
+    setModeratingId(report.id);
+    setError(null);
+    try {
+      await moderateReport(report.id);
+      await loadAll(filter);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '제재 처리 실패');
+    } finally {
+      setModeratingId(null);
     }
   };
 
@@ -192,6 +223,7 @@ export default function AdminReportsPage() {
                   <th>사유</th>
                   <th>내용</th>
                   <th>신고자</th>
+                  <th>대상 상태 · 제재</th>
                   <th>상태</th>
                   <th>관리 메모</th>
                 </tr>
@@ -217,6 +249,35 @@ export default function AdminReportsPage() {
                     <td>{REASON_LABEL[r.reason]}</td>
                     <td className="admin-cell-detail">{r.detail ?? '-'}</td>
                     <td className="mono">{r.reporterId ?? '익명'}</td>
+                    <td>
+                      {(() => {
+                        const state = targetStates.get(r.id);
+                        const canModerate = MODERATABLE_TARGETS.includes(r.targetType);
+                        if (!canModerate) {
+                          return <span className="admin-cell-sub">제재 대상 아님</span>;
+                        }
+                        if (!state) {
+                          return <span className="admin-cell-sub">상태 확인 불가</span>;
+                        }
+                        return (
+                          <>
+                            <div className="admin-cell-sub">{state.stateLabel}</div>
+                            {state.targetExists && state.isActive && (
+                              <button
+                                type="button"
+                                className="admin-moderate-btn"
+                                disabled={moderatingId === r.id}
+                                onClick={() => void handleModerate(r)}
+                              >
+                                {moderatingId === r.id
+                                  ? '처리 중…'
+                                  : MODERATION_ACTION_LABEL[r.targetType]}
+                              </button>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </td>
                     <td>
                       <select
                         value={r.status}
@@ -247,7 +308,7 @@ export default function AdminReportsPage() {
                 ))}
                 {reports.length === 0 && (
                   <tr>
-                    <td colSpan={7}>표시할 신고가 없습니다.</td>
+                    <td colSpan={8}>표시할 신고가 없습니다.</td>
                   </tr>
                 )}
               </tbody>

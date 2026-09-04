@@ -163,6 +163,51 @@ export async function updateContentReport(
   if (error) throw error;
 }
 
+/** 신고 대상의 현재 상태 — 제재 버튼 활성/비활성과 "이미 조치됨" 표시에 쓴다 */
+export interface ReportTargetState {
+  reportId: string;
+  targetExists: boolean;
+  /** 아직 공개/게시 중이라 제재할 여지가 있는가. place처럼 제재 대상이 아니면 null */
+  isActive: boolean | null;
+  stateLabel: string;
+}
+
+/** 제재 액션이 있는 대상 유형 (place는 신고 UI가 없고 내릴 콘텐츠도 없다) */
+export const MODERATABLE_TARGETS: ReportTargetType[] = ['trip', 'plaza_listing', 'guide'];
+
+export const MODERATION_ACTION_LABEL: Record<string, string> = {
+  trip: '비공개 전환',
+  plaza_listing: '마당에서 내리기',
+  guide: '게시중지',
+};
+
+export async function fetchReportTargetStates(): Promise<Map<string, ReportTargetState>> {
+  const sb = requireSupabase();
+  const { data, error } = await sb.rpc('admin_report_target_states');
+  if (error) throw error;
+  const map = new Map<string, ReportTargetState>();
+  for (const raw of (data ?? []) as Array<Record<string, unknown>>) {
+    const reportId = raw.report_id as string;
+    map.set(reportId, {
+      reportId,
+      targetExists: Boolean(raw.target_exists),
+      isActive: raw.is_active === null ? null : Boolean(raw.is_active),
+      stateLabel: (raw.state_label as string) ?? '-',
+    });
+  }
+  return map;
+}
+
+/**
+ * 신고 대상에 제재를 가하고 신고를 '조치 완료'로 바꾼다 — 한 트랜잭션.
+ * 대상 유형은 서버가 신고 행에서 직접 읽으므로 호출자가 어긋나게 지정할 수 없다.
+ */
+export async function moderateReport(reportId: string): Promise<void> {
+  const sb = requireSupabase();
+  const { error } = await sb.rpc('admin_moderate_report', { p_report_id: reportId });
+  if (error) throw error;
+}
+
 export async function countOpenReports(): Promise<number> {
   const sb = requireSupabase();
   const { count, error } = await sb

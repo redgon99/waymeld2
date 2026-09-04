@@ -12874,6 +12874,29 @@ button {
   word-break: break-word;
 }
 
+/* 신고 검수 — 직접 제재 버튼 */
+.admin-moderate-btn {
+  margin-top: 4px;
+  padding: 3px 10px;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.admin-moderate-btn:hover:not(:disabled) {
+  background: #fee2e2;
+}
+
+.admin-moderate-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
 /* 관리자 목록 검색·페이지네이션 */
 .admin-search-input {
   flex: 1 1 260px;
