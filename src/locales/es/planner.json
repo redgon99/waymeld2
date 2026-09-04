@@ -226,7 +226,7 @@
       "aiSuggesting": "La IA está pensando…",
       "stayMinutesAria": "{{name}} estancia (min)",
       "preview": "Vista previa",
-      "previewStats": "{{km}} km · {{minutes}} min · termina {{time}}",
+      "previewStats": "{{km}} km · {{minutes}} min de trayecto · {{stayMinutes}} min de estancia · termina {{time}}",
       "build": "Crear ruta",
       "rebuild": "Recrear ruta",
       "stayReason": {

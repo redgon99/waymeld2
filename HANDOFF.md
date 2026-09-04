@@ -413,8 +413,8 @@ Supabase 프로젝트 ref: `ainftwifvclgiookzrwm` (대시보드: `https://supaba
 | # | 문제 | 상태 |
 |---|---|---|
 | 1 | **최적화 3버튼이 아무 일도 안 함** | ✅ 완료 (§3-15) |
-| 2 | Preview의 "13분"과 "ends 20:10"이 서로 다른 기준 | **다음 착수 대상** |
-| 3 | AI 자동 추천이 기본 ON이라 두 번 눌러야 실제 호출 | 미착수 |
+| 2 | Preview의 "13분"과 "ends 20:10"이 서로 다른 기준 | ✅ 완료 (§3-17) |
+| 3 | AI 자동 추천이 기본 ON이라 두 번 눌러야 실제 호출 | **다음 착수 대상** |
 | 4 | "핀 순서" 모드인데 동선 패널에서 순서 변경 불가 | 미착수 |
 | 5 | 날짜를 비우면 영업시간 검증이 조용히 꺼짐 | 미착수 |
 
@@ -454,6 +454,27 @@ Supabase 프로젝트 ref: `ainftwifvclgiookzrwm` (대시보드: `https://supaba
 **검증:** 안동 4지점 실호출 — 최단거리 88.9km·130분, 최소시간 103.2km·115분으로 경로가 실제 갈리고 좌표가 2000개씩 온다. `tsc`·`build` 클린. 커밋 `ab69c47`.
 
 **⚠️ 남은 확인:** 폴리라인이 지도에 실제로 그려지는지는 **브라우저 확인 전.**
+
+---
+
+## 3-17. 동선짜기 UX 검토 2번 — Preview 시간 표기 기준 통일 (완료)
+
+**문제:** Preview 한 줄에 "{{km}} km · {{minutes}}분 · ends {{time}}"이 떴는데, `minutes`는 **이동시간만**(`preview.totalTravelMinutes`)이고 `ends`(`preview.finishAt`)는 **이동+체류를 전부 더한** 도착 시각이었다. 라벨이 그냥 "분"이라 뭘 뜻하는지 알 수 없고, 두 숫자가 서로 안 맞는 것처럼 보였다.
+
+**원인 확인:** `src/lib/planner.ts`의 `generateRoute()`가 이미 `totalStayMinutes`(체류시간 합)를 계산해 `GeneratedRoute`에 담고 있었는데(`types/index.ts:234`), `RouteOptionsPanel.tsx`가 그 필드를 읽지 않고 있었을 뿐이었다. 새로 합산 로직을 짤 필요는 없었다.
+
+**해법:** `RouteOptionsPanel.tsx:622-627`에서 `stayMinutes: preview.totalStayMinutes`를 i18n 호출에 추가하고, 9개 로케일의 `route.options.previewStats`를 "이동 {{minutes}}분 · 체류 {{stayMinutes}}분 · {{time}} 끝" 형태로 갈랐다. 새 단어를 지어내지 않고 이미 앱에 있는 표현을 그대로 재사용했다:
+- 이동시간 표현은 기존 `detailTravel` 키("이동 {{minutes}}분" 등, `RouteOptionsPanel.tsx`의 스톱별 상세에 이미 쓰이던 문구)와 동일하게
+- 종료시각 표현은 기존 `pillNext` 키의 "{{finish}} 끝"/"ends {{finish}}"/"{{finish}} 終了" 패턴과 동일하게
+- 체류시간 명사는 기존 `stayMinutesAria`가 쓰던 단어(체류/stay/滞在/停留/estancia/Aufenthalt)를 재사용
+
+부수적으로 ja/zh-CN/zh-TW 세 로케일에 남아있던 번역 누락(영어 "ends"가 그대로 노출)도 함께 고쳤다("終了"/"结束"/"結束").
+
+**변경한 파일:** `src/components/RouteOptionsPanel.tsx`, `src/locales/{ko,en,ja,zh-CN,zh-TW,es,fr,de,ru}/planner.json`
+
+**확인한 것:** 9개 로케일 JSON 전부 `JSON.parse` 통과, `tsc --noEmit`·`npm run build` 클린, `previewStats` 키가 이 한 곳에서만 쓰이는 것 확인(다른 곳에 영향 없음).
+
+**⚠️ 남은 확인:** 이번 세션에는 브라우저 자동화 도구(Playwright 등)가 연결돼 있지 않아 **실제 화면에서 줄이 어떻게 보이는지, 줄바꿈 없이 한 줄에 들어가는지는 직접 확인 못 했다.** 특히 en/es/fr/de/ru는 문구가 길어져서(예: "12.3 km · 25 min travel · 40 min stay · ends 20:10") 좁은 화면에서 잘리거나 줄바꿈될 수 있으니 다음 세션에서 브라우저로 꼭 확인할 것.
 
 ---
 

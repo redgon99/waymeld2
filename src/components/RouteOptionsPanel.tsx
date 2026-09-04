@@ -622,6 +622,7 @@ export function RouteOptionsPanel({
               {t('route.options.previewStats', {
                 km: preview.totalDistanceKm,
                 minutes: preview.totalTravelMinutes,
+                stayMinutes: preview.totalStayMinutes,
                 time: preview.finishAt,
               })}
               {/* 무료도로는 0원이 당연하므로 나머지 두 기준에서만 통행료를 적는다 */}

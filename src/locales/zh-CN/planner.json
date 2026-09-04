@@ -212,7 +212,7 @@
       "aiSuggesting": "AI推荐中…",
       "stayMinutesAria": "{{name}} 停留时间(分钟)",
       "preview": "Preview 预估",
-      "previewStats": "{{km}} km · {{minutes}} 分钟 · ends {{time}}",
+      "previewStats": "{{km}} km · 移动 {{minutes}} 分钟 · 停留 {{stayMinutes}} 分钟 · {{time}} 结束",
       "build": "Build route · 创建路线",
       "rebuild": "Rebuild route · 重新创建路线",
       "stayReason": {

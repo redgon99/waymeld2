@@ -226,7 +226,7 @@
       "aiSuggesting": "KI denkt nach…",
       "stayMinutesAria": "Aufenthalt {{name}} (Min.)",
       "preview": "Vorschau",
-      "previewStats": "{{km}} km · {{minutes}} Min. · Ende {{time}}",
+      "previewStats": "{{km}} km · {{minutes}} Min. Fahrt · {{stayMinutes}} Min. Aufenthalt · Ende {{time}}",
       "build": "Route erstellen",
       "rebuild": "Route neu erstellen",
       "stayReason": {

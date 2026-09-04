@@ -226,7 +226,7 @@
       "aiSuggesting": "L’IA réfléchit…",
       "stayMinutesAria": "Durée à {{name}} (min)",
       "preview": "Aperçu",
-      "previewStats": "{{km}} km · {{minutes}} min · fin {{time}}",
+      "previewStats": "{{km}} km · {{minutes}} min de trajet · {{stayMinutes}} min sur place · fin {{time}}",
       "build": "Créer l’itinéraire",
       "rebuild": "Recréer l’itinéraire",
       "stayReason": {

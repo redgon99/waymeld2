@@ -226,7 +226,7 @@
       "aiSuggesting": "AI 추천 중…",
       "stayMinutesAria": "{{name}} 체류시간(분)",
       "preview": "Preview 예상",
-      "previewStats": "{{km}} km · {{minutes}}분 · ends {{time}}",
+      "previewStats": "{{km}} km · 이동 {{minutes}}분 · 체류 {{stayMinutes}}분 · {{time}} 끝",
       "build": "Build route · 동선 만들기",
       "rebuild": "Rebuild route · 동선 다시 만들기",
       "stayReason": {

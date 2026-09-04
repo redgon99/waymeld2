@@ -226,7 +226,7 @@
       "aiSuggesting": "ИИ думает…",
       "stayMinutesAria": "Стоянка {{name}} (мин)",
       "preview": "Предпросмотр",
-      "previewStats": "{{km}} км · {{minutes}} мин · окончание {{time}}",
+      "previewStats": "{{km}} км · {{minutes}} мин в пути · {{stayMinutes}} мин на месте · окончание {{time}}",
       "build": "Построить маршрут",
       "rebuild": "Перестроить маршрут",
       "stayReason": {

@@ -212,7 +212,7 @@
       "aiSuggesting": "AI推薦中…",
       "stayMinutesAria": "{{name}} 滞在時間(分)",
       "preview": "Preview 予想",
-      "previewStats": "{{km}} km · {{minutes}}分 · ends {{time}}",
+      "previewStats": "{{km}} km · 移動 {{minutes}}分 · 滞在 {{stayMinutes}}分 · {{time}} 終了",
       "build": "Build route · ルート作成",
       "rebuild": "Rebuild route · ルート作り直し",
       "stayReason": {
