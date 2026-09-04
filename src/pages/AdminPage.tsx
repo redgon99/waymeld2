@@ -12,16 +12,58 @@ import {
   listAdminNotices,
   listAdminUserAccounts,
   listAdminUserRows,
+  listPlazaListings,
   removeAdminUserAccount,
   updateAdminNotice,
   upsertUserVerification,
+  ADMIN_PAGE_SIZE,
   type AdminNotice,
+  type AdminPlazaListing,
   type AdminShareStats,
   type AdminUserAccount,
   type AdminUserRow,
 } from '../lib/admin';
 import { evaluateTier3Gates, type GateStatus } from '../lib/tierGates';
 import '../styles/app.css';
+
+/** 서버 페이지네이션용 이전/다음 컨트롤. 총 건수가 한 페이지 이하면 숨는다. */
+function Pager({
+  page,
+  total,
+  onPage,
+}: {
+  page: number;
+  total: number;
+  onPage: (next: number) => void;
+}) {
+  const lastPage = Math.max(Math.ceil(total / ADMIN_PAGE_SIZE) - 1, 0);
+  if (total <= ADMIN_PAGE_SIZE) return null;
+  const from = page * ADMIN_PAGE_SIZE + 1;
+  const to = Math.min((page + 1) * ADMIN_PAGE_SIZE, total);
+  return (
+    <div className="admin-pager">
+      <button
+        type="button"
+        className="admin-link-btn"
+        disabled={page <= 0}
+        onClick={() => onPage(page - 1)}
+      >
+        이전
+      </button>
+      <span className="admin-cell-sub">
+        {from}–{to} / {total}
+      </span>
+      <button
+        type="button"
+        className="admin-link-btn"
+        disabled={page >= lastPage}
+        onClick={() => onPage(page + 1)}
+      >
+        다음
+      </button>
+    </div>
+  );
+}
 
 function formatDateTime(iso: string | null): string {
   if (!iso) return '-';
@@ -38,6 +80,15 @@ export default function AdminPage() {
   const [refreshing, setRefreshing] = useState(false);
 
   const [users, setUsers] = useState<AdminUserRow[]>([]);
+  const [userTotal, setUserTotal] = useState(0);
+  const [userSearch, setUserSearch] = useState('');
+  const [userPage, setUserPage] = useState(0);
+
+  const [plaza, setPlaza] = useState<AdminPlazaListing[]>([]);
+  const [plazaTotal, setPlazaTotal] = useState(0);
+  const [plazaSearch, setPlazaSearch] = useState('');
+  const [plazaPage, setPlazaPage] = useState(0);
+
   const [stats, setStats] = useState<AdminShareStats | null>(null);
   const [notices, setNotices] = useState<AdminNotice[]>([]);
   const [gates, setGates] = useState<GateStatus[]>([]);
@@ -58,14 +109,12 @@ export default function AdminPage() {
     setRefreshing(true);
     setError(null);
     try {
-      const [userRows, shareStats, noticeRows, gateRows, adminRows] = await Promise.all([
-        listAdminUserRows(),
+      const [shareStats, noticeRows, gateRows, adminRows] = await Promise.all([
         fetchAdminShareStats(),
         listAdminNotices(),
         evaluateTier3Gates(),
         listAdminUserAccounts(),
       ]);
-      setUsers(userRows);
       setStats(shareStats);
       setNotices(noticeRows);
       setGates(gateRows);
@@ -77,6 +126,50 @@ export default function AdminPage() {
       setRefreshing(false);
     }
   }, []);
+
+  /**
+   * 목록 두 개는 서버에서 페이지 단위로 가져온다. 검색어는 타이핑마다
+   * 요청이 나가지 않도록 디바운스한다.
+   */
+  const loadUsers = useCallback(async (search: string, page: number) => {
+    try {
+      const result = await listAdminUserRows({
+        search,
+        limit: ADMIN_PAGE_SIZE,
+        offset: page * ADMIN_PAGE_SIZE,
+      });
+      setUsers(result.rows);
+      setUserTotal(result.totalCount);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '사용자 목록을 불러오지 못했습니다.');
+    }
+  }, []);
+
+  const loadPlaza = useCallback(async (search: string, page: number) => {
+    try {
+      const result = await listPlazaListings({
+        search,
+        limit: ADMIN_PAGE_SIZE,
+        offset: page * ADMIN_PAGE_SIZE,
+      });
+      setPlaza(result.rows);
+      setPlazaTotal(result.totalCount);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '공유마당 목록을 불러오지 못했습니다.');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const timer = setTimeout(() => void loadUsers(userSearch, userPage), 250);
+    return () => clearTimeout(timer);
+  }, [isAdmin, userSearch, userPage, loadUsers]);
+
+  useEffect(() => {
+    if (!isAdmin) return;
+    const timer = setTimeout(() => void loadPlaza(plazaSearch, plazaPage), 250);
+    return () => clearTimeout(timer);
+  }, [isAdmin, plazaSearch, plazaPage, loadPlaza]);
 
   useEffect(() => {
     if (!configured || loading || !user) {
@@ -160,7 +253,7 @@ export default function AdminPage() {
         isVerified: !row.isVerified,
         memo: row.memo ?? '',
       });
-      await loadAll();
+      await loadUsers(userSearch, userPage);
     } catch (e) {
       setError(e instanceof Error ? e.message : '사용자 확인 상태 변경 실패');
     }
@@ -173,7 +266,7 @@ export default function AdminPage() {
         isVerified: row.isVerified,
         memo,
       });
-      await loadAll();
+      await loadUsers(userSearch, userPage);
     } catch (e) {
       setError(e instanceof Error ? e.message : '메모 저장 실패');
     }
@@ -355,12 +448,27 @@ export default function AdminPage() {
         </section>
 
         <section className="admin-section">
-          <h2>현재 사용자확인 관리</h2>
+          <h2>현재 사용자확인 관리 ({userTotal}명)</h2>
+
+          <div className="admin-filter-row">
+            <input
+              type="search"
+              className="admin-search-input"
+              value={userSearch}
+              placeholder="이메일 · 메모 · 사용자 ID로 검색"
+              onChange={(e) => {
+                setUserSearch(e.target.value);
+                setUserPage(0);
+              }}
+              aria-label="사용자 검색"
+            />
+          </div>
+
           <div className="admin-table-wrap">
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>사용자 ID</th>
+                  <th>이메일</th>
                   <th>여행수</th>
                   <th>첫 생성</th>
                   <th>마지막 활동</th>
@@ -371,7 +479,10 @@ export default function AdminPage() {
               <tbody>
                 {users.map((row) => (
                   <tr key={row.userId}>
-                    <td className="mono">{row.userId}</td>
+                    <td>
+                      {row.email ?? <span className="admin-cell-sub">(계정 없음)</span>}
+                      <div className="admin-cell-sub mono">{row.userId}</div>
+                    </td>
                     <td>{row.tripCount}</td>
                     <td>{formatDateTime(row.firstTripAt)}</td>
                     <td>{formatDateTime(row.lastUpdatedAt)}</td>
@@ -399,12 +510,20 @@ export default function AdminPage() {
                 ))}
                 {users.length === 0 && (
                   <tr>
-                    <td colSpan={6}>표시할 사용자가 없습니다.</td>
+                    <td colSpan={6}>
+                      {userSearch ? '검색 결과가 없습니다.' : '표시할 사용자가 없습니다.'}
+                    </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          <Pager
+            page={userPage}
+            total={userTotal}
+            onPage={setUserPage}
+          />
         </section>
 
         <section className="admin-section">
@@ -436,11 +555,26 @@ export default function AdminPage() {
             </article>
           </div>
 
+          <h3 className="admin-subheading">공유마당 등록 목록 ({plazaTotal}건)</h3>
+
+          <div className="admin-filter-row">
+            <input
+              type="search"
+              className="admin-search-input"
+              value={plazaSearch}
+              placeholder="제목 · 소유자 이메일로 검색"
+              onChange={(e) => {
+                setPlazaSearch(e.target.value);
+                setPlazaPage(0);
+              }}
+              aria-label="공유마당 검색"
+            />
+          </div>
+
           <div className="admin-table-wrap">
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>여행 ID</th>
                   <th>제목</th>
                   <th>소유자</th>
                   <th>마당 등록시각</th>
@@ -448,23 +582,31 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody>
-                {(stats?.recentListed ?? []).map((row) => (
+                {plaza.map((row) => (
                   <tr key={row.id}>
-                    <td className="mono">{row.id}</td>
-                    <td>{row.title}</td>
-                    <td className="mono">{row.ownerId ?? '-'}</td>
+                    <td>
+                      {row.title}
+                      <div className="admin-cell-sub mono">{row.id}</div>
+                    </td>
+                    <td>
+                      {row.ownerEmail ?? <span className="admin-cell-sub">(계정 없음)</span>}
+                    </td>
                     <td>{formatDateTime(row.listedAt)}</td>
                     <td>{row.materialsCount}</td>
                   </tr>
                 ))}
-                {(stats?.recentListed ?? []).length === 0 && (
+                {plaza.length === 0 && (
                   <tr>
-                    <td colSpan={5}>공유마당 등록 데이터가 없습니다.</td>
+                    <td colSpan={4}>
+                      {plazaSearch ? '검색 결과가 없습니다.' : '공유마당 등록 데이터가 없습니다.'}
+                    </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
+
+          <Pager page={plazaPage} total={plazaTotal} onPage={setPlazaPage} />
         </section>
 
         <section className="admin-section">

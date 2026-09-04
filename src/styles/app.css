@@ -12874,6 +12874,30 @@ button {
   word-break: break-word;
 }
 
+/* 관리자 목록 검색·페이지네이션 */
+.admin-search-input {
+  flex: 1 1 260px;
+  min-width: 0;
+  max-width: 420px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.admin-pager {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.admin-subheading {
+  margin: 22px 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
 /* 감사 로그 */
 .audit-op {
   display: inline-block;

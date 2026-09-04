@@ -27,8 +27,8 @@
 
 1. **관리자 계정 관리 UI 부재** → ✅ **완료 + 실사용 검증됨** (§3, §3-1, §3-2 참고. 후속으로 발견된 `is_admin()` 무한재귀까지 수정 완료)
 2. **감사 로그(Audit log) 부재** → ✅ **완료** (§3-3 참고)
-3. **대용량 데이터 페이지네이션/검색 부재** → **다음 착수 대상 (착수 전 컨펌 필요)** — 사용자 목록·여행 목록을 전량 클라이언트로 가져와 JS에서 집계(`lib/admin.ts`의 `listAdminUserRows`, `fetchAdminShareStats`), 검색창 자체가 없음
-4. **신고 검수에서 직접 제재 액션 연결 부재** — 상태값만 바꿀 수 있고, 신고 대상 콘텐츠(여행/가이드/장소)를 비공개 전환·삭제하는 액션이 이 화면에 없어 원본 데이터 화면으로 따로 이동해야 함
+3. **대용량 데이터 페이지네이션/검색 부재** → ✅ **완료** (§3-4 참고) — 사용자 목록·여행 목록을 전량 클라이언트로 가져와 JS에서 집계(`lib/admin.ts`의 `listAdminUserRows`, `fetchAdminShareStats`), 검색창 자체가 없음
+4. **신고 검수에서 직접 제재 액션 연결 부재** → **다음 착수 대상 (착수 전 컨펌 필요)** — 상태값만 바꿀 수 있고, 신고 대상 콘텐츠(여행/가이드/장소)를 비공개 전환·삭제하는 액션이 이 화면에 없어 원본 데이터 화면으로 따로 이동해야 함
 
 ### 그 다음 단계 백로그 (아직 순서 미확정, 참고용)
 - 데이터 내보내기(CSV) 기능 전무
@@ -106,6 +106,28 @@
 **확인한 것:** `npx tsc --noEmit`, `npm run build` 클린 통과. `/admin/audit` 라우트가 미인증 시 로그인으로 리다이렉트되고 JS 오류 없음(Playwright). RLS 4종(관리자 조회/수정차단/삭제차단/비관리자 차단)은 롤백 트랜잭션으로 검증.
 
 **⚠️ 다음 세션에서 알아둘 것:** 트리거는 설치 시점부터 기록하므로 **그 이전 변경 이력은 없다.** 화면을 처음 열면 비어 있는 게 정상이고, 관리자 액션을 한 번 하면 그때부터 쌓인다. 브라우저에서 실제 목록·필터·더보기 동작은 아직 사용자 확인 전이다.
+
+---
+
+## 3-4. 우선순위 ③ — 목록 페이지네이션·검색 (완료)
+
+**무엇이 문제였나:** `lib/admin.ts`가 `waymeld_trips` 전량을 브라우저로 가져와 JS에서 집계했다. 특히 `fetchAdminShareStats()`는 자료 개수를 세려고 **`payload` 컬럼까지 통째로** 받아왔다 — 현재 19건에 297KB(최대 1건 151KB)지만 1,000건이면 15MB, 10,000건이면 150MB를 매 조회마다 내려받는 구조였다. 검색창은 아예 없었고, 사용자 목록은 `owner_id`(UUID)만 보여줘 검색을 붙여도 쓸모가 없었다.
+
+*(참고: PostgREST `db_max_rows`는 미설정이라 조용히 잘려 집계가 틀리는 문제는 없었다 — 순수 전송량 문제였다.)*
+
+**변경한 파일:**
+1. `supabase/migrations/20260904030000_admin_pagination_search.sql` (신규) — RPC 3개
+   - `admin_user_rows(p_search, p_limit, p_offset)` — 여행 수 집계 + `auth.users` 이메일 조인 + 이메일/메모/UUID 검색 + 페이지네이션
+   - `admin_share_stats()` — 카운트를 전부 SQL에서 계산. 자료 수는 `jsonb_array_length(payload->'materials')`로 세므로 payload가 브라우저로 나가지 않는다
+   - `admin_plaza_listings(p_search, p_limit, p_offset)` — 최근 12건 고정이던 것을 검색·페이지네이션으로
+   - 셋 다 `security definer`라 **첫 줄에서 `is_admin()`을 직접 확인**한다(RLS를 우회하므로 필수)
+2. `src/lib/admin.ts` — 위 RPC 호출로 교체. `AdminUserRow`에 `email` 추가, `AdminShareStats`에서 `recentListed` 분리, `AdminPage<T>`(rows+totalCount)·`AdminListQuery`·`ADMIN_PAGE_SIZE`(25) 추가. JS 집계 코드와 `readMaterialsCount()` 삭제
+3. `src/pages/AdminPage.tsx` — 사용자/공유마당 각각 검색창(250ms 디바운스) + `Pager` 컴포넌트. 사용자 목록에 이메일 노출(UUID는 아래 작게)
+4. `src/styles/app.css` — `.admin-search-input`, `.admin-pager`, `.admin-subheading`
+
+**검증:** RPC 3개를 관리자 JWT로 직접 호출해 값이 기존 집계와 일치함을 확인(총 19건·공개 2건·사용자 2명). 검색 `test` → `redgontest@gmail.com` 1건이며 `total_count`도 필터 기준으로 갱신됨. 비관리자 JWT 호출은 `42501`로 거부됨. `tsc`·`npm run build` 클린.
+
+**⚠️ 남은 확인:** 브라우저에서 검색·페이지 이동 실제 동작은 사용자 확인 전. 데이터가 25건 미만이라 `Pager`는 현재 숨겨진 상태가 정상이다(총 건수가 한 페이지 이하면 렌더하지 않음).
 
 ---
 

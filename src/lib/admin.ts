@@ -7,6 +7,8 @@ const ADMIN_EMAILS_FROM_ENV = String(import.meta.env.VITE_ADMIN_EMAILS ?? '')
 
 export interface AdminUserRow {
   userId: string;
+  /** auth.users에서 조회 — 탈퇴 등으로 계정이 없으면 null */
+  email: string | null;
   tripCount: number;
   firstTripAt: string | null;
   lastUpdatedAt: string | null;
@@ -15,19 +17,35 @@ export interface AdminUserRow {
   verifiedAt: string | null;
 }
 
+/** 목록 조회 결과 — 페이지네이션을 위해 필터 적용 후 전체 건수를 함께 준다 */
+export interface AdminPage<T> {
+  rows: T[];
+  totalCount: number;
+}
+
+export interface AdminListQuery {
+  search?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export const ADMIN_PAGE_SIZE = 25;
+
+export interface AdminPlazaListing {
+  id: string;
+  title: string;
+  ownerId: string | null;
+  ownerEmail: string | null;
+  listedAt: string | null;
+  materialsCount: number;
+}
+
 export interface AdminShareStats {
   totalTrips: number;
   publicTrips: number;
   listedTrips: number;
   totalMaterials: number;
   totalImports: number;
-  recentListed: Array<{
-    id: string;
-    title: string;
-    ownerId: string | null;
-    listedAt: string | null;
-    materialsCount: number;
-  }>;
 }
 
 export interface AdminNotice {
@@ -58,12 +76,6 @@ function requireSupabase() {
   return sb;
 }
 
-function readMaterialsCount(payload: unknown): number {
-  const row = payload as { materials?: unknown };
-  if (!Array.isArray(row?.materials)) return 0;
-  return row.materials.length;
-}
-
 export async function isCurrentUserAdmin(): Promise<boolean> {
   const sb = requireSupabase();
   const { data: userData } = await sb.auth.getUser();
@@ -79,68 +91,36 @@ export async function isCurrentUserAdmin(): Promise<boolean> {
   return Boolean(data?.email);
 }
 
-export async function listAdminUserRows(): Promise<AdminUserRow[]> {
+/**
+ * 사용자 목록. 집계·검색·페이지네이션을 전부 DB(admin_user_rows RPC)에서 한다.
+ * 예전에는 waymeld_trips 전량을 받아 JS에서 owner_id별로 묶었는데, 여행이
+ * 늘수록 매 조회마다 전체를 내려받아야 했다.
+ */
+export async function listAdminUserRows(
+  query: AdminListQuery = {}
+): Promise<AdminPage<AdminUserRow>> {
   const sb = requireSupabase();
-  const { data: trips, error: tripsError } = await sb
-    .from('waymeld_trips')
-    .select('owner_id, created_at, updated_at')
-    .not('owner_id', 'is', null)
-    .order('updated_at', { ascending: false });
-  if (tripsError) throw tripsError;
+  const { data, error } = await sb.rpc('admin_user_rows', {
+    p_search: query.search?.trim() || null,
+    p_limit: query.limit ?? ADMIN_PAGE_SIZE,
+    p_offset: query.offset ?? 0,
+  });
+  if (error) throw error;
 
-  const { data: verifications, error: verificationError } = await sb
-    .from('admin_user_verifications')
-    .select('user_id, is_verified, memo, verified_at');
-  if (verificationError) throw verificationError;
-
-  const verifyMap = new Map(
-    (verifications ?? []).map((row) => [
-      row.user_id as string,
-      {
-        isVerified: Boolean(row.is_verified),
-        memo: (row.memo as string | null) ?? null,
-        verifiedAt: (row.verified_at as string | null) ?? null,
-      },
-    ])
-  );
-
-  const agg = new Map<
-    string,
-    { count: number; firstAt: string | null; lastAt: string | null }
-  >();
-  for (const row of trips ?? []) {
-    const userId = row.owner_id as string | null;
-    if (!userId) continue;
-    const createdAt = (row.created_at as string | null) ?? null;
-    const updatedAt = (row.updated_at as string | null) ?? null;
-    const prev = agg.get(userId);
-    if (!prev) {
-      agg.set(userId, { count: 1, firstAt: createdAt, lastAt: updatedAt });
-      continue;
-    }
-    prev.count += 1;
-    if (createdAt && (!prev.firstAt || createdAt < prev.firstAt)) prev.firstAt = createdAt;
-    if (updatedAt && (!prev.lastAt || updatedAt > prev.lastAt)) prev.lastAt = updatedAt;
-  }
-
-  return [...agg.entries()]
-    .map(([userId, item]) => {
-      const verified = verifyMap.get(userId);
-      return {
-        userId,
-        tripCount: item.count,
-        firstTripAt: item.firstAt,
-        lastUpdatedAt: item.lastAt,
-        isVerified: verified?.isVerified ?? false,
-        memo: verified?.memo ?? null,
-        verifiedAt: verified?.verifiedAt ?? null,
-      };
-    })
-    .sort((a, b) => {
-      const av = a.lastUpdatedAt ?? '';
-      const bv = b.lastUpdatedAt ?? '';
-      return bv.localeCompare(av);
-    });
+  const rows = (data ?? []) as Array<Record<string, unknown>>;
+  return {
+    rows: rows.map((row) => ({
+      userId: row.user_id as string,
+      email: (row.email as string | null) ?? null,
+      tripCount: Number(row.trip_count ?? 0),
+      firstTripAt: (row.first_trip_at as string | null) ?? null,
+      lastUpdatedAt: (row.last_updated_at as string | null) ?? null,
+      isVerified: Boolean(row.is_verified),
+      memo: (row.memo as string | null) ?? null,
+      verifiedAt: (row.verified_at as string | null) ?? null,
+    })),
+    totalCount: Number(rows[0]?.total_count ?? 0),
+  };
 }
 
 export async function upsertUserVerification(input: {
@@ -168,45 +148,47 @@ export async function upsertUserVerification(input: {
   if (error) throw error;
 }
 
+/**
+ * 공유자료 현황. 예전에는 자료 개수를 세려고 payload(여행 1건이 최대 150KB)를
+ * 전부 내려받았다 — 이제 DB에서 jsonb_array_length로 세어 숫자만 받는다.
+ */
 export async function fetchAdminShareStats(): Promise<AdminShareStats> {
   const sb = requireSupabase();
-  const { data: trips, error: tripsError } = await sb
-    .from('waymeld_trips')
-    .select('id, title, owner_id, is_public, listed_in_plaza, plaza_listed_at, payload');
-  if (tripsError) throw tripsError;
+  const { data, error } = await sb.rpc('admin_share_stats');
+  if (error) throw error;
+  const row = ((data ?? []) as Array<Record<string, unknown>>)[0];
+  return {
+    totalTrips: Number(row?.total_trips ?? 0),
+    publicTrips: Number(row?.public_trips ?? 0),
+    listedTrips: Number(row?.listed_trips ?? 0),
+    totalMaterials: Number(row?.total_materials ?? 0),
+    totalImports: Number(row?.total_imports ?? 0),
+  };
+}
 
-  const { count: importsCount, error: importsError } = await sb
-    .from('share_plaza_imports')
-    .select('id', { count: 'exact', head: true });
-  if (importsError) throw importsError;
+/** 공유마당 등록 목록. 예전에는 최근 12건만 고정 노출됐고 검색이 없었다. */
+export async function listPlazaListings(
+  query: AdminListQuery = {}
+): Promise<AdminPage<AdminPlazaListing>> {
+  const sb = requireSupabase();
+  const { data, error } = await sb.rpc('admin_plaza_listings', {
+    p_search: query.search?.trim() || null,
+    p_limit: query.limit ?? ADMIN_PAGE_SIZE,
+    p_offset: query.offset ?? 0,
+  });
+  if (error) throw error;
 
-  const rows = trips ?? [];
-  const publicTrips = rows.filter((r) => Boolean(r.is_public)).length;
-  const listedTrips = rows.filter((r) => Boolean(r.listed_in_plaza)).length;
-  const totalMaterials = rows.reduce((sum, row) => sum + readMaterialsCount(row.payload), 0);
-  const recentListed = rows
-    .filter((r) => Boolean(r.listed_in_plaza))
-    .sort((a, b) => {
-      const av = (a.plaza_listed_at as string | null) ?? '';
-      const bv = (b.plaza_listed_at as string | null) ?? '';
-      return bv.localeCompare(av);
-    })
-    .slice(0, 12)
-    .map((row) => ({
+  const rows = (data ?? []) as Array<Record<string, unknown>>;
+  return {
+    rows: rows.map((row) => ({
       id: row.id as string,
       title: (row.title as string) || '제목 없음',
       ownerId: (row.owner_id as string | null) ?? null,
-      listedAt: (row.plaza_listed_at as string | null) ?? null,
-      materialsCount: readMaterialsCount(row.payload),
-    }));
-
-  return {
-    totalTrips: rows.length,
-    publicTrips,
-    listedTrips,
-    totalMaterials,
-    totalImports: importsCount ?? 0,
-    recentListed,
+      ownerEmail: (row.owner_email as string | null) ?? null,
+      listedAt: (row.listed_at as string | null) ?? null,
+      materialsCount: Number(row.materials_count ?? 0),
+    })),
+    totalCount: Number(rows[0]?.total_count ?? 0),
   };
 }
 
