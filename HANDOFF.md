@@ -2,7 +2,7 @@
 
 작성일: 2026-09-04 (같은 사용자가 다른 장소/세션에서 이어받기 위한 인계 문서)
 
-브랜치: `main` / 이 문서 작성 시점 최신 커밋은 아래 "커밋 상태" 참고(이 문서 자체가 포함된 커밋이 최신).
+브랜치: `main`(관리자 페이지 작업) / `claude/mobile-search-layout-fdi8f4`(모바일 검색 레이아웃 작업, §3-1 참고). 이 문서 작성 시점 최신 커밋은 아래 "커밋 상태" 참고.
 
 ---
 
@@ -67,6 +67,32 @@
 
 ---
 
+## 3-1. 추가 완료 작업 — 모바일 검색을 지도 절반 시트로 변경
+
+**브랜치:** `claude/mobile-search-layout-fdi8f4` (main 아님, 푸시 완료 / PR은 아직 안 만듦)
+
+**사용자 요청:** "모바일모드에서 하단에서 검색을 할 때 전체화면으로 하지 말고 반은 지도, 반만 검색하도록"
+
+**문제였던 것:** 모바일 플래너에서 상단 검색 필을 누르면 `.mobile-search-overlay`가 `position: absolute; inset: 0`으로 화면 전체를 덮어, 검색 중에는 지도를 전혀 볼 수 없었다. 게다가 루트에 `mobile-sheet-open` 클래스가 붙어 지도에 딤(dim)이 깔리고 상단바까지 숨겨졌다.
+
+**변경한 파일:**
+1. `src/components/mobile/MobileSearchSheet.tsx` — 전체화면 오버레이 마크업(`mobile-search-fullscreen*`)을 바텀시트 구조(`mobile-search-sheet-inner`)로 교체. 상단에 드래그 핸들 바와 크기 전환 버튼(`mobile-search-size-btn`, chevronDown 아이콘을 CSS로 회전) 추가. `level: 'half' | 'full'`, `onToggleLevel` prop 신설.
+2. `src/pages/PlannerPage.tsx` — `mobileSearchLevel` 상태(`'half' | 'full'`) 추가. 루트 클래스에서 `mobile-sheet-open`을 빼고 `mobile-search-open` / `mobile-search-full`만 부여. 검색을 여는 두 진입점(`openSearchPanel`, 상단 검색 필 onClick)에서 항상 `half`로 초기화. 검색 결과 선택 시(`onSelectResult`) 자동으로 `half`로 접어 지도 마커를 볼 수 있게 함.
+3. `src/styles/app.css` — `.mobile-search-overlay`를 하단 시트로 재작성(`top: 52%` / `bottom: 0`, 라운드 모서리 22px, 상단 그림자, `transition: top 0.25s`). `.search-full`은 `top: 14%`. `mobile-search-full` 상태에서는 일차 탭(`.mobile-planner-days`)만 숨기고 검색 필은 유지. 하단 `env(safe-area-inset-bottom)` 여백 반영. 기존 `mobile-search-fullscreen*` 규칙은 새 클래스명으로 교체.
+
+**동작 요약:** 절반 상태(위 52%는 지도, 아래는 검색) ↔ 확대 상태(위 14%만 지도) 를 핸들 바 또는 헤더 우측 화살표 버튼으로 토글. 검색 중에도 지도가 딤 없이 그대로 보이고 조작 가능.
+
+**확인한 것:** `npx tsc -b`, `npm run build` 클린 통과. Playwright(390x844, 모바일 뷰포트)로 `/plan`을 열어 절반/확대 두 상태 스크린샷 검증 — 시트 박스가 각각 `y=438.9 (h=405)`, `y=118.2 (h=725.8)`로 의도대로 나옴. 단, 로컬에 `VITE_KAKAO_JS_KEY`가 없어 지도 타일은 회색으로만 렌더됨(레이아웃 검증에는 영향 없음).
+
+**참고:** `npm run lint`는 이 리포에 `eslint.config.js`가 없어서 원래부터 실행되지 않는다(ESLint 9+ 형식 미마이그레이션). 이번 작업과 무관한 기존 문제.
+
+**남은 것 / 다음 세션 참고:**
+- 실기기(또는 키보드가 뜨는 환경)에서 절반 상태로 검색어를 입력할 때 가상 키보드가 시트를 가리지 않는지 확인 필요. 필요하면 입력 포커스 시 자동으로 `full`로 올리는 처리를 넣을 수 있다(현재는 명시적 토글만).
+- 지도 중심이 시트에 가려지는 문제(선택한 마커가 시트 뒤에 놓일 수 있음)는 이번 범위에서 다루지 않음. 필요하면 선택 시 지도 중심을 위쪽으로 오프셋하는 처리를 추가할 것.
+- PR은 만들지 않았다. 필요하면 `claude/mobile-search-layout-fdi8f4` → `main`으로 생성.
+
+---
+
 ## 4. ⚠️ 중요 발견 — Supabase 마이그레이션 이력이 CLI와 어긋나 있음
 
 `supabase db push --dry-run`을 시도하다가 발견. **다음에 스키마 변경을 배포하려 할 때마다 똑같이 막힐 것이므로 반드시 인지하고 시작할 것.**
@@ -102,3 +128,5 @@ Supabase 프로젝트 ref: `ainftwifvclgiookzrwm` (대시보드: `https://supaba
 ## 6. 커밋 상태
 
 오늘 작업분(§3의 파일 3개 + 이 HANDOFF.md)을 커밋했다. `supabase/.temp/cli-latest`는 로컬 CLI 버전 체크 과정에서 자동으로 바뀐 파일이라 이번 커밋에 포함하지 않음(작업 내용과 무관).
+
+이후 같은 날 §3-1(모바일 검색 절반 시트) 작업분을 별도 브랜치 `claude/mobile-search-layout-fdi8f4`에 커밋·푸시했다(커밋 `f04e1f5`, 파일 3개). `tsconfig.tsbuildinfo`는 빌드 산출물이라 커밋에서 제외했다(리포에 추적돼 있어 빌드할 때마다 diff가 뜨므로, 앞으로도 커밋에 섞이지 않게 주의할 것).
