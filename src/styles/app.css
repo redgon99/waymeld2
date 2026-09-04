@@ -12405,11 +12405,31 @@ button {
 
 .mobile-search-overlay {
   position: absolute;
-  inset: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 52%;
   z-index: 40;
   background: #fff;
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -8px 32px rgba(15, 23, 42, 0.14);
   display: none;
   flex-direction: column;
+  overflow: hidden;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  transition: top 0.25s ease;
+}
+
+/* 절반은 지도, 절반은 검색 결과 */
+.mobile-search-overlay.search-half {
+  top: 52%;
+}
+
+/* 핸들을 올리면 지도를 조금만 남기고 확대 */
+.mobile-search-overlay.search-full {
+  top: 14%;
 }
 
 .waymeld-root.mobile-layout.mobile-search-open .mobile-search-overlay {
@@ -12417,6 +12437,15 @@ button {
 }
 
 .waymeld-root.mobile-layout.mobile-search-open .mobile-planner-sheet {
+  display: none;
+}
+
+/* 검색 시트가 열려 있어도 지도는 그대로 보이도록 (딤/상단바 숨김 없음) */
+.waymeld-root.mobile-layout.mobile-search-open .overlay-bottom-left {
+  display: none;
+}
+
+.waymeld-root.mobile-layout.mobile-search-full .mobile-planner-days {
   display: none;
 }
 
@@ -13050,29 +13079,66 @@ button {
   flex-shrink: 0;
 }
 
-.mobile-search-overlay {
-  padding: 0;
-}
-
-.mobile-search-fullscreen {
+.mobile-search-sheet-inner {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   background: #fff;
 }
 
-.mobile-search-fullscreen-head {
+.mobile-search-handle-btn {
+  border: none;
+  background: transparent;
+  padding: 8px 0 2px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.mobile-search-handle-bar {
+  width: 40px;
+  height: 4px;
+  border-radius: 99px;
+  background: #e2e8f0;
+}
+
+.mobile-search-sheet-head {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 14px;
+  padding: 2px 14px 8px;
   border-bottom: 1px solid var(--color-border);
   flex-shrink: 0;
 }
 
+.mobile-search-size-btn {
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-bg-secondary);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mobile-search-size-btn .wm-icon {
+  transform: rotate(180deg);
+  transition: transform 0.2s ease;
+}
+
+.mobile-search-size-btn.is-full .wm-icon {
+  transform: rotate(0deg);
+}
+
 .mobile-search-back {
-  width: 38px;
-  height: 38px;
+  width: 34px;
+  height: 34px;
   border: none;
   border-radius: 12px;
   background: var(--color-bg-secondary);
@@ -13081,18 +13147,19 @@ button {
   justify-content: center;
 }
 
-.mobile-search-fullscreen-title {
+.mobile-search-sheet-title {
   font-size: 15px;
   font-weight: 700;
 }
 
-.mobile-search-fullscreen-body {
+.mobile-search-sheet-body {
   flex: 1;
   min-height: 0;
   overflow: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-.mobile-search-fullscreen-body .search-panel {
+.mobile-search-sheet-body .search-panel {
   border: none;
   box-shadow: none;
   height: 100%;

@@ -282,6 +282,7 @@ export default function PlannerPage() {
   const isMobile = useIsMobile();
   const [mobileSheet, setMobileSheet] = useState<MobileSheetKind>(null);
   const [mobileSheetLevel, setMobileSheetLevel] = useState<MobileSheetLevel>('half');
+  const [mobileSearchLevel, setMobileSearchLevel] = useState<'half' | 'full'>('half');
   const [mobileSheetTab, setMobileSheetTab] = useState<MobileSheetTab>('pins');
   const [selectedPinIds, setSelectedPinIds] = useState<Set<string>>(() => new Set());
   const [mustVisitOnly, setMustVisitOnly] = useState(false);
@@ -664,6 +665,7 @@ export default function PlannerPage() {
   const openSearchPanel = useCallback(() => {
     setPanelOpen(true);
     setPanelTab('search');
+    setMobileSearchLevel('half');
     setMobileSheet('search');
   }, []);
 
@@ -1950,7 +1952,8 @@ export default function PlannerPage() {
     presentationMode ? 'presentation-mode' : '',
     searchExpanded ? 'search-expanded' : '',
     useMobileChrome ? 'mobile-layout' : '',
-    mobileSheet === 'search' ? 'mobile-search-open mobile-sheet-open' : '',
+    mobileSheet === 'search' ? 'mobile-search-open' : '',
+    mobileSheet === 'search' && mobileSearchLevel === 'full' ? 'mobile-search-full' : '',
   ]
     .filter(Boolean)
     .join(' ');
@@ -2086,7 +2089,10 @@ export default function PlannerPage() {
                 onClear={handleResetSearch}
                 onResetResults={handleResetSearch}
                 onTogglePin={handleTogglePin}
-                onSelectResult={handleSelectPlace}
+                onSelectResult={(p) => {
+                  handleSelectPlace(p);
+                  setMobileSearchLevel('half');
+                }}
                 onOpenRoadview={(p) => setRoadviewTarget(p)}
                 onOpenPlacePhotos={handleOpenPlacePhotos}
                 hasMore={searchHasMore}
@@ -2280,7 +2286,10 @@ export default function PlannerPage() {
               <button
                 type="button"
                 className="mobile-planner-search-pill"
-                onClick={() => setMobileSheet('search')}
+                onClick={() => {
+                  setMobileSearchLevel('half');
+                  setMobileSheet('search');
+                }}
               >
                 <Icon name="search" size={18} />
                 {tp('search.ariaLabel')}
@@ -2436,9 +2445,11 @@ export default function PlannerPage() {
           </div>
 
           {mobileSheet === 'search' && (
-            <div className="mobile-search-overlay">
+            <div className={`mobile-search-overlay search-${mobileSearchLevel}`}>
               <MobileSearchSheet
                 open
+                level={mobileSearchLevel}
+                onToggleLevel={() => setMobileSearchLevel((v) => (v === 'half' ? 'full' : 'half'))}
                 onClose={() => setMobileSheet(null)}
                 results={displayResults}
                 pinnedIds={pinnedIds}
