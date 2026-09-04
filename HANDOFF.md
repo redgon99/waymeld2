@@ -168,6 +168,20 @@
 
 ---
 
+## 3-6. 보안 어드바이저 점검 및 강화 (완료)
+
+②~④에서 SECURITY DEFINER 함수를 6개 추가했으므로 Supabase security advisor를 돌려 검증했다.
+
+**결과:** 전체 214건 중 **WayMeld 테이블의 ERROR는 0건.** ERROR 40여 건은 전부 같은 프로젝트를 쓰는 다른 앱(`category_columns`, `transfer_results`, `getphnum_*` 뷰 등) 것이다. 이 DB가 여러 실서비스와 공유된다는 점을 다시 확인.
+
+**고친 것 두 가지** (`supabase/migrations/20260904060000_admin_function_hardening.sql`):
+1. `audit_redact()`에 `set search_path = public`이 빠져 있었다(다른 함수엔 전부 넣었는데 이것만 누락).
+2. Postgres가 함수 EXECUTE를 PUBLIC에 기본 부여하므로 관리자 전용 RPC 5개가 **로그아웃(anon) 상태에서도 호출 가능**했다. `is_admin()` 게이트로 막히긴 하지만 호출 자체를 못 하게 PUBLIC/anon 회수 후 `authenticated`에만 부여했다. 적용 후 anon 호출은 `permission denied for function`으로 막히는 것을 확인.
+
+**⚠️ 건드리면 안 되는 것:** `is_admin()`의 EXECUTE 권한은 회수하면 안 된다. RLS 정책 본문에서 호출되므로 호출자(anon 포함)에게 EXECUTE가 없으면 **정책 평가 자체가 실패해 관련 테이블이 전부 접근 불가**가 된다. 트리거 함수 `log_admin_action()`도 같은 이유로 그대로 뒀다. 어드바이저가 이 둘을 계속 WARN으로 표시하지만 의도된 것이다.
+
+---
+
 ## 4. ⚠️ 중요 발견 — Supabase 마이그레이션 이력이 CLI와 어긋나 있음
 
 `supabase db push --dry-run`을 시도하다가 발견. **다음에 스키마 변경을 배포하려 할 때마다 똑같이 막힐 것이므로 반드시 인지하고 시작할 것.**
