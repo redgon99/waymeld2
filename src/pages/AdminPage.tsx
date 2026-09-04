@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Navigate, Link } from 'react-router-dom';
+import { Navigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { AdminHeader } from '../components/AdminHeader';
 import {
@@ -79,9 +79,12 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
+  // 전역 검색 결과에서 /admin?q=이메일 로 넘어오면 사용자 검색을 채워둔다
+  const [searchParams] = useSearchParams();
+
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [userTotal, setUserTotal] = useState(0);
-  const [userSearch, setUserSearch] = useState('');
+  const [userSearch, setUserSearch] = useState(() => searchParams.get('q') ?? '');
   const [userPage, setUserPage] = useState(0);
 
   const [plaza, setPlaza] = useState<AdminPlazaListing[]>([]);

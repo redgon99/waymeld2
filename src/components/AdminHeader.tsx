@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, type FormEvent, type ReactNode } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { AuthBar } from './AuthBar';
 
 export type AdminPageKey =
@@ -11,7 +11,8 @@ export type AdminPageKey =
   | 'scenarios'
   | 'landing'
   | 'reports'
-  | 'audit';
+  | 'audit'
+  | 'search';
 
 interface Props {
   /** 페이지별 설명. 화면 제목은 항상 「관리자 페이지」로 고정. */
@@ -43,6 +44,18 @@ export function AdminHeader({
   onRefresh,
   extraActions,
 }: Props) {
+  const navigate = useNavigate();
+  const [params] = useSearchParams();
+  // 검색 결과 화면에서는 현재 검색어가 입력창에 남아 있어야 이어서 고칠 수 있다
+  const [term, setTerm] = useState(current === 'search' ? (params.get('q') ?? '') : '');
+
+  const submitSearch = (e: FormEvent) => {
+    e.preventDefault();
+    const q = term.trim();
+    if (!q) return;
+    navigate(`/admin/search?q=${encodeURIComponent(q)}`);
+  };
+
   return (
     <header className="admin-header">
       <div className="admin-header-top">
@@ -50,6 +63,18 @@ export function AdminHeader({
           <h1>관리자 페이지</h1>
           <p>{subtitle}</p>
         </div>
+        <form className="admin-global-search" onSubmit={submitSearch} role="search">
+          <input
+            type="search"
+            value={term}
+            onChange={(e) => setTerm(e.target.value)}
+            placeholder="전체 검색 (이메일 · 여행 · 시나리오 · 가이드)"
+            aria-label="관리자 전역 검색"
+          />
+          <button type="submit" className="admin-link-btn">
+            검색
+          </button>
+        </form>
         <AuthBar />
       </div>
       <nav className="admin-header-nav" aria-label="관리자 메뉴">
