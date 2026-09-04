@@ -26,8 +26,8 @@
 사용자에게 브리핑하고 합의한 순서. **하나씩 완료 → 브리핑 → 사용자 컨펌 후에만 다음으로 진행**하는 규칙이므로, 다음 세션은 반드시 이 순서를 지킬 것 — 사용자 확답 없이 앞서가지 말 것.
 
 1. **관리자 계정 관리 UI 부재** → ✅ **완료 + 실사용 검증됨** (§3, §3-1, §3-2 참고. 후속으로 발견된 `is_admin()` 무한재귀까지 수정 완료)
-2. **감사 로그(Audit log) 부재** → **다음 착수 대상 (착수 전 컨펌 필요)**. 누가 언제 무엇을(승인/삭제/게시) 했는지 기록·조회하는 화면이 없음
-3. **대용량 데이터 페이지네이션/검색 부재** — 사용자 목록·여행 목록을 전량 클라이언트로 가져와 JS에서 집계(`lib/admin.ts`의 `listAdminUserRows`, `fetchAdminShareStats`), 검색창 자체가 없음
+2. **감사 로그(Audit log) 부재** → ✅ **완료** (§3-3 참고)
+3. **대용량 데이터 페이지네이션/검색 부재** → **다음 착수 대상 (착수 전 컨펌 필요)** — 사용자 목록·여행 목록을 전량 클라이언트로 가져와 JS에서 집계(`lib/admin.ts`의 `listAdminUserRows`, `fetchAdminShareStats`), 검색창 자체가 없음
 4. **신고 검수에서 직접 제재 액션 연결 부재** — 상태값만 바꿀 수 있고, 신고 대상 콘텐츠(여행/가이드/장소)를 비공개 전환·삭제하는 액션이 이 화면에 없어 원본 데이터 화면으로 따로 이동해야 함
 
 ### 그 다음 단계 백로그 (아직 순서 미확정, 참고용)
@@ -77,7 +77,35 @@
 - 적용 방식: MCP `apply_migration`으로 원격에 직접 적용(사용자 승인). 적용 후 재검증 — 비관리자 조회는 에러 대신 0건, 관리자 2명 상태 목록 조회도 재귀 없이 정상(롤백 트랜잭션으로 확인).
 - `is_admin()`을 참조하는 정책 24개가 전부 WayMeld 테이블임을 확인했다(소방·volmgr·inv·autodist 등 같은 DB의 다른 앱은 사용하지 않음) — 공유 DB지만 영향 범위는 WayMeld 한정.
 
-**→ 우선순위 ①은 완료. 다음은 ②(감사 로그)이며, 착수 전 사용자 컨펌을 받을 것.**
+**→ 우선순위 ①은 완료.**
+
+---
+
+## 3-3. 우선순위 ② — 감사 로그 (완료)
+
+**설계 판단:** 호출부마다 로깅 코드를 넣는 대신 **DB 트리거**로 붙였다. 관리자 변경 지점이 9개 테이블·7개 lib 파일에 흩어져 있어 호출부 방식은 새 기능을 추가할 때 빠뜨리기 쉽고, 대시보드에서 직접 고친 변경은 아예 못 잡는다. 트리거는 앱·대시보드·엣지함수 어느 경로든 빠짐없이 남기고 호출부 수정이 0이다.
+
+**변경한 파일:**
+1. `supabase/migrations/20260904020000_admin_audit_log.sql` (신규) — `admin_audit_log` 테이블 + `audit_redact()` + `log_admin_action()` 트리거 함수 + 9개 테이블에 트리거 부착
+2. `src/lib/adminAudit.ts` (신규) — 조회·필터·키셋 페이지네이션, 로그 한 줄을 사람 문장으로 바꾸는 `describeAuditEntry()`
+3. `src/pages/AdminAuditPage.tsx` (신규) — `/admin/audit`
+4. `src/components/AdminHeader.tsx` — 내비에 "감사 로그" 추가 (`AdminPageKey`에 `audit`)
+5. `src/App.tsx` — 라우트 추가
+6. `src/styles/app.css` — `.audit-op`, `.audit-detail`
+
+**감사 대상 9개 테이블:** `admin_users` / `admin_notices` / `admin_user_verifications` / `guide_articles` / `scenario_catalog` / `landing_promo` / `distribution_accounts` / `insight_keywords` / `content_reports`(관리자 조치인 UPDATE·DELETE만 — INSERT는 일반 사용자의 신고라 제외).
+`insight_raw_items`·`distribution_posts`는 수집·발행 파이프라인이 대량으로 써서 로그가 넘치므로 **일부러 제외**했다.
+
+**설계상 지켜진 것 (검증 완료):**
+- **append-only** — SELECT 정책만 두고 UPDATE/DELETE 정책을 만들지 않아 관리자도 자기 흔적을 못 지운다. 실제로 관리자 JWT로 UPDATE/DELETE 시도 시 0행 영향 확인.
+- **비관리자 차단** — 비관리자 JWT 조회 0건 확인.
+- **대용량 컬럼 자동 생략** — `scenario_catalog.content`(9개 언어) 같은 컬럼은 1000바이트 초과 시 크기만 남긴다. 컬럼명 하드코딩 없이 길이로 판단. 실제 게시중지 UPDATE 로그가 19바이트로 남는 것 확인.
+- **UPDATE는 바뀐 컬럼만** 기록. `updated_at`만 바뀐 no-op UPDATE는 아예 기록하지 않음(확인 완료).
+- 서비스 롤(엣지함수·크론) 변경은 JWT가 없어 `actor_email`이 null → UI에서 "시스템"으로 표기.
+
+**확인한 것:** `npx tsc --noEmit`, `npm run build` 클린 통과. `/admin/audit` 라우트가 미인증 시 로그인으로 리다이렉트되고 JS 오류 없음(Playwright). RLS 4종(관리자 조회/수정차단/삭제차단/비관리자 차단)은 롤백 트랜잭션으로 검증.
+
+**⚠️ 다음 세션에서 알아둘 것:** 트리거는 설치 시점부터 기록하므로 **그 이전 변경 이력은 없다.** 화면을 처음 열면 비어 있는 게 정상이고, 관리자 액션을 한 번 하면 그때부터 쌓인다. 브라우저에서 실제 목록·필터·더보기 동작은 아직 사용자 확인 전이다.
 
 ---
 

@@ -14,6 +14,7 @@ import AdminDistributionPage from './pages/AdminDistributionPage';
 import AdminScenariosPage from './pages/AdminScenariosPage';
 import AdminLandingPage from './pages/AdminLandingPage';
 import AdminReportsPage from './pages/AdminReportsPage';
+import AdminAuditPage from './pages/AdminAuditPage';
 import GuidesPage from './pages/GuidesPage';
 import GuideDetailPage from './pages/GuideDetailPage';
 import KoreaInfoPage from './pages/KoreaInfoPage';
@@ -43,6 +44,7 @@ const PAGE_ROUTES = (
     <Route path="admin/scenarios" element={<AdminScenariosPage />} />
     <Route path="admin/landing" element={<AdminLandingPage />} />
     <Route path="admin/reports" element={<AdminReportsPage />} />
+    <Route path="admin/audit" element={<AdminAuditPage />} />
     <Route path="setup" element={<KoreaSetupPage />} />
     <Route path="help" element={<HelpPage />} />
     <Route path="themes" element={<ThemesPage />} />

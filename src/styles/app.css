@@ -12874,6 +12874,68 @@ button {
   word-break: break-word;
 }
 
+/* 감사 로그 */
+.audit-op {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.audit-op--insert {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+
+.audit-op--update {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.audit-op--delete {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.audit-detail {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.audit-detail h4 {
+  margin: 0 0 4px;
+  font-size: 11px;
+  color: var(--color-text-muted, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.audit-detail pre {
+  margin: 0;
+  padding: 8px 10px;
+  background: var(--color-surface-sunk, #f8fafc);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 6px;
+  font-size: 11.5px;
+  line-height: 1.6;
+  max-height: 260px;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+@media (max-width: 640px) {
+  .audit-detail {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* 예정 방문 시각 영업 검증 */
 .route-stay-hours-warning,
 .leg-hours-warning {
