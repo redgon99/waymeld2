@@ -24,6 +24,7 @@ import {
   type AdminUserRow,
 } from '../lib/admin';
 import { csvFilename, downloadCsv, toCsv } from '../lib/csv';
+import { deleteWaymeldMockMailUsers } from '../lib/mockMailUsers';
 import { evaluateTier3Gates, type GateStatus } from '../lib/tierGates';
 import '../styles/app.css';
 
@@ -103,10 +104,11 @@ export default function AdminPage() {
   const [noticePublished, setNoticePublished] = useState(true);
   const [noticePinned, setNoticePinned] = useState(false);
 
-  const [newAdminEmail, setNewAdminEmail] = useState('');
-  const [addingAdmin, setAddingAdmin] = useState(false);
   const [exporting, setExporting] = useState<'users' | 'plaza' | null>(null);
 
+  const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [addingAdmin, setAddingAdmin] = useState(false);
+  const [deletingMocks, setDeletingMocks] = useState(false);
 
   const envAdminEmails = useMemo(() => getEnvAdminEmails(), []);
   const currentEmail = user?.email?.trim().toLowerCase() ?? null;
@@ -165,9 +167,6 @@ export default function AdminPage() {
     }
   }, []);
 
-  useEffect(() => {
-    if (!isAdmin) return;
-    const timer = setTimeout(() => void loadUsers(userSearch, userPage), 250);
   /**
    * 내보내기는 화면에 보이는 페이지가 아니라 현재 검색 조건에 맞는 전체를
    * 받아야 쓸모가 있다. 서버 페이지네이션을 쓰므로 큰 limit으로 한 번 더 부른다.
@@ -215,6 +214,9 @@ export default function AdminPage() {
     }
   };
 
+  useEffect(() => {
+    if (!isAdmin) return;
+    const timer = setTimeout(() => void loadUsers(userSearch, userPage), 250);
     return () => clearTimeout(timer);
   }, [isAdmin, userSearch, userPage, loadUsers]);
 
@@ -339,6 +341,25 @@ export default function AdminPage() {
       setError(e instanceof Error ? e.message : '관리자 추가 실패');
     } finally {
       setAddingAdmin(false);
+    }
+  };
+
+  const handleDeleteMockUsers = async () => {
+    const ok = window.confirm(
+      '시험용 목업 계정 user1@mail.com ~ user30@mail.com 과 목업 여행을 삭제할까요? 이 작업은 되돌릴 수 없습니다.'
+    );
+    if (!ok) return;
+    setDeletingMocks(true);
+    setError(null);
+    try {
+      const result = await deleteWaymeldMockMailUsers();
+      setUserPage(0);
+      await Promise.all([loadUsers(userSearch, 0), loadAll()]);
+      window.alert(`목업 계정 ${result.deletedUsers}명, 여행 ${result.deletedTrips}건을 삭제했습니다.`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '목업 계정 삭제 실패');
+    } finally {
+      setDeletingMocks(false);
     }
   };
 
@@ -515,6 +536,22 @@ export default function AdminPage() {
               }}
               aria-label="사용자 검색"
             />
+            <button
+              type="button"
+              className="admin-link-btn"
+              disabled={exporting !== null || userTotal === 0}
+              onClick={() => void handleExportUsers()}
+            >
+              {exporting === 'users' ? '내보내는 중…' : `CSV 내보내기 (${userTotal})`}
+            </button>
+            <button
+              type="button"
+              className="danger"
+              disabled={deletingMocks}
+              onClick={() => void handleDeleteMockUsers()}
+            >
+              {deletingMocks ? '삭제 중…' : '목업 계정 삭제'}
+            </button>
           </div>
 
           <div className="admin-table-wrap">
@@ -536,15 +573,6 @@ export default function AdminPage() {
                       {row.email ?? <span className="admin-cell-sub">(계정 없음)</span>}
                       <div className="admin-cell-sub mono">{row.userId}</div>
                     </td>
-            <button
-              type="button"
-              className="admin-link-btn"
-              disabled={exporting !== null || userTotal === 0}
-              onClick={() => void handleExportUsers()}
-            >
-              {exporting === 'users' ? '내보내는 중…' : `CSV 내보내기 (${userTotal})`}
-            </button>
-            <button
                     <td>{row.tripCount}</td>
                     <td>{formatDateTime(row.firstTripAt)}</td>
                     <td>{formatDateTime(row.lastUpdatedAt)}</td>
@@ -631,6 +659,14 @@ export default function AdminPage() {
               }}
               aria-label="공유마당 검색"
             />
+            <button
+              type="button"
+              className="admin-link-btn"
+              disabled={exporting !== null || plazaTotal === 0}
+              onClick={() => void handleExportPlaza()}
+            >
+              {exporting === 'plaza' ? '내보내는 중…' : `CSV 내보내기 (${plazaTotal})`}
+            </button>
           </div>
 
           <div className="admin-table-wrap">
@@ -669,14 +705,6 @@ export default function AdminPage() {
           </div>
 
           <Pager page={plazaPage} total={plazaTotal} onPage={setPlazaPage} />
-            <button
-              type="button"
-              className="admin-link-btn"
-              disabled={exporting !== null || plazaTotal === 0}
-              onClick={() => void handleExportPlaza()}
-            >
-              {exporting === 'plaza' ? '내보내는 중…' : `CSV 내보내기 (${plazaTotal})`}
-            </button>
         </section>
 
         <section className="admin-section">

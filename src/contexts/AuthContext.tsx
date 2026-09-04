@@ -13,6 +13,7 @@ import { tripsRepo, acceptPendingInvites } from '../lib/trips';
 import { formatAuthError, isGoogleAuthEnabled } from '../lib/authErrors';
 import { fetchUserProfile } from '../lib/profiles';
 import { isCurrentUserAdmin } from '../lib/admin';
+import { isMockMailUser, signInMockMailUser } from '../lib/mockMailUsers';
 import type { PlanId } from '../lib/subscription';
 import type { Session, User } from '@supabase/supabase-js';
 
@@ -132,8 +133,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signInWithEmail = useCallback(async (email: string) => {
     const sb = getSupabase();
     if (!sb) throw new Error('Supabase 미설정');
+    const trimmed = email.trim();
+    if (isMockMailUser(trimmed)) {
+      await signInMockMailUser(trimmed);
+      return;
+    }
     const { error } = await sb.auth.signInWithOtp({
-      email,
+      email: trimmed,
       options: {
         emailRedirectTo: loginRedirectUrl(),
       },

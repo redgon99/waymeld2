@@ -1,8 +1,9 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState, type MouseEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
 import { Icon } from '../components/Icon';
 import { LegalLinks } from '../components/LegalLinks';
+import { LegalModal, type LegalModalKind } from '../components/LegalModal';
 import { useAuth } from '../contexts/AuthContext';
 import {
   clearAuthCallbackErrorFromUrl,
@@ -16,7 +17,8 @@ import {
 } from '../lib/authSetup';
 import { normalizeLocale } from '../lib/locale';
 import i18n from '../lib/i18n';
-import { plannerPath, privacyPath, termsPath } from '../lib/routes';
+import { isMockMailUser } from '../lib/mockMailUsers';
+import { plannerPath } from '../lib/routes';
 import '../styles/app.css';
 
 const FEATURE_ICONS = ['cloudOk', 'route', 'share'] as const;
@@ -59,9 +61,8 @@ export default function LoginPage() {
   const [copiedCallback, setCopiedCallback] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [agreePrivacy, setAgreePrivacy] = useState(false);
+  const [legalModal, setLegalModal] = useState<LegalModalKind | null>(null);
   const canAuth = agreeTerms && agreePrivacy;
-  const termsHref = termsPath(locale);
-  const privacyHref = privacyPath(locale);
 
   async function copyCallbackUrl() {
     try {
@@ -111,13 +112,20 @@ export default function LoginPage() {
     setSending(true);
     setError(null);
     try {
-      await signInWithEmail(email.trim());
-      setSent(true);
+      const trimmed = email.trim();
+      await signInWithEmail(trimmed);
+      if (!isMockMailUser(trimmed)) setSent(true);
     } catch (err) {
       setError(formatAuthError(err));
     } finally {
       setSending(false);
     }
+  }
+
+  function openLegal(e: MouseEvent, kind: LegalModalKind) {
+    e.preventDefault();
+    e.stopPropagation();
+    setLegalModal(kind);
   }
 
   async function handleGoogle() {
@@ -218,7 +226,13 @@ export default function LoginPage() {
                       i18nKey="login.agreeTerms"
                       ns="auth"
                       components={{
-                        terms: <Link to={termsHref} className="login-legal-link" />,
+                        terms: (
+                          <button
+                            type="button"
+                            className="login-legal-link"
+                            onClick={(e) => openLegal(e, 'terms')}
+                          />
+                        ),
                       }}
                     />
                   </span>
@@ -234,7 +248,13 @@ export default function LoginPage() {
                       i18nKey="login.agreePrivacy"
                       ns="auth"
                       components={{
-                        privacy: <Link to={privacyHref} className="login-legal-link" />,
+                        privacy: (
+                          <button
+                            type="button"
+                            className="login-legal-link"
+                            onClick={(e) => openLegal(e, 'privacy')}
+                          />
+                        ),
                       }}
                     />
                   </span>
@@ -261,7 +281,11 @@ export default function LoginPage() {
                   className="login-primary-btn"
                   disabled={sending || loading || !canAuth}
                 >
-                  {sending ? ta('login.sending') : ta('login.sendLink')}
+                  {sending
+                    ? ta('login.sending')
+                    : isMockMailUser(email)
+                      ? ta('login.mockSignIn')
+                      : ta('login.sendLink')}
                 </button>
               </form>
 
@@ -335,6 +359,7 @@ export default function LoginPage() {
           )}
         </footer>
       </div>
+      <LegalModal kind={legalModal} onClose={() => setLegalModal(null)} />
     </div>
   );
 }

@@ -22,3 +22,7 @@ verify_jwt = false
 
 [functions.tour-scenario-candidates]
 verify_jwt = false
+
+# 시험용 user1~30@mail.com 이메일 단독 로그인. 운영 종료 시 함수를 제거하세요.
+[functions.mock-email-login]
+verify_jwt = false
