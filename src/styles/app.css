@@ -12874,6 +12874,98 @@ button {
   word-break: break-word;
 }
 
+/* 통합 대시보드 */
+.dash-alerts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dash-alert {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-left-width: 3px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.dash-alert--warn {
+  border-left-color: #dc2626;
+  background: #fef2f2;
+}
+
+.dash-alert--info {
+  border-left-color: #2563eb;
+  background: #f8fafc;
+}
+
+.dash-alert-msg {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
+}
+
+.dash-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+}
+
+.dash-card:hover {
+  border-color: #94a3b8;
+}
+
+.dash-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted, #64748b);
+}
+
+.dash-card-primary {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-card-primary small {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-muted, #64748b);
+  margin-left: 5px;
+}
+
+.dash-card-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 12px;
+  color: var(--color-text-muted, #64748b);
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-card-details em {
+  font-style: normal;
+  margin-right: 4px;
+}
+
 /* 신고 검수 — 직접 제재 버튼 */
 .admin-moderate-btn {
   margin-top: 4px;

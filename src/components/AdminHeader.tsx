@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { AuthBar } from './AuthBar';
 
 export type AdminPageKey =
+  | 'dashboard'
   | 'admin'
   | 'insights'
   | 'guides'
@@ -24,6 +25,7 @@ interface Props {
 }
 
 const NAV_ITEMS: Array<{ key: AdminPageKey; label: string; to: string }> = [
+  { key: 'dashboard', label: '대시보드', to: '/admin/dashboard' },
   { key: 'admin', label: '현황 관리', to: '/admin' },
   { key: 'insights', label: '시장 인사이트', to: '/admin/insights' },
   { key: 'guides', label: '가이드 카드', to: '/admin/guides' },
