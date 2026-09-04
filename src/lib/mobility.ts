@@ -1,4 +1,4 @@
-import type { TravelMode } from '../types';
+import type { OptimizeBy, TravelMode } from '../types';
 import { estimateLegDistance, estimateLegMinutes, haversineMeters } from './planner';
 
 const KAKAO_REST_KEY = import.meta.env.VITE_KAKAO_REST_KEY;
@@ -17,13 +17,39 @@ function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+/**
+ * 최적화 기준 → 카카오 자동차 길찾기 파라미터.
+ *
+ * 이 화면의 "최단거리·최소시간·무료도로" 버튼은 원래 저장만 되고 아무 데도
+ * 쓰이지 않아 눌러도 결과가 같았다. 카카오 길찾기가 priority/avoid를 받으므로
+ * 여기서 실제로 연결한다. 도보·자전거·대중교통 API는 이 파라미터를 받지
+ * 않으므로 자동차에서만 의미가 있다.
+ */
+function carParamsFor(optimizeBy: OptimizeBy | undefined): {
+  priority: string;
+  avoid?: string;
+} {
+  switch (optimizeBy) {
+    case 'distance':
+      return { priority: 'DISTANCE' };
+    case 'time':
+      return { priority: 'TIME' };
+    case 'no-toll':
+      // 무료도로 = 유료도로 회피. 우선순위는 카카오 기본 추천을 그대로 둔다.
+      return { priority: 'RECOMMEND', avoid: 'toll' };
+    default:
+      return { priority: 'RECOMMEND' };
+  }
+}
+
 async function tryFetchApiLeg(
   from: { lat: number; lng: number },
   to: { lat: number; lng: number },
-  mode: TravelMode
+  mode: TravelMode,
+  optimizeBy?: OptimizeBy
 ): Promise<LegResult | null> {
   if (!KAKAO_REST_KEY) return null;
-  if (mode === 'car') return fetchCarLegFromKakao(from, to);
+  if (mode === 'car') return fetchCarLegFromKakao(from, to, optimizeBy);
   if (mode === 'walk' || mode === 'bike') return fetchWalkLegFromKakao(from, to);
   if (mode === 'transit') return fetchTransitLegFromKakao(from, to);
   return null;
@@ -35,20 +61,21 @@ async function tryFetchApiLeg(
 export async function fetchLeg(
   from: { lat: number; lng: number },
   to: { lat: number; lng: number },
-  mode: TravelMode
+  mode: TravelMode,
+  optimizeBy?: OptimizeBy
 ): Promise<LegResult> {
   if (!KAKAO_REST_KEY) {
     return estimateLeg(from, to, mode);
   }
 
   try {
-    const result = await tryFetchApiLeg(from, to, mode);
+    const result = await tryFetchApiLeg(from, to, mode, optimizeBy);
     if (result) return result;
   } catch (e) {
     console.warn(`카카오 길찾기(${mode}) 1차 실패, 재시도합니다`, e);
     try {
       await wait(250);
-      const retried = await tryFetchApiLeg(from, to, mode);
+      const retried = await tryFetchApiLeg(from, to, mode, optimizeBy);
       if (retried) return retried;
     } catch (retryError) {
       console.warn(`카카오 길찾기(${mode}) 재시도 실패, 추정으로 폴백`, retryError);
@@ -73,13 +100,16 @@ function estimateLeg(
 
 async function fetchCarLegFromKakao(
   from: { lat: number; lng: number },
-  to: { lat: number; lng: number }
+  to: { lat: number; lng: number },
+  optimizeBy?: OptimizeBy
 ): Promise<LegResult> {
+  const { priority, avoid } = carParamsFor(optimizeBy);
   const params = new URLSearchParams({
     origin: `${from.lng},${from.lat}`,
     destination: `${to.lng},${to.lat}`,
-    priority: 'RECOMMEND',
+    priority,
   });
+  if (avoid) params.set('avoid', avoid);
   const route = await fetchMobilityRoute(`${CAR_URL}?${params.toString()}`);
   const dist = route.summary.distance as number;
   const durSec = route.summary.duration as number;
@@ -179,14 +209,15 @@ function extractPolylineFromRoute(route: {
 
 export async function fetchLegs(
   points: Array<{ lat: number; lng: number }>,
-  mode: TravelMode
+  mode: TravelMode,
+  optimizeBy?: OptimizeBy
 ): Promise<LegResult[]> {
   if (points.length < 2) return [];
   const pairs: Array<[typeof points[number], typeof points[number]]> = [];
   for (let i = 0; i < points.length - 1; i++) {
     pairs.push([points[i], points[i + 1]]);
   }
-  const firstPass = await Promise.all(pairs.map(([a, b]) => fetchLeg(a, b, mode)));
+  const firstPass = await Promise.all(pairs.map(([a, b]) => fetchLeg(a, b, mode, optimizeBy)));
 
   // 실패(estimate) 구간만 한 번 더 보강 시도
   if (!KAKAO_REST_KEY) return firstPass;
@@ -201,7 +232,7 @@ export async function fetchLegs(
     const [from, to] = pairs[idx];
     try {
       await wait(180);
-      const retried = await tryFetchApiLeg(from, to, mode);
+      const retried = await tryFetchApiLeg(from, to, mode, optimizeBy);
       if (retried) {
         secondPass[idx] = retried;
       }

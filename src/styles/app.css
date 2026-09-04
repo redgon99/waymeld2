@@ -5860,8 +5860,6 @@ button {
   max-width: 400px;
 }
 
-}
-
 .upgrade-modal .btn-primary,
 .upgrade-modal .btn-secondary {
   width: 100%;
@@ -12881,6 +12879,17 @@ button {
   max-width: 280px;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.route-optimize-hint {
+  margin: 6px 0 0;
+  font-size: 11px;
+  color: var(--color-text-muted, #64748b);
+}
+
+.route-optimize-chip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 /* 지도 → 핀 목록 핀업 연출 */

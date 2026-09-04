@@ -246,7 +246,8 @@
       "reservedHint": "Eine Reservierung verschiebt sich nicht; der übrige Tag richtet sich danach.",
       "date": "Besuchsdatum",
       "dateHint": "Mit Datum werden die Öffnungszeiten je Wochentag geprüft",
-      "hoursFilter": "Zeiten prüfen {{n}}"
+      "hoursFilter": "Zeiten prüfen {{n}}",
+      "optimizeCarOnly": "Gilt nur für Autofahrten"
     },
     "reservedAt": "Reserviert um {{time}} · feste Zeit",
     "reservedLate": "{{minutes}} Min. zu spät zur Reservierung um {{time}}",

@@ -246,7 +246,8 @@
       "reservedHint": "L'heure d'une réservation ne bouge pas ; le reste de la journée s'organise autour.",
       "date": "Date de visite",
       "dateHint": "Ajoutez la date pour vérifier les horaires selon le jour",
-      "hoursFilter": "Horaires à vérifier {{n}}"
+      "hoursFilter": "Horaires à vérifier {{n}}",
+      "optimizeCarOnly": "Uniquement en voiture"
     },
     "reservedAt": "Réservé à {{time}} · heure fixe",
     "reservedLate": "{{minutes}} min de retard sur la réservation de {{time}}",

@@ -344,12 +344,17 @@ export function RouteOptionsPanel({
                 className={`route-optimize-chip ${
                   options.optimizeBy === key ? 'selected' : ''
                 }`}
+                disabled={options.travelMode !== 'car'}
                 onClick={() => patch('optimizeBy', key)}
               >
                 {t(OPTIMIZE_I18N[key])}
               </button>
             ))}
           </div>
+          {/* 길찾기 API가 우선순위·유료도로 회피를 자동차에서만 받는다 */}
+          {options.travelMode !== 'car' && (
+            <p className="route-optimize-hint">{t('route.options.optimizeCarOnly')}</p>
+          )}
           <div className="route-order-row">
             <button
               type="button"

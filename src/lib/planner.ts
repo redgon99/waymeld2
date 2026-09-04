@@ -272,7 +272,9 @@ export async function refineRouteWithRealLegs(
   route: GeneratedRoute,
   fetchLegs: (
     points: Array<{ lat: number; lng: number }>,
-    mode: GeneratedRoute['options']['travelMode']
+    mode: GeneratedRoute['options']['travelMode'],
+    // 최단거리·최소시간·무료도로를 길찾기 API에 그대로 넘긴다
+    optimizeBy: GeneratedRoute['options']['optimizeBy']
   ) => Promise<
     Array<{
       distanceMeters: number;
@@ -288,7 +290,7 @@ export async function refineRouteWithRealLegs(
   }
   route.stops.forEach((s) => points.push({ lat: s.lat, lng: s.lng }));
 
-  const newLegs = await fetchLegs(points, route.options.travelMode);
+  const newLegs = await fetchLegs(points, route.options.travelMode, route.options.optimizeBy);
 
   // 도착·출발 시각 재계산
   const departMin = (() => {

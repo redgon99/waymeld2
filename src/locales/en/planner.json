@@ -246,7 +246,8 @@
       "reservedHint": "A reservation never moves. The rest of the day is planned around it.",
       "date": "Visit date",
       "dateHint": "Add a date to check day-of-week opening hours",
-      "hoursFilter": "Hours to check {{n}}"
+      "hoursFilter": "Hours to check {{n}}",
+      "optimizeCarOnly": "Applies to driving only"
     },
     "reservedAt": "Reserved at {{time}} · fixed",
     "reservedLate": "{{minutes}} min late for the {{time}} reservation",

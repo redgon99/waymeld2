@@ -246,7 +246,8 @@
       "reservedHint": "La hora de una reserva no cambia; el resto del día se organiza a su alrededor.",
       "date": "Fecha de visita",
       "dateHint": "Añade la fecha para comprobar el horario según el día",
-      "hoursFilter": "Horarios por revisar {{n}}"
+      "hoursFilter": "Horarios por revisar {{n}}",
+      "optimizeCarOnly": "Solo se aplica en coche"
     },
     "reservedAt": "Reservado a las {{time}} · hora fija",
     "reservedLate": "{{minutes}} min tarde para la reserva de las {{time}}",
