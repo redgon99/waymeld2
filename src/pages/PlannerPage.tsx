@@ -54,7 +54,8 @@ import { consumeShareHandoff } from '../lib/shareTarget';
 import { isValidHHMM } from '../lib/timeOfDay';
 import { fetchLegs } from '../lib/mobility';
 import { resolveOriginForRoute } from '../lib/resolveOrigin';
-import { suggestStayMinutes } from '../lib/categories';
+import { suggestStayMinutes, CATEGORY_MAP } from '../lib/categories';
+import { currentBubblePinRect, flyPinToTab } from '../lib/pinFlyAnimation';
 import {
   normalizeTrip,
   DEFAULT_ROUTE_OPTIONS,
@@ -1247,9 +1248,22 @@ export default function PlannerPage() {
 
   const handleTogglePinFromInfo = useCallback(
     (place: Place) => {
+      // 추가일 때만 날린다. 해제는 연출할 것이 없고, 말풍선이 닫히기 전에
+      // 버튼 위치를 읽어야 하므로 handleTogglePin보다 먼저 잰다.
+      const isAdding = !(trip.pinnedByDay[currentDay] ?? []).some((p) => p.id === place.id);
+      const from = isAdding ? currentBubblePinRect() : null;
+
       handleTogglePin(place);
+
+      if (from) {
+        flyPinToTab({
+          from,
+          label: place.name,
+          iconName: CATEGORY_MAP[place.categoryCode]?.icon ?? 'mapPin',
+        });
+      }
     },
-    [handleTogglePin]
+    [handleTogglePin, trip.pinnedByDay, currentDay]
   );
 
   const handleToggleRequired = useCallback((id: string) => {

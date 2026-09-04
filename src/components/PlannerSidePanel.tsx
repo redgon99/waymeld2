@@ -44,6 +44,8 @@ export function PlannerSidePanel({
               type="button"
               role="tab"
               aria-selected={tab === id}
+              // 핀업 애니메이션이 착지할 지점을 찾는 데 쓴다 (lib/pinFlyAnimation.ts)
+              data-tab={id}
               className={`planner-side-tab ${tab === id ? 'active' : ''}`}
               onClick={() => onTabChange(id)}
             >
