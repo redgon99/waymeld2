@@ -292,16 +292,31 @@ async function fetchCollaboratorRoles(userId: string): Promise<Map<string, Colla
   return new Map(data.map((r) => [r.trip_id as string, r.role as CollaboratorRole]));
 }
 
+/**
+ * "내 여행" 범위를 쿼리에서 명시적으로 좁힌다.
+ *
+ * RLS에 맡기면 안 된다. waymeld_trips에는 SELECT 정책이 4개 있고 PostgreSQL은
+ * permissive 정책을 OR로 합치므로, 필터를 빼면 `public_slug_select`(is_public)와
+ * `waymeld_trips_admin_select`(is_admin)까지 열려 남의 여행이 내 목록에 섞인다.
+ * RLS는 "접근해도 되는가"를 정하고, 내 목록은 그보다 의도적으로 좁은 질의다.
+ */
+function collaboratorIdsOf(roles: Map<string, CollaboratorRole>): string[] {
+  return [...roles.keys()];
+}
+
 async function listRemote(userId: string): Promise<TripSummary[]> {
   const sb = getSupabase();
   if (!sb) return [];
   const roles = await fetchCollaboratorRoles(userId);
-  // RLS가 owner_id=나 OR trip_collaborators에 내가 있는 행만 돌려주므로
-  // 여기서 owner_id 필터를 걸면 공유받은 여행이 목록에서 빠진다.
-  const { data, error } = await sb
-    .from('waymeld_trips')
-    .select('id, slug, title, total_days, updated_at')
-    .order('updated_at', { ascending: false });
+  const collabIds = collaboratorIdsOf(roles);
+
+  const base = sb.from('waymeld_trips').select('id, slug, title, total_days, updated_at');
+  const scoped =
+    collabIds.length > 0
+      ? base.or(`owner_id.eq.${userId},id.in.(${collabIds.join(',')})`)
+      : base.eq('owner_id', userId);
+
+  const { data, error } = await scoped.order('updated_at', { ascending: false });
   if (error || !data) return [];
   return data.map((row) => ({
     id: row.id,
@@ -316,27 +331,37 @@ async function listRemote(userId: string): Promise<TripSummary[]> {
 async function readRemoteById(userId: string, tripId: string): Promise<Trip | null> {
   const sb = getSupabase();
   if (!sb) return null;
-  const { data, error } = await sb
-    .from('waymeld_trips')
-    .select(TRIP_SELECT)
-    .eq('id', tripId)
-    .maybeSingle();
-  if (error || !data) return null;
   const roles = await fetchCollaboratorRoles(userId);
+
+  // 협업자로 등록된 여행이면 소유자 조건 없이, 아니면 내 것만.
+  // 공개 여행 열람은 /trip/:slug 공유 페이지와 "끌어오기"가 담당한다.
+  const base = sb.from('waymeld_trips').select(TRIP_SELECT).eq('id', tripId);
+  const scoped = roles.has(tripId) ? base : base.eq('owner_id', userId);
+
+  const { data, error } = await scoped.maybeSingle();
+  if (error || !data) return null;
   return rowToTrip(data, roles.get(tripId));
 }
 
 async function readRemoteLatest(userId: string): Promise<Trip | null> {
   const sb = getSupabase();
   if (!sb) return null;
-  const { data, error } = await sb
-    .from('waymeld_trips')
-    .select(TRIP_SELECT)
+  const roles = await fetchCollaboratorRoles(userId);
+  const collabIds = collaboratorIdsOf(roles);
+
+  // 범위를 좁히지 않으면 "전체에서 가장 최근 수정된 여행"이 잡혀,
+  // 남의 여행이 앱을 열자마자 내 플래너로 열린다.
+  const base = sb.from('waymeld_trips').select(TRIP_SELECT);
+  const scoped =
+    collabIds.length > 0
+      ? base.or(`owner_id.eq.${userId},id.in.(${collabIds.join(',')})`)
+      : base.eq('owner_id', userId);
+
+  const { data, error } = await scoped
     .order('updated_at', { ascending: false })
     .limit(1)
     .maybeSingle();
   if (error || !data) return null;
-  const roles = await fetchCollaboratorRoles(userId);
   return rowToTrip(data, roles.get(data.id));
 }
 
