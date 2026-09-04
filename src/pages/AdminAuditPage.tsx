@@ -12,6 +12,8 @@ import {
   describeAuditEntry,
   listAdminAuditLog,
   listAuditActors,
+  restoreAuditEntry,
+  restoreBlockReason,
   type AdminAuditEntry,
   type AuditOperation,
 } from '../lib/adminAudit';
@@ -42,6 +44,7 @@ export default function AdminAuditPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [exporting, setExporting] = useState(false);
+  const [restoringId, setRestoringId] = useState<number | null>(null);
 
   const [tableFilter, setTableFilter] = useState('');
   const [operationFilter, setOperationFilter] = useState<AuditOperation | ''>('');
@@ -114,6 +117,24 @@ export default function AdminAuditPage() {
       setError(e instanceof Error ? e.message : '추가 로드 실패');
     } finally {
       setLoadingMore(false);
+    }
+  };
+
+  const handleRestore = async (entry: AdminAuditEntry) => {
+    const target = auditSubject(entry);
+    const what = entry.operation === 'DELETE' ? '삭제된 항목을 되살립니다' : '이 변경을 되돌립니다';
+    if (!window.confirm(`"${target}" — ${what}. 되돌린 기록도 감사 로그에 남습니다. 진행할까요?`)) {
+      return;
+    }
+    setRestoringId(entry.id);
+    setError(null);
+    try {
+      await restoreAuditEntry(entry.id);
+      await loadFirstPage();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '되돌리기 실패');
+    } finally {
+      setRestoringId(null);
     }
   };
 
@@ -309,6 +330,34 @@ export default function AdminAuditPage() {
                               </pre>
                             </div>
                           </div>
+                          {(() => {
+                            const blocked = restoreBlockReason(entry);
+                            return (
+                              <div className="audit-restore-row">
+                                {blocked ? (
+                                  <span className="admin-cell-sub">되돌릴 수 없음 — {blocked}</span>
+                                ) : (
+                                  <>
+                                    <button
+                                      type="button"
+                                      className="admin-moderate-btn"
+                                      disabled={restoringId === entry.id}
+                                      onClick={() => void handleRestore(entry)}
+                                    >
+                                      {restoringId === entry.id
+                                        ? '되돌리는 중…'
+                                        : entry.operation === 'DELETE'
+                                          ? '삭제 되살리기'
+                                          : '이 변경 되돌리기'}
+                                    </button>
+                                    <span className="admin-cell-sub">
+                                      되돌린 기록도 감사 로그에 남습니다
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+                            );
+                          })()}
                         </td>
                       </tr>
                     )}

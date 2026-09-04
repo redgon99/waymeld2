@@ -125,6 +125,49 @@ export async function listAuditActors(): Promise<string[]> {
   return [...seen].sort();
 }
 
+/**
+ * 되돌리기를 지원하는 테이블. 내용 테이블만 넣는다 — `admin_users`(권한 부여)나
+ * `content_reports`(신고 처리)는 되돌리면 안 되므로 서버에서도 거부한다.
+ * (마이그레이션 20260904090000의 v_allowed와 같아야 한다)
+ */
+export const RESTORABLE_TABLES = [
+  'guide_articles',
+  'landing_promo',
+  'admin_notices',
+  'scenario_catalog',
+];
+
+/**
+ * 값이 커서 기록되지 않은 필드. 이런 항목을 복원하면 원본 자리에 자리표시자가
+ * 덮어써지므로 서버가 거부한다 — 버튼도 미리 막아 이유를 보여준다.
+ */
+function omittedFields(value: Record<string, unknown> | null): string[] {
+  if (!value) return [];
+  return Object.entries(value)
+    .filter(([, v]) => {
+      if (v && typeof v === 'object' && '__audit_omitted_bytes__' in (v as object)) return true;
+      return typeof v === 'string' && v.startsWith('[생략됨 ');
+    })
+    .map(([k]) => k);
+}
+
+/** 되돌릴 수 없으면 그 이유, 되돌릴 수 있으면 null */
+export function restoreBlockReason(entry: AdminAuditEntry): string | null {
+  if (!RESTORABLE_TABLES.includes(entry.tableName)) return '이 영역은 되돌리기를 지원하지 않습니다';
+  if (entry.operation === 'INSERT') return '추가는 되돌릴 수 없습니다';
+  if (!entry.before || Object.keys(entry.before).length === 0) return '복원할 이전 값이 없습니다';
+  const omitted = omittedFields(entry.before);
+  if (omitted.length > 0) return `값이 커서 기록되지 않은 필드가 있습니다: ${omitted.join(', ')}`;
+  return null;
+}
+
+/** 되돌리기. 되돌린 것 자체도 대상 테이블의 감사 트리거가 다시 기록한다. */
+export async function restoreAuditEntry(auditId: number): Promise<void> {
+  const sb = requireSupabase();
+  const { error } = await sb.rpc('admin_restore_audit_entry', { p_audit_id: auditId });
+  if (error) throw error;
+}
+
 /** 대상을 사람이 알아볼 이름으로. UPDATE는 바뀐 컬럼만 담기므로 못 찾을 수 있다. */
 const SUBJECT_KEYS = ['email', 'title', 'slug', 'keyword', 'name', 'platform', 'label'];
 

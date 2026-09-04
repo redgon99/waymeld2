@@ -293,3 +293,33 @@ Supabase 프로젝트 ref: `ainftwifvclgiookzrwm` (대시보드: `https://supaba
 **검증:** `esbuild`로 `csv.ts`를 번들해 실제 함수를 직접 호출, 수식 인젝션(`=1+1`→`'=1+1`, `@mention`→`'@mention`) / 따옴표 이중화 / 쉼표·줄바꿈 감싸기 / null 처리가 모두 정확함을 확인. `tsc`·`npm run build` 클린.
 
 **⚠️ 남은 확인:** 브라우저에서 실제 다운로드는 사용자 확인 전.
+
+---
+
+## 3-10. 버전 이력 되돌리기 (완료)
+
+**왜 별도 버전 테이블을 안 만들었나:** ②의 감사 로그가 이미 변경 전/후를 갖고 있다. 감사 로그 항목 하나를 골라 그 시점으로 되돌리면 되므로 새 테이블이 필요 없고, 되돌리기 자체도 트리거가 다시 기록해 이력이 이어진다. 백로그의 "가이드 버전 이력/롤백 없음", "랜딩 변경 이력/되돌리기 없음"이 한 번에 해결된다.
+
+**⚠️ 이 기능의 핵심 위험과 대응:** `audit_redact()`는 1000바이트 넘는 값을 잘라낸다. 그대로 복원하면 **가이드 본문(`body_md`) 자리에 자리표시자 문자열이 덮어써져 원본이 파괴된다.** 그래서 두 가지를 했다.
+1. 잘림 마커를 문자열이 아니라 구조화된 jsonb(`{"__audit_omitted_bytes__": N}`)로 바꿨다 — 사용자가 입력한 텍스트와 절대 헷갈리지 않는다.
+2. 복원 시 잘린 필드가 하나라도 있으면 **필드명을 알려주며 거부**한다. UI도 버튼을 막고 이유를 보여준다.
+
+**변경한 파일:**
+1. `supabase/migrations/20260904090000_admin_audit_restore.sql` (신규) — `audit_redact()` 마커 구조화, `audit_omitted_fields()`, `admin_restore_audit_entry(p_audit_id)`
+2. `src/lib/adminAudit.ts` — `RESTORABLE_TABLES`, `restoreBlockReason()`(버튼 사전 차단 + 이유), `restoreAuditEntry()`
+3. `src/pages/AdminAuditPage.tsx` — 상세 펼침 안에 되돌리기 버튼
+4. `src/styles/app.css` — `.audit-restore-row`
+
+**허용 테이블:** `guide_articles` / `landing_promo` / `admin_notices` / `scenario_catalog`. `admin_users`(권한 부여)·`content_reports`(신고 처리)는 되돌리면 안 되므로 **서버에서 거부**한다(UI만 막지 않는다). INSERT 되돌리기도 거부한다 — 해당 화면에서 삭제하면 된다.
+
+**동작 방식:** UPDATE는 `before`에 담긴 컬럼만 되돌린다(`jsonb_populate_record`로 컬럼 타입에 맞게 캐스팅). DELETE는 전체 행을 원래 id 그대로 다시 넣는다.
+
+**검증(롤백 트랜잭션) 4종:**
+- 가이드 제목 변경 → 되돌리기 → 원래 제목 복구 ✅
+- 본문(2000바이트) 변경 후 되돌리기 시도 → `되돌릴 수 없습니다: body_md`로 거부 ✅
+- 공지 삭제 → 되살리기 → 원래 id로 복원 ✅
+- `admin_user_verifications` 되돌리기 시도 → 거부 ✅
+
+`tsc`·`npm run build` 클린.
+
+**⚠️ 남은 확인:** 브라우저 실동작은 사용자 확인 전.

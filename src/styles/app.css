@@ -13175,6 +13175,15 @@ button {
   background: transparent;
   color: #b45309;
   font-size: 11px;
+.audit-restore-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border, #e2e8f0);
+}
+
   font-weight: 700;
   cursor: pointer;
 }
