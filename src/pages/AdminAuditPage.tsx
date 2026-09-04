@@ -15,7 +15,11 @@ import {
   type AdminAuditEntry,
   type AuditOperation,
 } from '../lib/adminAudit';
+import { csvFilename, downloadCsv, toCsv } from '../lib/csv';
 import '../styles/app.css';
+
+/** 내보내기는 화면에 불러온 페이지가 아니라 현재 필터 전체를 대상으로 한다 */
+const EXPORT_LIMIT = 5000;
 
 const OPERATIONS: AuditOperation[] = ['INSERT', 'UPDATE', 'DELETE'];
 
@@ -37,6 +41,7 @@ export default function AdminAuditPage() {
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [expanded, setExpanded] = useState<number | null>(null);
+  const [exporting, setExporting] = useState(false);
 
   const [tableFilter, setTableFilter] = useState('');
   const [operationFilter, setOperationFilter] = useState<AuditOperation | ''>('');
@@ -109,6 +114,37 @@ export default function AdminAuditPage() {
       setError(e instanceof Error ? e.message : '추가 로드 실패');
     } finally {
       setLoadingMore(false);
+    }
+  };
+
+  const handleExport = async () => {
+    setExporting(true);
+    setError(null);
+    try {
+      const rows = await listAdminAuditLog({
+        tableName: tableFilter || undefined,
+        operation: operationFilter || undefined,
+        actorEmail: actorFilter || undefined,
+        limit: EXPORT_LIMIT,
+      });
+      const csv = toCsv(rows, [
+        { header: '시각', value: (r) => r.createdAt },
+        { header: '작업자', value: (r) => r.actorEmail ?? '시스템' },
+        { header: '영역', value: (r) => auditTableLabel(r.tableName) },
+        { header: '테이블', value: (r) => r.tableName },
+        { header: '작업', value: (r) => OPERATION_LABEL[r.operation] },
+        { header: '대상', value: (r) => auditSubject(r) },
+        { header: '대상 ID', value: (r) => r.rowId ?? '' },
+        { header: '변경 요약', value: (r) => describeAuditEntry(r) },
+        { header: '변경 컬럼', value: (r) => r.changedFields.join(' ') },
+        { header: '이전', value: (r) => (r.before ? JSON.stringify(r.before) : '') },
+        { header: '이후', value: (r) => (r.after ? JSON.stringify(r.after) : '') },
+      ]);
+      downloadCsv(csvFilename('waymeld_감사로그'), csv);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '내보내기 실패');
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -206,6 +242,15 @@ export default function AdminAuditPage() {
                 </option>
               ))}
             </select>
+
+            <button
+              type="button"
+              className="admin-link-btn"
+              disabled={exporting || entries.length === 0}
+              onClick={() => void handleExport()}
+            >
+              {exporting ? '내보내는 중…' : 'CSV 내보내기'}
+            </button>
           </div>
 
           <div className="admin-table-wrap">

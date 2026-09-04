@@ -23,6 +23,7 @@ import {
   type AdminUserAccount,
   type AdminUserRow,
 } from '../lib/admin';
+import { csvFilename, downloadCsv, toCsv } from '../lib/csv';
 import { evaluateTier3Gates, type GateStatus } from '../lib/tierGates';
 import '../styles/app.css';
 
@@ -104,6 +105,8 @@ export default function AdminPage() {
 
   const [newAdminEmail, setNewAdminEmail] = useState('');
   const [addingAdmin, setAddingAdmin] = useState(false);
+  const [exporting, setExporting] = useState<'users' | 'plaza' | null>(null);
+
 
   const envAdminEmails = useMemo(() => getEnvAdminEmails(), []);
   const currentEmail = user?.email?.trim().toLowerCase() ?? null;
@@ -165,6 +168,53 @@ export default function AdminPage() {
   useEffect(() => {
     if (!isAdmin) return;
     const timer = setTimeout(() => void loadUsers(userSearch, userPage), 250);
+  /**
+   * 내보내기는 화면에 보이는 페이지가 아니라 현재 검색 조건에 맞는 전체를
+   * 받아야 쓸모가 있다. 서버 페이지네이션을 쓰므로 큰 limit으로 한 번 더 부른다.
+   */
+  const EXPORT_LIMIT = 5000;
+
+  const handleExportUsers = async () => {
+    setExporting('users');
+    try {
+      const { rows } = await listAdminUserRows({ search: userSearch, limit: EXPORT_LIMIT });
+      const csv = toCsv(rows, [
+        { header: '이메일', value: (r) => r.email ?? '' },
+        { header: '사용자 ID', value: (r) => r.userId },
+        { header: '여행수', value: (r) => r.tripCount },
+        { header: '첫 생성', value: (r) => r.firstTripAt ?? '' },
+        { header: '마지막 활동', value: (r) => r.lastUpdatedAt ?? '' },
+        { header: '확인 상태', value: (r) => (r.isVerified ? '확인됨' : '미확인') },
+        { header: '확인 시각', value: (r) => r.verifiedAt ?? '' },
+        { header: '메모', value: (r) => r.memo ?? '' },
+      ]);
+      downloadCsv(csvFilename('waymeld_사용자'), csv);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '내보내기 실패');
+    } finally {
+      setExporting(null);
+    }
+  };
+
+  const handleExportPlaza = async () => {
+    setExporting('plaza');
+    try {
+      const { rows } = await listPlazaListings({ search: plazaSearch, limit: EXPORT_LIMIT });
+      const csv = toCsv(rows, [
+        { header: '제목', value: (r) => r.title },
+        { header: '여행 ID', value: (r) => r.id },
+        { header: '소유자', value: (r) => r.ownerEmail ?? '' },
+        { header: '마당 등록시각', value: (r) => r.listedAt ?? '' },
+        { header: '자료 수', value: (r) => r.materialsCount },
+      ]);
+      downloadCsv(csvFilename('waymeld_공유마당'), csv);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '내보내기 실패');
+    } finally {
+      setExporting(null);
+    }
+  };
+
     return () => clearTimeout(timer);
   }, [isAdmin, userSearch, userPage, loadUsers]);
 
@@ -486,6 +536,15 @@ export default function AdminPage() {
                       {row.email ?? <span className="admin-cell-sub">(계정 없음)</span>}
                       <div className="admin-cell-sub mono">{row.userId}</div>
                     </td>
+            <button
+              type="button"
+              className="admin-link-btn"
+              disabled={exporting !== null || userTotal === 0}
+              onClick={() => void handleExportUsers()}
+            >
+              {exporting === 'users' ? '내보내는 중…' : `CSV 내보내기 (${userTotal})`}
+            </button>
+            <button
                     <td>{row.tripCount}</td>
                     <td>{formatDateTime(row.firstTripAt)}</td>
                     <td>{formatDateTime(row.lastUpdatedAt)}</td>
@@ -610,6 +669,14 @@ export default function AdminPage() {
           </div>
 
           <Pager page={plazaPage} total={plazaTotal} onPage={setPlazaPage} />
+            <button
+              type="button"
+              className="admin-link-btn"
+              disabled={exporting !== null || plazaTotal === 0}
+              onClick={() => void handleExportPlaza()}
+            >
+              {exporting === 'plaza' ? '내보내는 중…' : `CSV 내보내기 (${plazaTotal})`}
+            </button>
         </section>
 
         <section className="admin-section">
