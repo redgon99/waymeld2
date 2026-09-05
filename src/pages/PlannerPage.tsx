@@ -29,7 +29,7 @@ import {
   writeMapProviderChoice,
 } from '../lib/mapProviderPreference';
 import { getApproximateLocation } from '../lib/geolocation';
-import { KAKAO_LEVEL_DEFAULT } from '../lib/mapZoom';
+import { KAKAO_LEVEL_DEFAULT, KAKAO_LEVEL_PLACE_FOCUS } from '../lib/mapZoom';
 import {
   DEFAULT_MAP_CENTER,
   readMapViewport,
@@ -299,6 +299,8 @@ export default function PlannerPage() {
   const [mapLevel, setMapLevel] = useState(
     () => readMapViewport()?.level ?? KAKAO_LEVEL_DEFAULT
   );
+  // 같은 레벨을 다시 지정해도 지도에 반영되도록 하는 신호
+  const [mapLevelTick, setMapLevelTick] = useState(0);
   const [mapType, setMapType] = useState<'roadmap' | 'satellite'>('roadmap');
   const [mapProviderBooting, setMapProviderBooting] = useState(
     () => !hasSavedMapProviderChoice()
@@ -375,9 +377,12 @@ export default function PlannerPage() {
     if (!pinSelectionActive) return;
     setInfoWindowPlace((prev) => {
       if (!prev || selectedPinIds.has(prev.id)) return prev;
+      /* 핀 선택에서 빠진 "핀"의 말풍선만 닫는다. 검색 결과 말풍선까지 닫으면
+       * 핀 탭 체크가 남아 있는 동안 검색 결과를 눌러도 아무 반응이 없다. */
+      if (!pinned.some((p) => p.id === prev.id)) return prev;
       return null;
     });
-  }, [pinSelectionActive, selectedPinIds]);
+  }, [pinSelectionActive, selectedPinIds, pinned]);
   const generatedRoute = trip.generatedRouteByDay[currentDay] ?? null;
   const routeOptions = useMemo(
     () => getRouteOptionsForDay(trip, currentDay),
@@ -1074,23 +1079,37 @@ export default function PlannerPage() {
     setEnrichingStats(false);
   }, []);
 
-  const handleSelectPlace = useCallback((place: Place) => {
-    setSelectedPlaceId(place.id);
-    setFitSearchBounds(false);
-    setMapCenter({ lat: place.lat, lng: place.lng });
-    setInfoWindowPlace(place);
+  /* 다른 장소를 고르면 앞서 열어둔 상세는 닫는다. 목록에서 고른 곳과 옆에
+   * 붙은 상세가 서로 다른 장소를 가리키면 지금 보는 곳이 어디인지 알 수 없다. */
+  const closeStalePlaceDetail = useCallback((nextId: string) => {
+    setPhotosTarget((prev) => (prev && prev.id !== nextId ? null : prev));
   }, []);
+
+  const handleSelectPlace = useCallback(
+    (place: Place) => {
+      setSelectedPlaceId(place.id);
+      setFitSearchBounds(false);
+      setMapCenter({ lat: place.lat, lng: place.lng });
+      setInfoWindowPlace(place);
+      closeStalePlaceDetail(place.id);
+    },
+    [closeStalePlaceDetail]
+  );
 
   /** 지도 검색 핀 호버 — 결과 칩만 선택 (지도 이동·말풍선 없음) */
   const handleHoverSearchPlace = useCallback((place: Place) => {
     setSelectedPlaceId((prev) => (prev === place.id ? prev : place.id));
   }, []);
 
-  const handlePinnedMarkerClick = useCallback((place: Place) => {
-    setSelectedPlaceId(place.id);
-    setMapCenter({ lat: place.lat, lng: place.lng });
-    setInfoWindowPlace(place);
-  }, []);
+  const handlePinnedMarkerClick = useCallback(
+    (place: Place) => {
+      setSelectedPlaceId(place.id);
+      setMapCenter({ lat: place.lat, lng: place.lng });
+      setInfoWindowPlace(place);
+      closeStalePlaceDetail(place.id);
+    },
+    [closeStalePlaceDetail]
+  );
 
   const handleCloseInfoWindow = useCallback(() => {
     setInfoWindowPlace(null);
@@ -1130,8 +1149,44 @@ export default function PlannerPage() {
     });
   }, [mapContextMenu, runSearch, openSearchPanel]);
 
+  /**
+   * 좌측 패널 + 장소 상세 패널이 지도 왼쪽을 가린다.
+   * 남는 지도 영역의 한가운데가 화면 중심에서 얼마나 오른쪽인지 계산해,
+   * 그만큼 지도 중심을 밀어 대상이 가려지지 않게 한다.
+   * (모바일은 패널이 지도 위를 덮는 구조라 보정하지 않는다)
+   */
+  const occludedCenterShiftPx = useCallback(() => {
+    if (typeof window === 'undefined') return 0;
+    // 도킹 여부는 CSS와 같은 기준(.mobile-layout)으로 판단한다
+    if (document.querySelector('.waymeld-root.mobile-layout')) return 0;
+    const styles = getComputedStyle(document.documentElement);
+    const px = (name: string, fallback: number) =>
+      parseFloat(styles.getPropertyValue(name)) || fallback;
+    const gutter = px('--chrome-gutter', 16);
+    const sidePanel = px('--side-panel-w', 360);
+    const detailPanel =
+      // 아직 렌더 전이면 기본 모달 폭(680)으로 어림한다
+      document.querySelector('.photos-panel')?.getBoundingClientRect().width ?? 680;
+
+    const occludedRight = gutter * 2 + sidePanel + detailPanel;
+    const visibleCenter = (occludedRight + window.innerWidth) / 2;
+    return Math.max(0, visibleCenter - window.innerWidth / 2);
+  }, []);
+
   const handleOpenPlacePhotos = useCallback((place: Place) => {
     setPhotosTarget(place);
+    /* 상세를 지도 옆에 띄우므로(가리지 않으므로) 그 장소를 지도에서도 바로
+     * 짚어준다. 이미 충분히 확대돼 있으면 축척을 건드리지 않는다 — 사용자가
+     * 맞춰둔 화면을 상세를 열 때마다 되돌리면 성가시다. levelTick은 같은
+     * 레벨로 다시 지정할 때도 지도에 반영되게 하는 신호다. */
+    setSelectedPlaceId(place.id);
+    setFitSearchBounds(false);
+
+    if (mapLevelRef.current > KAKAO_LEVEL_PLACE_FOCUS) {
+      setMapLevel(KAKAO_LEVEL_PLACE_FOCUS);
+      setMapLevelTick((t) => t + 1);
+    }
+    setMapCenter({ lat: place.lat, lng: place.lng });
   }, []);
 
   const handleUseMyLocationForSearch = useCallback(() => {
@@ -1948,7 +2003,7 @@ export default function PlannerPage() {
 
   useEffect(() => {
     if (!useMobileChrome) setMobileSheet(null);
-  }, [useMobileChrome]);
+  }, []);
 
   useEffect(() => {
     if (!presentationMode || tableViewMode) return;
@@ -1999,6 +2054,8 @@ export default function PlannerPage() {
           googleMapsReady={googleReady}
           center={mapCenter}
           level={mapLevel}
+          levelTick={mapLevelTick}
+          centerOffsetX={photosTarget ? occludedCenterShiftPx() : 0}
           mapType={mapType}
           searchResults={displayResults}
           pinned={mapPins}

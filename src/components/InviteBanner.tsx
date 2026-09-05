@@ -22,6 +22,9 @@ export function InviteBanner() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
   const inviteId = params.get('invite');
+  /* 초대 링크가 실어 온 주소. 미리보기 RPC의 주소는 마스킹돼 있어 로그인창을
+   * 채울 수 없으므로, 링크에 있을 때만 그대로 넘긴다. */
+  const invitedEmailFromLink = params.get('email');
 
   const [preview, setPreview] = useState<TripInvitePreview | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -44,6 +47,8 @@ export function InviteBanner() {
   const dismiss = () => {
     const next = new URLSearchParams(params);
     next.delete('invite');
+    // 주소를 주소창에 계속 남겨둘 이유가 없다
+    next.delete('email');
     setParams(next, { replace: true });
   };
 
@@ -73,7 +78,14 @@ export function InviteBanner() {
       trip: preview.tripTitle,
       email: preview.invitedEmail ?? '',
     });
-    action = { label: t('invite.loginCta'), run: () => navigate('/login') };
+    action = {
+      label: t('invite.loginCta'),
+      run: () => {
+        const q = new URLSearchParams({ invite: inviteId });
+        if (invitedEmailFromLink) q.set('email', invitedEmailFromLink);
+        navigate(`/login?${q.toString()}`);
+      },
+    };
   } else if (!looksLikeMe) {
     body = t('invite.wrongAccount', {
       email: preview.invitedEmail ?? '',

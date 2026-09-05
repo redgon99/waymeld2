@@ -37,6 +37,8 @@ interface Props {
   /** 최적화 3종 비교 경로 — 확정 경로 아래에 겹쳐 그린다 */
   compareRoutes?: Array<{ optimizeBy: string; color: string; path: Array<{ lat: number; lng: number }> }>;
   selectedOptimizeBy?: string;
+  /** 좌측 패널이 지도를 가릴 때, 대상이 남은 영역 한가운데 오도록 미는 픽셀 */
+  centerOffsetX?: number;
   nearbySearchCenter?: { lat: number; lng: number } | null;
   pickingOriginFromMap?: boolean;
   pickingPinFromMap?: boolean;
@@ -81,6 +83,9 @@ export function GoogleMapView({
   compareRoutes,
 
   selectedOptimizeBy,
+
+
+  centerOffsetX = 0,
   nearbySearchCenter = null,
   pickingOriginFromMap = false,
   pickingPinFromMap = false,
@@ -208,12 +213,37 @@ export function GoogleMapView({
     const c = mapRef.current.getCenter();
     const current: MapLatLng = { lat: c.lat(), lng: c.lng() };
 
+    /* 좌측 패널이 지도를 가릴 때 대상이 패널 뒤로 들어가지 않도록 남은 영역
+     * 한가운데로 민다.
+     *
+     * panBy는 쓰지 않는다 — 상대 이동인 데다 애니메이션이라 setCenter와 겹치면
+     * 이동량이 누적된다. 대신 월드 좌표에서 offset(픽셀)을 현재 축척으로 나눠
+     * 빼는 방식으로 중심을 구한다. 동기 계산이라 여러 번 실행해도 결과가 같다. */
+    if (centerOffsetX) {
+      const projection = mapRef.current.getProjection();
+      /* 지도의 현재 줌(getZoom)을 쓰면 안 된다. 이 효과는 줌 효과보다 먼저
+       * 실행되므로 확대 전 축척이 잡히고, 그 축척으로 픽셀을 환산하면 수백 km
+       * 밀려 대상이 화면 밖으로 나간다. 곧 적용될 목표 줌으로 계산한다. */
+      const zoom = kakaoLevelToGoogleZoom(level);
+      if (projection && typeof zoom === 'number') {
+        const scale = 2 ** zoom;
+        const pt = projection.fromLatLngToPoint(
+          new window.google.maps.LatLng(target.lat, target.lng),
+        );
+        const shifted = new window.google.maps.Point(pt.x - centerOffsetX / scale, pt.y);
+        mapRef.current.setCenter(projection.fromPointToLatLng(shifted));
+      } else {
+        mapRef.current.setCenter(target);
+      }
+      return;
+    }
+
     if (shouldAnimateMapCenter(current, target)) {
       mapRef.current.panTo(target);
     } else if (!mapCentersNear(current, target)) {
       mapRef.current.setCenter(target);
     }
-  }, [center.lat, center.lng, fitSearchBounds]);
+  }, [center.lat, center.lng, fitSearchBounds, centerOffsetX, level]);
 
   useEffect(() => {
     if (!mapRef.current || fitSearchBounds) return;
@@ -372,7 +402,9 @@ export function GoogleMapView({
     }
 
     const pinnedMap = new Map(visiblePinned.map((p) => [p.id, p]));
-    const resultsForMarkers = pinSelectionActive ? [] : searchResults;
+    /* 핀 선택은 "어떤 핀을 볼지"만 정한다. 검색 결과까지 지우면 핀 탭에서
+     * 체크 하나 남겨둔 채 검색하는 순간 지도에 결과가 안 뜬다. */
+    const resultsForMarkers = searchResults;
     const searchIdSet = new Set(resultsForMarkers.map((s) => s.id));
     const places: Array<Place & { _pinned?: PinnedPlace }> = [
       ...resultsForMarkers.map((s) => ({ ...s, _pinned: pinnedMap.get(s.id) })),

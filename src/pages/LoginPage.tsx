@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useState, type MouseEvent } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
 import { Icon } from '../components/Icon';
 import { LegalLinks } from '../components/LegalLinks';
@@ -53,7 +53,10 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const { user, loading, configured, googleAuthEnabled, signInWithEmail, signInWithGoogle, syncLocalTrips } =
     useAuth();
-  const [email, setEmail] = useState('');
+  const [searchParams] = useSearchParams();
+  /* 공동편집 초대로 넘어온 경우 초대받은 주소를 미리 채운다. 그 주소로
+   * 로그인해야만 초대가 연결되므로, 다시 받아 적게 할 이유가 없다. */
+  const [email, setEmail] = useState(() => searchParams.get('email')?.trim() ?? '');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);

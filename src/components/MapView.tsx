@@ -32,6 +32,8 @@ interface Props {
   /** 최적화 3종 비교 경로 — 확정 경로 아래에 겹쳐 그린다 */
   compareRoutes?: Array<{ optimizeBy: string; color: string; path: Array<{ lat: number; lng: number }> }>;
   selectedOptimizeBy?: string;
+  /** 좌측 패널이 지도를 가릴 때, 대상이 남은 영역 한가운데 오도록 미는 픽셀 */
+  centerOffsetX?: number;
   nearbySearchCenter?: { lat: number; lng: number } | null;
   pickingOriginFromMap?: boolean;
   pickingPinFromMap?: boolean;
@@ -89,6 +91,7 @@ export function MapView({
         generatedRoute={rest.generatedRoute}
         compareRoutes={rest.compareRoutes}
         selectedOptimizeBy={rest.selectedOptimizeBy}
+        centerOffsetX={rest.centerOffsetX}
         nearbySearchCenter={rest.nearbySearchCenter}
         pickingOriginFromMap={rest.pickingOriginFromMap}
         pickingPinFromMap={rest.pickingPinFromMap}
@@ -137,6 +140,9 @@ function KakaoMapView({
   compareRoutes,
 
   selectedOptimizeBy,
+
+
+  centerOffsetX = 0,
   nearbySearchCenter = null,
   pickingOriginFromMap = false,
   pickingPinFromMap = false,
@@ -281,12 +287,30 @@ function KakaoMapView({
     const c = mapRef.current.getCenter();
     const current: MapLatLng = { lat: c.getLat(), lng: c.getLng() };
 
+    /* 좌측 패널이 지도를 가릴 때, 대상이 패널 뒤로 들어가지 않도록 남은
+     * 영역 한가운데로 밀어준다.
+     *
+     * panBy는 쓰지 않는다 — 상대 이동인 데다 애니메이션이라 setCenter와 겹치면
+     * 이동량이 누적된다(실제로 4배까지 밀려 화면 밖으로 나갔다). 대신 대상을
+     * 중앙에 놓은 뒤 투영으로 "offset만큼 왼쪽 지점"의 좌표를 구해 그것을
+     * 중심으로 삼는다. 동기 계산이라 몇 번을 실행해도 결과가 같다. */
+    if (centerOffsetX) {
+      mapRef.current.setCenter(latlng);
+      const projection = mapRef.current.getProjection();
+      if (projection) {
+        const c = projection.containerPointFromCoords(latlng);
+        const shifted = new window.kakao.maps.Point(c.x - centerOffsetX, c.y);
+        mapRef.current.setCenter(projection.coordsFromContainerPoint(shifted));
+      }
+      return;
+    }
+
     if (shouldAnimateMapCenter(current, target)) {
       mapRef.current.panTo(latlng);
     } else if (!mapCentersNear(current, target)) {
       mapRef.current.setCenter(latlng);
     }
-  }, [center.lat, center.lng, fitSearchBounds]);
+  }, [center.lat, center.lng, fitSearchBounds, centerOffsetX, level]);
 
   useEffect(() => {
     if (!mapRef.current || fitSearchBounds) return;
@@ -528,7 +552,9 @@ function KakaoMapView({
     placeMarkerContentsRef.current = [];
 
     const pinnedMap = new Map(visiblePinned.map((p) => [p.id, p]));
-    const resultsForMarkers = pinSelectionActive ? [] : searchResults;
+    /* 핀 선택은 "어떤 핀을 볼지"만 정한다. 검색 결과까지 지우면 핀 탭에서
+     * 체크 하나 남겨둔 채 검색하는 순간 지도에 결과가 안 뜬다. */
+    const resultsForMarkers = searchResults;
     const searchIdSet = new Set(resultsForMarkers.map((s) => s.id));
 
     const places: Array<Place & { _pinned?: PinnedPlace }> = [

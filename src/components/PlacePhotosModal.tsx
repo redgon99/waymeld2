@@ -328,7 +328,12 @@ export function PlacePhotosModal({
           role="dialog"
           aria-modal="true"
           aria-label={t('place.detail.lightboxAria')}
-          onClick={() => setLightboxOpen(false)}
+          /* 라이트박스는 오버레이의 자식이라, 막지 않으면 여기서 닫는 클릭이
+           * 오버레이까지 올라가 상세 패널도 같이 닫힌다. */
+          onClick={(e) => {
+            e.stopPropagation();
+            setLightboxOpen(false);
+          }}
         >
           <button
             type="button"

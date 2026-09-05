@@ -1751,6 +1751,49 @@ button {
   padding: 16px;
 }
 
+/**
+ * 데스크톱에서는 장소 상세를 좌측 패널 바로 옆에 붙인다.
+ * 화면 가운데를 덮고 배경을 어둡게 하면 정작 그 장소가 지도 어디인지 못 본다.
+ * 배경을 비우고 pointer-events도 넘겨 지도를 계속 조작할 수 있게 한다.
+ * (모바일은 좌측 패널이 없으므로 기존 전체화면 모달을 그대로 쓴다)
+ */
+.waymeld-root:not(.mobile-layout) .photos-overlay {
+  position: absolute;
+  background: none;
+  padding: 0;
+  display: block;
+  pointer-events: none;
+}
+
+/* 오버레이를 통과시킨 클릭이 뒤쪽 앱바(로그아웃 등)를 누르지 않도록,
+ * 오버레이의 자식은 모두 클릭을 되받는다. 사진 라이트박스도 여기 자식이라
+ * .photos-panel만 되돌리면 라이트박스 닫기가 로그아웃을 눌러버린다. */
+.waymeld-root:not(.mobile-layout) .photos-overlay > * {
+  pointer-events: auto;
+}
+
+.waymeld-root:not(.mobile-layout) .photos-overlay > .photos-panel {
+  /* 앱바 아래 남은 세로 공간의 한가운데에 놓는다(위아래 auto 여백).
+   * 지도 옆에 붙는 패널이 위쪽에만 붙어 있으면 지도와 눈높이가 어긋난다. */
+  position: fixed;
+  top: calc(var(--app-bar-h) + var(--chrome-gutter));
+  bottom: var(--chrome-gutter);
+  left: calc(var(--side-panel-w) + var(--chrome-gutter) * 2);
+  margin-block: auto;
+  /* 크기는 원래 모달(680×720) 그대로 두고 위치만 바꾼다. 다만 좌측 패널이
+   * 차지한 만큼은 빼야 좁은 화면에서 지도 밖으로 넘치지 않는다. */
+  width: min(
+    var(--place-detail-modal-w),
+    calc(100vw - var(--side-panel-w) - var(--chrome-gutter) * 3)
+  );
+  height: min(
+    var(--place-detail-modal-h),
+    calc(100vh - var(--app-bar-h) - var(--chrome-gutter) * 2)
+  );
+  min-height: 0;
+  max-height: calc(100vh - var(--app-bar-h) - var(--chrome-gutter) * 2);
+}
+
 .photos-panel,
 .place-detail-panel {
   --place-detail-modal-w: 680px;

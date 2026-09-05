@@ -39,9 +39,9 @@ export function CollaboratorsModal({ open, tripId, tripTitle, currentUserId, onC
    * 직접(카톡·문자 등) 전달한다. 링크만으로는 권한이 생기지 않고
    * 초대한 이메일로 로그인해야 연결된다.
    */
-  const handleCopyLink = async (inviteId: string) => {
+  const handleCopyLink = async (inviteId: string, email: string) => {
     try {
-      await navigator.clipboard.writeText(buildInviteLink(inviteId));
+      await navigator.clipboard.writeText(buildInviteLink(inviteId, email));
       setCopiedId(inviteId);
       window.setTimeout(() => setCopiedId((prev) => (prev === inviteId ? null : prev)), 2000);
     } catch {
@@ -191,7 +191,7 @@ export function CollaboratorsModal({ open, tripId, tripTitle, currentUserId, onC
                         <button
                           type="button"
                           className="collab-copy-link-btn"
-                          onClick={() => void handleCopyLink(i.id)}
+                          onClick={() => void handleCopyLink(i.id, i.email)}
                         >
                           {copiedId === i.id ? t('collab.linkCopied') : t('collab.copyLink')}
                         </button>

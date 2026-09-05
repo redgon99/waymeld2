@@ -437,9 +437,19 @@ export async function listCollaborators(tripId: string): Promise<TripCollaborato
 }
 
 /** 초대 링크. 아직 이메일 발송 수단이 없어 소유자가 직접 전달한다. */
-export function buildInviteLink(inviteId: string): string {
+/**
+ * 초대 링크.
+ *
+ * 초대받은 주소를 함께 실어 로그인창에 미리 채워준다 — 초대는 그 주소로
+ * 로그인해야만 연결되는데, 미리보기 RPC는 주소를 마스킹해 내려주므로
+ * (anon도 호출할 수 있어서) 받는 쪽에서는 전체 주소를 알 길이 없다.
+ * 링크를 가진 사람은 곧 초대받은 본인이라 새로 드러나는 정보는 없다.
+ */
+export function buildInviteLink(inviteId: string, email?: string | null): string {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
-  return `${origin}/plan?invite=${inviteId}`;
+  const params = new URLSearchParams({ invite: inviteId });
+  if (email) params.set('email', email);
+  return `${origin}/plan?${params.toString()}`;
 }
 
 export interface TripInvitePreview {
